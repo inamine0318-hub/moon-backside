@@ -1084,47 +1084,205 @@ function hitE(j,dmg){
   }
 }
 function ov(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
+function chooseBossAtk(){
+  const p2=boss.phase===2;
+  const col=['#cc00ff','#ffff00','#ff6600','#44ffff','#eeeeff','#cc6600','#cc44ff'][currentStage-1];
+  switch(boss.type){
+    case 'susanoo': // 嵐: 突進+ビーム基本
+      if(Math.random()<0.45){boss.state='charge';boss.stateTimer=60;boss.chargeDir=boss.dir;}
+      else if(Math.random()<0.6){boss.state='beam';boss.stateTimer=50;fireBossBeam();}
+      else{boss.state='slam';boss.stateTimer=80;}
+      break;
+    case 'takemikazu': // 雷: 頭上から落雷
+      boss.state='lightning';boss.stateTimer=p2?80:60;boss.lightningCount=0;
+      addShake(4);sfx('slash');
+      break;
+    case 'kagutsuchi': // 火: 扇状火球+炎柱
+      if(Math.random()<0.5){boss.state='fireball';boss.stateTimer=55;}
+      else if(Math.random()<0.6){boss.state='pillar';boss.stateTimer=70;boss.pillarCount=0;}
+      else{boss.state='slam';boss.stateTimer=80;}
+      break;
+    case 'yamata': // 大蛇: 8方向拡散
+      boss.state='spread';boss.stateTimer=40;
+      if(p2){boss.state='orbit';boss.stateTimer=90;boss.orbitAngle=0;}
+      break;
+    case 'tsukuyomi': // 月: 瞬間移動+三日月弾
+      boss.state='blink';boss.stateTimer=30;
+      break;
+    case 'tajikarao': // 大地: 超震動スラム
+      boss.state='quake';boss.stateTimer=100;boss.quakeCharge=0;
+      break;
+    case 'izanami': // 虚無: 召喚+渦巻き
+      if(Math.random()<0.5){boss.state='summon';boss.stateTimer=60;}
+      else{boss.state='vortex';boss.stateTimer=90;boss.vortexAngle=0;}
+      break;
+  }
+}
 function updateBoss(){
   boss.phase=boss.hp<boss.maxHp*.45?2:1;
   boss.dir=(player.x+player.w/2)<(boss.x+boss.w/2)?-1:1;
-  // 重力
   boss.vy+=GRAVITY*.65;if(boss.vy>18)boss.vy=18;
   boss.stateTimer--;
-  const spd=(boss.phase===2?1.8:1.1)*(1+currentStage*.08);
-  const atkBase=[150,130,120,110,100,95,90][currentStage-1]||90;
+  const spd=(boss.phase===2?1.9:1.2)*(1+currentStage*.07);
+  const atkBase=[155,135,125,115,105,95,88][currentStage-1]||88;
+  const col=['#cc00ff','#ffff00','#ff6600','#44ffff','#eeeeff','#cc6600','#cc44ff'][currentStage-1];
+
   if(boss.state==='walk'){
     boss.vx=boss.dir*spd;
     boss.atkTimer--;
     if(boss.atkTimer<=0){
-      boss.atkTimer=boss.phase===2?Math.floor(atkBase*.62):atkBase;
-      const pick=Math.random();
-      if(pick<0.4){
-        boss.state='charge';boss.stateTimer=60;
-        boss.chargeDir=boss.dir;addShake(4);
-      }else if(pick<0.75){
-        boss.state='beam';boss.stateTimer=48;
-        fireBossBeam();addShake(4);
-      }else{
-        boss.state='slam';boss.stateTimer=80;
-      }
+      boss.atkTimer=boss.phase===2?Math.floor(atkBase*.58):atkBase;
+      chooseBossAtk();
     }
-  }else if(boss.state==='charge'){
-    const cspd=(boss.phase===2?8.5:6.5)*(1+currentStage*.06);
-    boss.vx=boss.chargeDir*cspd;
+  }
+  // ─ 共通: チャージ ─
+  else if(boss.state==='charge'){
+    boss.vx=boss.chargeDir*(boss.phase===2?9:6.5)*(1+currentStage*.06);
     if(boss.stateTimer<=0){boss.state='walk';boss.vx=0;addShake(3);}
-  }else if(boss.state==='beam'){
-    boss.vx*=0.85;
+  }
+  // ─ 共通: ビーム ─
+  else if(boss.state==='beam'){
+    boss.vx*=0.82;
+    if(boss.stateTimer===30&&boss.phase===2)fireBossBeam();
     if(boss.stateTimer<=0)boss.state='walk';
-  }else if(boss.state==='slam'){
-    if(boss.stateTimer>44)boss.vy=-4;
-    else boss.vy=Math.max(boss.vy,12);
+  }
+  // ─ 共通: スラム ─
+  else if(boss.state==='slam'){
+    if(boss.stateTimer>44)boss.vy=-5;
+    else boss.vy=Math.max(boss.vy,13);
     if(boss.onGround&&boss.stateTimer<44){
       addShake(9);
-      eProjectiles.push({x:boss.x,y:boss.y+boss.h-8,vx:-4.5,vy:-1,w:18,h:12,life:40,boss:true,wave:true});
-      eProjectiles.push({x:boss.x+boss.w,y:boss.y+boss.h-8,vx:4.5,vy:-1,w:18,h:12,life:40,boss:true,wave:true});
+      eProjectiles.push({x:boss.x,         y:boss.y+boss.h-8,vx:-5,  vy:-2,w:20,h:14,life:44,boss:true,wave:true});
+      eProjectiles.push({x:boss.x+boss.w,  y:boss.y+boss.h-8,vx: 5,  vy:-2,w:20,h:14,life:44,boss:true,wave:true});
+      if(boss.phase===2){
+        eProjectiles.push({x:boss.x-20,    y:boss.y+boss.h-8,vx:-7,  vy:-3,w:16,h:12,life:50,boss:true,wave:true});
+        eProjectiles.push({x:boss.x+boss.w+20,y:boss.y+boss.h-8,vx:7,vy:-3,w:16,h:12,life:50,boss:true,wave:true});
+      }
       boss.state='walk';
     }
   }
+  // ─ タケミカヅチ: 落雷 ─
+  else if(boss.state==='lightning'){
+    boss.vx*=0.88;
+    const interval=boss.phase===2?10:15;
+    if(boss.stateTimer%interval===0){
+      const lx=player.x+(Math.random()-.5)*(boss.phase===2?160:100);
+      // 警告線(上から下へ落ちる細い弾)
+      eProjectiles.push({x:lx,y:0,vx:0,vy:14,w:8,h:24,life:38,boss:true,stageCol:'#ffff88'});
+      addShake(2);
+    }
+    if(boss.stateTimer<=0)boss.state='walk';
+  }
+  // ─ カグヅチ: 扇形火球 ─
+  else if(boss.state==='fireball'){
+    boss.vx*=0.88;
+    if(boss.stateTimer===45||boss.stateTimer===30||(boss.phase===2&&boss.stateTimer===15)){
+      const count=boss.phase===2?5:3;
+      for(let k=0;k<count;k++){
+        const a=(k/(count-1)-.5)*1.1;
+        const spd2=6+currentStage*.15;
+        eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h*.4,vx:boss.dir*spd2*Math.cos(a),vy:Math.sin(a)*spd2-1,w:14,h:14,life:80,boss:true,stageCol:'#ff5500'});
+      }
+      sfx('explode');addShake(3);
+    }
+    if(boss.stateTimer<=0)boss.state='walk';
+  }
+  // ─ カグヅチ: 炎柱 ─
+  else if(boss.state==='pillar'){
+    boss.vx*=0.9;
+    if(boss.stateTimer%22===0&&boss.stateTimer>10){
+      const px=player.x+(Math.random()-.5)*120;
+      eProjectiles.push({x:px,y:H,vx:0,vy:-(10+currentStage*.3),w:16,h:30,life:36,boss:true,stageCol:'#ff6600'});
+      addShake(3);
+    }
+    if(boss.stateTimer<=0)boss.state='walk';
+  }
+  // ─ ヤマタノオロチ: 8方向拡散 ─
+  else if(boss.state==='spread'){
+    boss.vx*=0.8;
+    if(boss.stateTimer===35){
+      const dirs=boss.phase===2?8:6;
+      for(let k=0;k<dirs;k++){
+        const a=k/dirs*Math.PI*2;
+        eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h*.4,vx:Math.cos(a)*6,vy:Math.sin(a)*6,w:14,h:14,life:90,boss:true,stageCol:'#44ffff'});
+      }
+      sfx('explode');addShake(5);
+    }
+    if(boss.stateTimer<=0)boss.state='walk';
+  }
+  // ─ ヤマタノオロチ: 旋回弾 ─
+  else if(boss.state==='orbit'){
+    boss.vx*=0.88;
+    boss.orbitAngle=(boss.orbitAngle||0)+0.12;
+    if(boss.stateTimer%8===0&&boss.stateTimer>10){
+      const a=boss.orbitAngle;
+      eProjectiles.push({x:boss.x+boss.w/2+Math.cos(a)*50,y:boss.y+boss.h/2+Math.sin(a)*30,vx:Math.cos(a+Math.PI/2)*5,vy:Math.sin(a+Math.PI/2)*5,w:12,h:12,life:80,boss:true,stageCol:'#00ffff'});
+    }
+    if(boss.stateTimer<=0)boss.state='walk';
+  }
+  // ─ ツクヨミ: 瞬間移動 ─
+  else if(boss.state==='blink'){
+    boss.vx*=0.5;
+    if(boss.stateTimer===25){
+      // 瞬間移動
+      const tx=Math.max(200,Math.min(WORLD_W-300,player.x+(boss.dir>0?200:-200)));
+      burst(boss.x+boss.w/2,boss.y+boss.h/2,'#eeeeff',18);
+      boss.x=tx;
+      burst(boss.x+boss.w/2,boss.y+boss.h/2,'#eeeeff',18);
+      addShake(4);
+    }
+    if(boss.stateTimer===10){
+      // 三日月弾を3方向
+      const shots=boss.phase===2?5:3;
+      for(let k=0;k<shots;k++){
+        const a=(k/(shots-1)-.5)*1.2+Math.atan2(player.y-boss.y,player.x-boss.x);
+        eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h*.4,vx:Math.cos(a)*7,vy:Math.sin(a)*7,w:16,h:16,life:80,boss:true,stageCol:'#ffffff'});
+      }
+      sfx('slash');
+    }
+    if(boss.stateTimer<=0)boss.state='walk';
+  }
+  // ─ タジカラオ: 超スラム ─
+  else if(boss.state==='quake'){
+    boss.vx*=0.85;
+    boss.quakeCharge=(boss.quakeCharge||0)+1;
+    if(boss.quakeCharge<30)boss.vy=-8; // 高くジャンプ
+    else boss.vy=Math.max(boss.vy,16);
+    if(boss.onGround&&boss.quakeCharge>=30){
+      addShake(14);
+      for(let k=0;k<(boss.phase===2?6:4);k++){
+        const d=k%2===0?1:-1;
+        eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h-10,vx:d*(4+k*2),vy:-3,w:22,h:16,life:55,boss:true,wave:true});
+      }
+      sfx('explode');boss.state='walk';
+    }
+  }
+  // ─ イザナミ: 召喚 ─
+  else if(boss.state==='summon'){
+    boss.vx*=0.8;
+    if(boss.stateTimer===45){
+      const count=boss.phase===2?3:2;
+      for(let k=0;k<count;k++){
+        const ex=boss.x+boss.w/2+(k-1)*120;
+        enemies.push({id:++_eid,type:'flyer',x:ex,y:boss.y-60,w:28,h:28,hp:2,maxHp:2,vx:0,vy:0,onGround:false,dmgCd:0,flashTimer:0,dir:boss.dir,atkTimer:50,poisoned:0,poisonTimer:0,wallDir:0,wallSlide:false,patrolX:[ex-200,ex+200],patrolI:0});
+      }
+      burst(boss.x+boss.w/2,boss.y,'#cc44ff',16);addShake(5);sfx('slash');
+    }
+    if(boss.stateTimer<=0)boss.state='walk';
+  }
+  // ─ イザナミ: 渦巻き弾 ─
+  else if(boss.state==='vortex'){
+    boss.vx*=0.88;
+    boss.vortexAngle=(boss.vortexAngle||0)+0.18;
+    if(boss.stateTimer%6===0&&boss.stateTimer>10){
+      const a=boss.vortexAngle;
+      const spd2=5+currentStage*.1;
+      eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h*.4,vx:Math.cos(a)*spd2,vy:Math.sin(a)*spd2,w:12,h:12,life:100,boss:true,stageCol:'#cc44ff'});
+      if(boss.phase===2)eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h*.4,vx:Math.cos(a+Math.PI)*spd2,vy:Math.sin(a+Math.PI)*spd2,w:10,h:10,life:95,boss:true,stageCol:'#ff44cc'});
+    }
+    if(boss.stateTimer<=0)boss.state='walk';
+  }
+
   boss.x+=boss.vx;boss.y+=boss.vy;boss.onGround=false;
   for(const t of TERRAIN){
     if(boss.x+boss.w>t.x&&boss.x<t.x+t.w&&boss.vy>=0&&boss.y+boss.h>=t.y&&boss.y+boss.h<=t.y+t.h+20){
@@ -1134,11 +1292,10 @@ function updateBoss(){
   if(boss.x<100)boss.x=100;if(boss.x+boss.w>WORLD_W-100)boss.x=WORLD_W-100-boss.w;
   if(boss.dmgCd>0)boss.dmgCd--;
   if(boss.flashTimer>0)boss.flashTimer--;
-  // プレイヤー接触ダメージ
   if(player.invincible===0&&ov(boss,player)){
     player.hp--;player.invincible=75;player.vy=-7;
     player.vx=(player.x>boss.x+boss.w/2?1:-1)*5;
-    burst(player.x+player.w/2,player.y,'#ff4444',8);addShake(7);damageWeapon();
+    sfx('phit');burst(player.x+player.w/2,player.y,'#ff4444',8);addShake(7);damageWeapon();
     if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);state='gameover';return;}
   }
 }
