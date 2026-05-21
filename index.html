@@ -2854,7 +2854,25 @@ function draw(){
   else if(state==='gameover')drawGameOver();
   ctx.restore();
 }
-function loop(){update();draw();requestAnimationFrame(loop);}
+function loop(){
+  try{update();}catch(e){
+    ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#f44';ctx.font='14px monospace';ctx.textAlign='left';
+    ctx.fillText('UPDATE ERR:'+e.message,8,30);
+    ctx.fillText(e.stack?e.stack.slice(0,120):'',8,50);
+  }
+  try{draw();}catch(e){
+    ctx.fillStyle='#000';ctx.fillRect(0,0,W||300,H||200);
+    ctx.fillStyle='#f44';ctx.font='14px monospace';ctx.textAlign='left';
+    ctx.fillText('DRAW ERR:'+e.message,8,80);
+    ctx.fillText(e.stack?e.stack.slice(0,120):'',8,100);
+  }
+  requestAnimationFrame(loop);
+}
+// 起動確認: 初期描画テスト
+ctx.fillStyle='#111';ctx.fillRect(0,0,canvas.width||10,canvas.height||10);
+ctx.fillStyle='#0f0';ctx.font='16px monospace';ctx.textAlign='left';
+ctx.fillText('INIT OK W='+W+' H='+H,8,20);
 loop();
 </script>
 </body>
