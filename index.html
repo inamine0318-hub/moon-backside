@@ -54,7 +54,7 @@ function sfx(name){
     case 'dead':   snd(440,0.08,0.15,'sawtooth',200);setTimeout(()=>snd(200,0.25,0.18,'sawtooth',80),100);break;
   }
 }
-let W, H;
+let W, H, isPortrait=false;
 function resize(){
   isPortrait=window.innerWidth<window.innerHeight;
   if(isPortrait){
@@ -492,7 +492,6 @@ const STARS=Array.from({length:200},()=>({
 // ================================================================
 let state='title', selChar=2, player=null, cam={x:0}, score=0;
 let storyStartTime=0, storyHeld=false, storyDone=false;
-let isPortrait=false;
 let enemies=[], projectiles=[], eProjectiles=[], effects=[], particles=[];
 let shards=[], o2tanks=[];
 let shardCount=0;
