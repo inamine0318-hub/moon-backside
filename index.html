@@ -206,14 +206,11 @@ const SC_ACCNT =['#ff8800','#cc3300','#5566ee','#44ff88','#00dd44'];
 
 function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim){
   ctx.save();
-  // 視覚スケール: ヒットボックス変えずに見た目を大きく
-  // 足元(ヒットボックス底面中央)を基点に拡大
-  const VS=[1.28,1.0,1.28,1.28,1.28][ci]; // 熊はDS=1.35で既に大きいのでVS=1.0
+  // 視覚スケール: ヒットボックス変えずに見た目を大きく (全キャラ統一)
+  const VS=1.28;
   ctx.translate(Math.floor(sx+15),Math.floor(sy+CHARS[ci].h));
   ctx.scale(VS,VS);
   ctx.translate(-15,-49); // スプライト足底(local y=49)を基点に
-  const DS=ci===1?1.35:1;
-  if(DS!==1)ctx.scale(DS,DS);
   if(facing<0){ctx.translate(30,0);ctx.scale(-1,1);}
   // facing方向に前傾 (スキュー変換: 上半身が進行方向に傾く)
   ctx.transform(1,0,-0.11,1,0,0);
@@ -230,9 +227,9 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim){
   // クマフィニッシャー = 両腕叩き (体を前傾)
   const bearSlam=atk===3&&ci===1;
 
-  // O2 バックパック
-  _r(OL, 0,20, 6,14); _r('#1a3355', 1,21, 4,12);
-  _r('#4488aa', 1,21, 4, 2); _r(OL, 2,16, 2, 6); _r('#336699', 2,17, 2, 4);
+  // ジェット燃料バックパック (オレンジ系)
+  _r(OL, 0,20, 6,14); _r('#3a1a00', 1,21, 4,12);
+  _r('#cc5500', 1,21, 4, 2); _r(OL, 2,16, 2, 6); _r('#884400', 2,17, 2, 4);
 
   // 足 (蹴りポーズ時は前足を跳ね上げる)
   _r(OL, 4+lx,38,10, 9); _r(SC, 5+lx,39, 8, 7); _r(HL, 5+lx,39, 8, 2);
@@ -325,74 +322,111 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim){
     if(atk>=3){_r('#00ff44',38,14, 3, 10);_r('#55ff44',40,12, 3, 8);} // 毒爆発
   }}
 
-  // ネックリング
+  // スーツカラー (首リング)
   _r(OL, 9,17,12, 5); _r('#c0c8dd',10,18,10, 3); _r(HL,10,18,10, 1);
 
-  // ===== ヘルメット (横向きプロフィール) =====
-  // 後頭部 (左側・背面・丸い)
-  _r(OL, 2,-1,14,20);
-  _r('#7a86aa', 3, 0,11,18); _r(HL, 3, 0, 8, 3); _r(SH, 3,14,11, 3);
-  // 前面フェイスプレート (右側・前向き)
-  _r(OL,13,-1,14,20);
-  _r('#8a96bb',14, 0,12,18); _r(HL,14, 0,12, 3); _r(SH,14,14,12, 3);
-  _r('#5a6080',13,-1, 2,20);  // 区切りライン
-  // バイザー (右側のみ)
-  _r(OL,14, 3,12,12);
-  _r('#060f1c',15, 4,10,10); _r('#1a3366',15, 4,10, 3); _r('#040c18',15,11,10, 2);
-
-  drawHelmet(ci,_r,AC);
+  // ===== 動物の素顔 =====
+  drawAnimalHead(ci,_r,AC,atk);
   ctx.restore();
 }
 
-function drawHelmet(ci,_r,AC){
+function drawAnimalHead(ci,_r,AC,atk){
+  const OL='#080810';
   switch(ci){
-  case 0: // タカ - 鷹 [ニギハヤヒ] 横プロフィール
-    // 後頭部クレスト (左側)
-    _r('#cc5500', 3,-3, 5, 4); _r('#ff7700', 4,-2, 3, 3); _r('#ff9900', 5,-1, 2, 2);
-    // 鋭い目 (バイザー右寄り)
-    _r('#ff8800',16, 5, 5, 3); _r('#111',17, 6, 3, 2);
-    _r('#993300',15, 4, 6, 1);  // 眉線
-    // 鉤くちばし (前方突出)
-    _r('#ffaa00',24, 8, 5, 3); _r('#ff8800',25,10, 4, 2); _r('#ee6600',26,11, 3, 1);
+  case 0: { // ===== 鷹 BRUCE =====
+    // 後頭部: 濃い茶 (羽)
+    _r(OL, 2, 0,13,17); _r('#7a4818', 3, 1,11,15); _r('#5a3008', 3, 1,11, 2);
+    // クレスト (後頭部から上へ伸びる羽)
+    _r('#cc4400', 2,-5, 4, 6); _r('#ee6600', 3,-4, 3, 5); _r('#ff9900', 4,-3, 2, 4);
+    _r('#ffbb00', 4,-5, 2, 2); // 先端
+    // 前頭部: やや明るい茶
+    _r(OL,13,-1,15,18); _r('#aa7030',14, 0,13,16); _r('#cc9040',14, 0,13, 2);
+    // 白いアイリング
+    _r('#eecc88',17, 3, 9, 7); _r('#ddbb77',17, 3, 9, 1);
+    // 目: 鋭い黒目 + 琥珀
+    _r('#220800',18, 4, 7, 5); _r('#ff8800',19, 5, 5, 4); _r('#111',21, 6, 2, 2); _r('#fff',21, 5, 1, 1);
+    // 眉毛 (強い)
+    _r('#663300',17, 3,10, 2);
+    // 鉤嘴 (前方突出)
+    _r(OL,25, 5, 7, 7); _r('#ddaa00',26, 6, 5, 6); _r('#bb8800',27, 8, 5, 4);
+    _r('#ffee44',27, 6, 3, 1); // 上ハイライト
+    _r(OL,29, 9, 4, 4); _r('#886600',30,10, 3, 3); // 嘴先端フック
+    // 頬の白い羽
+    _r('#ddcc88',14, 9, 5, 5); _r('#eedd99',15,10, 3, 3);
     break;
-  case 1: // クマ - 熊 [タヂカラオ]
-    // 丸耳 (後頭部左)
-    _r('#6a3a18', 3,-4, 8, 5); _r('#8a5a30', 4,-3, 6, 4); _r('#aa7a50', 5,-2, 4, 2);
-    // 丸い目
-    _r('#331100',16, 5, 5, 4); _r('#663300',17, 5, 3, 3); _r('#cc9966',17, 5, 2, 1);
-    // 鼻 (前方突出)
-    _r('#440000',22, 8, 6, 4); _r('#772222',23, 8, 4, 2); _r('#cc8888',23, 8, 2, 1);
+  }
+  case 1: { // ===== 熊 LARC =====
+    // 丸耳 (両耳)
+    _r(OL, 2,-6, 9, 7); _r('#5a2a10', 3,-5, 7, 6); _r('#8a5a30', 4,-4, 5, 4); _r('#cc9966', 5,-3, 3, 2);
+    _r(OL,16,-6, 9, 7); _r('#5a2a10',17,-5, 7, 6); _r('#8a5a30',18,-4, 5, 4); _r('#cc9966',19,-3, 3, 2);
+    // 頭 (広く丸い)
+    _r(OL, 2,-1,22,19); _r('#7a4a22', 3, 0,20,17); _r('#9a6a3a', 3, 0,20, 2);
+    // 目 (丸い、ハニーブラウン)
+    _r('#2a1208',17, 4, 5, 5); _r('#6a3a18',18, 5, 3, 4); _r('#cc9955',18, 5, 2, 1); _r('#fff',17, 4, 1, 1);
+    // マズル: 薄茶の円形
+    _r(OL,16, 8,10, 8); _r('#bb8a50',17, 9, 8, 7); _r('#ddaa70',17, 9, 8, 1);
+    // 鼻: 大きく黒い
+    _r('#1a0000',19, 9, 6, 4); _r('#3a0808',20,10, 4, 3); _r('#993333',20,10, 2, 1);
+    // 口
+    _r('#441100',21,13, 4, 2); _r('#773322',22,14, 2, 1);
     break;
-  case 2: // オオカミ - 狼 [ヤマトタケル] 主人公
-    // 立ち耳 (後頭部左)
-    _r('#111133', 3,-6, 2, 7); _r('#3a4aaa', 4,-5, 4, 6); _r('#6677dd', 5,-4, 2, 4);
-    // 琥珀色縦スリット目
-    _r('#ff9900',15, 4, 6, 5); _r('#cc6600',15, 4, 6, 1); _r('#111',17, 4, 2, 5);
-    // マズル (前方突出)
-    _r('#9999bb',22, 8, 8, 4); _r('#7777aa',22, 8, 8, 1); _r('#555577',23,10, 6, 2);
-    _r('#111',26,10, 2, 1);
+  }
+  case 2: { // ===== 狼 MIGUEL (主人公) =====
+    // 立ち耳
+    _r(OL, 3,-8, 5, 9); _r('#222288', 4,-7, 3, 8); _r('#6677dd', 5,-6, 2, 6); _r('#99aaee', 5,-7, 1, 3);
+    _r(OL,16,-8, 5, 9); _r('#222288',17,-7, 3, 8); _r('#6677dd',18,-6, 2, 6); _r('#99aaee',18,-7, 1, 3);
+    // 頭本体
+    _r(OL, 3,-1,20,18); _r('#3a4aaa', 4, 0,18,16); _r('#5566cc', 4, 0,18, 2);
+    // 眉 (険しい)
+    _r('#1a2a88',15, 3,10, 2); _r('#0a1a66',18, 2, 4, 2);
+    // 琥珀目: 縦スリット
+    _r('#ff9900',17, 4, 6, 6); _r('#cc6600',17, 4, 6, 1); _r('#110000',19, 4, 2, 6); _r('#fff',17, 5, 1, 1);
+    // マズル (やや突出・白灰)
+    _r(OL,20, 7,12, 8); _r('#8899bb',21, 8,10, 7); _r('#aabbdd',21, 8,10, 1);
+    // 鼻: 黒
+    _r('#000',23, 9, 4, 2); _r('#333',23,10, 4, 1);
+    // 口
+    _r('#334477',22,13, 6, 2); _r('#fff',24,13, 2, 1); // 牙
     break;
-  case 3: // カマキリ - 蟷螂 [マガツヒ]
-    // 後頭部平ら
-    _r('#0a4a0a', 3, 2, 8, 3);
-    // 前方三角突起
-    _r('#0a6a0a',22,-3, 7, 5); _r('#0d900d',23,-2, 5, 4); _r('#00cc00',24,-1, 3, 2);
-    // 複眼 (大きく・前寄り)
-    _r('#880000',16, 3, 8, 8); _r('#cc0000',17, 4, 6, 6); _r('#ff3300',17, 4, 4, 3);
-    _r('#ffcc00',18, 4, 2, 2);
-    // 下顎
-    _r('#005500',22,10, 6, 3); _r('#00aa00',23,11, 4, 2);
+  }
+  case 3: { // ===== カマキリ CHESTER =====
+    // 後頭部 (細い三角)
+    _r(OL, 5, 1,10,15); _r('#1a6a22', 6, 2, 8,13); _r('#2a8a32', 6, 2, 8, 1);
+    // 頭上の三角突起
+    _r(OL,13,-6, 8, 8); _r('#0a6a0a',14,-5, 6, 7); _r('#0d9a0d',15,-4, 4, 5); _r('#22dd22',16,-3, 2, 3);
+    // 前頭部
+    _r(OL,14,-1,14,17); _r('#1a6a22',15, 0,12,16); _r('#2a8a32',15, 0,12, 1);
+    // 左複眼 (背面・暗め)
+    _r('#550000', 7, 2, 6, 9); _r('#880000', 8, 3, 4, 8); _r('#aa1100', 9, 3, 3, 5);
+    // 右複眼 (前面・鮮やか・大)
+    _r('#880000',17, 0, 9,13); _r('#cc0000',18, 1, 7,11); _r('#ff3300',18, 1, 6, 7);
+    _r('#ff7700',19, 1, 4, 4); _r('#ffcc00',19, 1, 2, 2); // 反射
+    // 下顎・牙
+    _r(OL,21,11, 8, 6); _r('#005500',22,12, 6, 5); _r('#00aa00',23,12, 4, 4);
+    _r('#88ff44',23,12, 2, 1); // 顎ハイライト
     break;
-  case 4: // ヘビ - 蛇 [ワダツミ]
-    // 後頭部鱗
-    _r('#0d600d', 3, 1, 6, 3); _r('#0a500a', 4, 5, 6, 3);
-    // 縦スリット瞳 (黄緑)
-    _r('#224422',15, 4, 6, 6); _r('#aaff00',16, 4, 4, 6); _r('#111',17, 4, 2, 6);
-    // くさび型頭 (前方突出)
-    _r('#1a8a1a',22, 7, 7, 4); _r('#0d600d',23, 8, 5, 3);
-    // 二股舌
-    _r('#ee1100',26, 9, 4, 1); _r('#ee1100',25,10, 2, 2); _r('#ee1100',29,10, 2, 2);
+  }
+  case 4: { // ===== ヘビ SCAR =====
+    // 後頭部 (鱗模様)
+    _r(OL, 3, 1,15,15); _r('#1a5a1a', 4, 2,13,13); _r('#2a7a2a', 4, 2,13, 1);
+    _r('#0a4a0a', 5, 3, 4, 4); _r('#0a4a0a', 9, 6, 4, 4); _r('#0a4a0a', 5, 8, 4, 4);
+    // 前頭部 (くさび形)
+    _r(OL,15, 0,16,16); _r('#1a6a1a',16, 1,14,14); _r('#2a8a2a',16, 1,14, 1);
+    _r('#0a4a0a',17, 4, 4, 4); _r('#0a4a0a',21, 6, 4, 4);
+    // 縦スリット目 (眼窩付き)
+    _r('#003300',16, 2, 7, 9); _r('#224422',17, 3, 5, 7);
+    _r('#88ff00',18, 3, 3, 7); _r('#ccff44',18, 3, 2, 2); // 瞳
+    _r('#000',19, 3, 1, 7); // スリット
+    // くさびスナウト (前方突出)
+    _r(OL,21, 5,11, 9); _r('#1a8a1a',22, 6, 9, 8); _r('#22aa22',22, 6, 9, 1);
+    _r('#0d600d',23, 8, 7, 6);
+    // 鼻孔
+    _r('#003300',24, 9, 2, 1); _r('#003300',27, 9, 2, 1);
+    // 二股舌 (攻撃時伸びる)
+    {const tx=atk>0?Math.min(atk*4,8):0;
+    _r('#ee1100',27+tx, 9, 5, 1); _r('#ee1100',26+tx,11, 2, 4); _r('#ee1100',30+tx,11, 2, 4);}
     break;
+  }
   }
 }
 
@@ -401,7 +435,7 @@ function drawHelmet(ci,_r,AC){
 // ================================================================
 const CHARS=[
   {name:'タカ型',   nick:'BRUCE',   dna:'鷹DNA',  col:'#c07828',w:30,h:42,spd:5.2,jmp:-8.8,maxHp:4,atkCd:18,atkLabel:'急降下斬',  glide:true, djump:true, wallSlide:false,ability:'滑空＋二段ジャンプ'},
-  {name:'クマ型',   nick:'LARC',    dna:'熊DNA',  col:'#7a4a22',w:40,h:52,spd:3.2,jmp:-8.5,maxHp:8,atkCd:30,atkLabel:'熊パンチ',  glide:false,djump:true, wallSlide:false,ability:'高HP×2・攻撃力2倍・二段J'},
+  {name:'クマ型',   nick:'LARC',    dna:'熊DNA',  col:'#7a4a22',w:34,h:46,spd:3.2,jmp:-8.5,maxHp:8,atkCd:30,atkLabel:'熊パンチ',  glide:false,djump:true, wallSlide:false,ability:'高HP×2・攻撃力2倍・二段J'},
   {name:'オオカミ型',nick:'MIGUEL', dna:'狼DNA',  col:'#3a4aaa',w:30,h:48,spd:5.5,jmp:-9.0,maxHp:5,atkCd:16,atkLabel:'三連爪',    glide:false,djump:true, wallSlide:true, ability:'二段ジャンプ・壁張付き【主人公】'},
   {name:'カマキリ型',nick:'CHESTER',dna:'蟷螂DNA',col:'#1a6a22',w:24,h:48,spd:6.0,jmp:-8.5,maxHp:4,atkCd:12,atkLabel:'大鎌斬撃', glide:false,djump:true, wallSlide:true, ability:'長リーチ斬・壁張付き・二段J'},
   {name:'ヘビ型',   nick:'SCAR',    dna:'蛇DNA',  col:'#1a6a1a',w:24,h:42,spd:4.5,jmp:-8.5,maxHp:4,atkCd:45,atkLabel:'毒ガス雲',  glide:false,djump:true, wallSlide:false,ability:'毒ガス持続ダメージ・二段J'},
@@ -669,11 +703,12 @@ canvas.addEventListener('touchstart',e=>{
   }
   if(state==='title'){tryFullscreen();bgmPlay('title');state='story';storyStartTime=Date.now();storyHeld=false;storyDone=false;return;}
   if(state==='story'){
-    // SKIPボタン判定
     const t0=e.changedTouches[0];const lp0=toLogical(t0.clientX,t0.clientY);
-    const sw2=Math.min(W*.22,90),sh2=26,sx2=W-sw2-10,sy2=H-sh2-8;
+    if(storyDone){state='charselect';return;}
+    // SKIPボタン (右サイド縦長)
+    const sw2=60,sh2=Math.min(H*.28,100),sx2=W-sw2-6,sy2=H/2-sh2/2;
     if(lp0.x>=sx2&&lp0.x<=sx2+sw2&&lp0.y>=sy2&&lp0.y<=sy2+sh2){state='charselect';return;}
-    storyHeld=true;return;
+    return; // 他タップは無視
   }
   if(state==='charselect'){handleCSTap(e);return;}
   if(state==='gameover'){state='charselect';bgmPlay('title');return;}
@@ -696,11 +731,7 @@ canvas.addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.chan
 canvas.addEventListener('touchend',e=>{
   e.preventDefault();
   for(const t of e.changedTouches)activeTouches.delete(t.identifier);
-  if(state==='story'){
-    if(storyDone)state='charselect';
-    else storyHeld=false;
-    return;
-  }
+  if(state==='story'){return;} // story中touchendは何もしない
   updHeld();
 },{passive:false});
 document.addEventListener('keydown',e=>{
@@ -711,7 +742,7 @@ document.addEventListener('keydown',e=>{
     paused=!paused;if(paused)bgmStop();else bgmPlay(bossTriggered&&boss&&boss.hp>0?'boss':'play');return;
   }
   if(state==='title'&&(e.key==='Enter'||e.key===' ')){bgmPlay('title');state='story';storyStartTime=Date.now();storyHeld=false;storyDone=false;return;}
-  if(state==='story'){if(e.key==='Enter'||e.key===' '){if(storyDone)state='charselect';else storyHeld=true;}return;}
+  if(state==='story'){if(e.key==='Enter'||e.key===' ')state='charselect';return;}
   if(state==='charselect'){
     if(e.key==='ArrowLeft')selChar=(selChar-1+CHARS.length)%CHARS.length;
     if(e.key==='ArrowRight')selChar=(selChar+1)%CHARS.length;
@@ -2415,17 +2446,17 @@ function drawO2Tanks(){
   o2tanks.forEach(t=>{
     if(t.collected)return;
     const tx=Math.floor(t.x-cam.x);
-    // タンク本体
-    dr(tx,   t.y,   18,22,'#224466');
-    dr(tx,   t.y,   18,2, '#4488aa');  // ハイライト
-    dr(tx,   t.y,   2, 22,'#336688');
-    dr(tx+14,t.y,   4, 22,'#112233');
+    // 燃料タンク本体 (オレンジ系)
+    dr(tx,   t.y,   18,22,'#442200');
+    dr(tx,   t.y,   18,2, '#cc6600');  // ハイライト
+    dr(tx,   t.y,   2, 22,'#883300');
+    dr(tx+14,t.y,   4, 22,'#221100');
     // バルブ
-    dr(tx+6, t.y-4, 6, 4,'#336699');
-    dr(tx+8, t.y-6, 2, 2,'#aaccff');
-    // O2テキスト
-    ctx.fillStyle='#88ccff';ctx.font='bold 7px monospace';ctx.textAlign='center';
-    ctx.fillText('O2',tx+9,t.y+13);
+    dr(tx+6, t.y-4, 6, 4,'#aa5500');
+    dr(tx+8, t.y-6, 2, 2,'#ffaa44');
+    // FUELテキスト
+    ctx.fillStyle='#ffaa44';ctx.font='bold 6px monospace';ctx.textAlign='center';
+    ctx.fillText('FUEL',tx+9,t.y+13);
   });
 }
 
@@ -2533,19 +2564,19 @@ function drawHUD(){
   ctx.fillStyle='#ff8899';ctx.font='bold 9px monospace';ctx.textAlign='left';
   ctx.fillText('HP',hbx,hby-1);
 
-  // O2バー
+  // JET FUELバー
   const o2x=10,o2y=48,o2w=100;
   const o2r=player.oxygen/player.maxOxygen;
-  const o2col=o2r>0.5?'#2288ff':o2r>0.25?'#ff8800':'#ff2200';
-  ctx.fillStyle='#001133';ctx.fillRect(o2x,o2y,o2w,7);
+  const o2col=o2r>0.5?'#ff8800':o2r>0.25?'#cc4400':'#ff2200';
+  ctx.fillStyle='#1a0800';ctx.fillRect(o2x,o2y,o2w,7);
   ctx.fillStyle=o2col;ctx.fillRect(o2x,o2y,Math.floor(o2w*o2r),7);
-  ctx.fillStyle='#88aaff';ctx.fillRect(o2x,o2y,o2w,1);
-  ctx.fillStyle='#88aaff';ctx.font='bold 9px monospace';
-  // O2警告点滅
+  ctx.fillStyle='#ff9955';ctx.fillRect(o2x,o2y,o2w,1);
+  ctx.fillStyle='#ff9955';ctx.font='bold 9px monospace';
+  // FUEL警告点滅
   if(o2r<0.25&&Math.floor(Date.now()/250)%2){
-    ctx.fillStyle='#ff4400';ctx.fillText('O2 !!',o2x,o2y-1);
+    ctx.fillStyle='#ff4400';ctx.fillText('FUEL!!',o2x,o2y-1);
   } else {
-    ctx.fillStyle='#88aaff';ctx.fillText('O2',o2x,o2y-1);
+    ctx.fillStyle='#ff9944';ctx.fillText('FUEL',o2x,o2y-1);
   }
 
   // 武器レベル・ゲージ
@@ -2568,7 +2599,7 @@ function drawHUD(){
   const pgx=0,pgy=H-4,pgw=Math.floor(W*(player.x/WORLD_W));
   dr(pgx,pgy,W,4,'#111');dr(pgx,pgy,pgw,4,'#334466');
 
-  // 低O2警告: 画面端を赤くパルス
+  // 低FUEL警告: 画面端を赤くパルス
   const o2pct=player.oxygen/player.maxOxygen;
   if(o2pct<0.25){
     const pulse=Math.abs(Math.sin(Date.now()/200))*(o2pct<0.1?0.55:0.35);
@@ -2583,7 +2614,7 @@ function drawHUD(){
   }
   // ジェット性能表示 (O2が50%未満時)
   if(o2pct<0.5&&player.jetCd<=0&&!player.jetActive){
-    const jtLabel=o2pct>=0.25?'JET 70%':'JET 40%';
+    const jtLabel=o2pct>=0.25?'FUEL 70%':'FUEL 40%';
     const jtC=o2pct>=0.25?'#ffaa44':'#ff4444';
     ctx.fillStyle=jtC;ctx.font='bold 8px monospace';ctx.textAlign='center';
     const jb=getBtns().jet;
@@ -2715,7 +2746,7 @@ function drawStory(){
     ['','',''],['','',''],['','',''],
   ];
   const totalH=lines.length*lh;
-  const speed=storyHeld?150:38;
+  const speed=40; // 自動スクロール固定速度
   const elapsed=(Date.now()-storyStartTime)/1000;
   const scrollY=elapsed*speed;
   if(scrollY>totalH+H*.05&&!storyDone)storyDone=true;
@@ -2740,24 +2771,25 @@ function drawStory(){
   ctx.fillStyle=gTop;ctx.fillRect(0,H*.04,W,H*.12);
   const gBot=ctx.createLinearGradient(0,H*.78,0,H*.94);gBot.addColorStop(0,'transparent');gBot.addColorStop(1,'#02020e');
   ctx.fillStyle=gBot;ctx.fillRect(0,H*.78,W,H*.16);
-  // 常時SKIPボタン (右下)
-  const sw2=Math.min(W*.22,90),sh2=26,sx2=W-sw2-10,sy2=H-sh2-8;
-  ctx.globalAlpha=0.6;dr(sx2,sy2,sw2,sh2,'#001133');ctx.globalAlpha=1;
-  ctx.strokeStyle='#335566';ctx.lineWidth=1.5;ctx.strokeRect(sx2,sy2,sw2,sh2);
-  ctx.fillStyle='#6688aa';ctx.font=`bold ${Math.min(W*.028,11)}px monospace`;ctx.textAlign='center';
-  ctx.fillText('SKIP →',sx2+sw2/2,sy2+sh2*.7);
+  // SKIPボタン (右サイド縦長・常時表示)
+  if(!storyDone){
+    const sw2=54,sh2=Math.min(H*.28,100),sx2=W-sw2-6,sy2=H/2-sh2/2;
+    ctx.globalAlpha=0.55;dr(sx2,sy2,sw2,sh2,'#001133');ctx.globalAlpha=1;
+    ctx.strokeStyle=Math.floor(Date.now()/400)%2?'#335566':'#4488aa';ctx.lineWidth=1.5;
+    ctx.strokeRect(sx2,sy2,sw2,sh2);
+    ctx.fillStyle='#6699bb';ctx.font=`bold ${Math.min(W*.028,12)}px monospace`;ctx.textAlign='center';
+    // 縦書き風に "SKIP"
+    'SKIP'.split('').forEach((ch,i)=>ctx.fillText(ch,sx2+sw2/2,sy2+sh2*.22+i*(sh2*.18)));
+    ctx.fillStyle='#4477aa';ctx.font=`${Math.min(W*.024,10)}px monospace`;
+    ctx.fillText('▶▶',sx2+sw2/2,sy2+sh2*.82);
+  }
   if(storyDone){
-    const bw=Math.min(W*.5,220),bh=36,bx=W/2-bw/2,by=H*.87;
-    ctx.globalAlpha=0.8;dr(bx,by,bw,bh,'#001133');ctx.globalAlpha=1;
+    const bw=Math.min(W*.5,220),bh=36,bx=W/2-bw/2,by=H*.85;
+    ctx.globalAlpha=0.85;dr(bx,by,bw,bh,'#001133');ctx.globalAlpha=1;
     ctx.strokeStyle=Math.floor(Date.now()/350)%2?'#4488ff':'#88bbff';ctx.lineWidth=2;ctx.strokeRect(bx,by,bw,bh);
     ctx.fillStyle=Math.floor(Date.now()/350)%2?'#88bbff':'#ffffff';
     ctx.font=`bold ${Math.min(W*.036,15)}px monospace`;ctx.textAlign='center';
     ctx.fillText('▼  GAME  START  ▼',W/2,by+bh*.68);
-  }else{
-    if(Math.floor(Date.now()/700)%2){
-      ctx.fillStyle='#556677';ctx.font=`${Math.min(W*.028,11)}px monospace`;ctx.textAlign='center';
-      ctx.fillText('長押し: 早送り',W/2,H*.975);
-    }
   }
   scanlines();
 }
