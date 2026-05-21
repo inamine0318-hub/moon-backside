@@ -56,37 +56,33 @@ function sfx(name){
 }
 let W, H, isPortrait=false;
 function resize(){
-  isPortrait=window.innerWidth<window.innerHeight;
+  const vw=window.innerWidth, vh=window.innerHeight;
+  isPortrait = vw < vh;
+  // canvasは常に画面全体に固定 - CSS回転なし
+  canvas.style.position='fixed';
+  canvas.style.top='0'; canvas.style.left='0';
+  canvas.style.width=vw+'px'; canvas.style.height=vh+'px';
+  canvas.style.transform=''; canvas.style.transformOrigin='';
   if(isPortrait){
-    // 縦向き: canvasを90度回転させて横向きとして表示
-    const sc=window.innerWidth/520;
-    H=520;W=Math.ceil(window.innerHeight/sc);
-    canvas.width=W;canvas.height=H;
-    canvas.style.width=window.innerHeight+'px';
-    canvas.style.height=window.innerWidth+'px';
-    canvas.style.position='fixed';
-    canvas.style.top='0';canvas.style.left='0';
-    canvas.style.transformOrigin='top left';
-    canvas.style.transform=`rotate(90deg) translateY(${-window.innerWidth}px)`;
-  }else{
-    const sc=window.innerHeight/520;
-    H=520;W=Math.ceil(window.innerWidth/sc);
-    canvas.width=W;canvas.height=H;
-    canvas.style.width=window.innerWidth+'px';
-    canvas.style.height=window.innerHeight+'px';
-    canvas.style.position='';
-    canvas.style.top='';canvas.style.left='';
-    canvas.style.transform='';canvas.style.transformOrigin='';
+    // 縦画面: ゲームは横向き(H=520)、物理canvas=縦のまま
+    const sc=vw/520;
+    H=520; W=Math.ceil(vh/sc);
+    canvas.width=vw; canvas.height=vh;
+  } else {
+    const sc=vh/520;
+    H=520; W=Math.ceil(vw/sc);
+    canvas.width=vw; canvas.height=vh;
   }
 }
-resize();window.addEventListener('resize',resize);
+resize(); window.addEventListener('resize',resize);
 function toLogical(cx,cy){
   if(isPortrait){
-    // 90度回転補正: 縦向きタッチ座標→横向き論理座標
-    return{x:cy*W/window.innerHeight, y:(window.innerWidth-cx)*H/window.innerWidth};
+    // ctx変換の逆: canvas_x=y*s, canvas_y=vh-x*s (s=canvas.width/H)
+    const s=canvas.width/H;
+    return{x:(canvas.height-cy)/s, y:cx/s};
   }
-  const r=canvas.getBoundingClientRect();
-  return{x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height};
+  const s=canvas.height/H;
+  return{x:cx/s, y:cy/s};
 }
 
 const GRAVITY = 0.32, WORLD_W = 7000, P = 3;
@@ -2845,6 +2841,17 @@ function drawGameOver(){
 // ================================================================
 function draw(){
   ctx.save();
+  if(isPortrait){
+    // 縦持ちでも横向きゲームを表示: ctx内部で90度回転+スケール
+    // 論理(x,y)→物理canvas(y*s, canvas.height-x*s) where s=canvas.width/H
+    const s=canvas.width/H;
+    ctx.translate(0,canvas.height);
+    ctx.rotate(-Math.PI/2);
+    ctx.scale(s,s);
+  } else {
+    const s=canvas.height/H;
+    ctx.scale(s,s);
+  }
   if(shakeDx||shakeDy)ctx.translate(Math.round(shakeDx),Math.round(shakeDy));
   if(state==='title')drawTitle();
   else if(state==='story')drawStory();
@@ -2854,25 +2861,7 @@ function draw(){
   else if(state==='gameover')drawGameOver();
   ctx.restore();
 }
-function loop(){
-  try{update();}catch(e){
-    ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
-    ctx.fillStyle='#f44';ctx.font='14px monospace';ctx.textAlign='left';
-    ctx.fillText('UPDATE ERR:'+e.message,8,30);
-    ctx.fillText(e.stack?e.stack.slice(0,120):'',8,50);
-  }
-  try{draw();}catch(e){
-    ctx.fillStyle='#000';ctx.fillRect(0,0,W||300,H||200);
-    ctx.fillStyle='#f44';ctx.font='14px monospace';ctx.textAlign='left';
-    ctx.fillText('DRAW ERR:'+e.message,8,80);
-    ctx.fillText(e.stack?e.stack.slice(0,120):'',8,100);
-  }
-  requestAnimationFrame(loop);
-}
-// 起動確認: 初期描画テスト
-ctx.fillStyle='#111';ctx.fillRect(0,0,canvas.width||10,canvas.height||10);
-ctx.fillStyle='#0f0';ctx.font='16px monospace';ctx.textAlign='left';
-ctx.fillText('INIT OK W='+W+' H='+H,8,20);
+function loop(){update();draw();requestAnimationFrame(loop);}
 loop();
 </script>
 </body>
