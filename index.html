@@ -135,7 +135,12 @@ const SC_ACCNT =['#ff8800','#cc3300','#5566ee','#44ff88','#00dd44'];
 
 function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim){
   ctx.save();
-  ctx.translate(Math.floor(sx),Math.floor(sy));
+  // 視覚スケール: ヒットボックス変えずに見た目を大きく
+  // 足元(ヒットボックス底面中央)を基点に拡大
+  const VS=[1.28,1.0,1.28,1.28,1.28][ci]; // 熊はDS=1.35で既に大きいのでVS=1.0
+  ctx.translate(Math.floor(sx+15),Math.floor(sy+CHARS[ci].h));
+  ctx.scale(VS,VS);
+  ctx.translate(-15,-49); // スプライト足底(local y=49)を基点に
   const DS=ci===1?1.35:1;
   if(DS!==1)ctx.scale(DS,DS);
   if(facing<0){ctx.translate(30,0);ctx.scale(-1,1);}
@@ -548,11 +553,18 @@ const keys={}, touchHeld={left:false,right:false,jumpHeld:false};
 const activeTouches=new Map();
 
 function getBtns(){
-  const s=Math.min(W*.13,68),mg=10,by=H-mg-s;
-  return{left:{x:mg,y:by,s},right:{x:mg+s+8,y:by,s},
-         jump:{x:W-mg-s,y:by,s},
-         atk: {x:W-mg-s*2-10,y:by,s},
-         jet: {x:W-mg-s*3-20,y:by,s}};
+  const mg=18,gap=20;
+  const jS=Math.min(W*.075,86); // JUMP: 最大
+  const aS=Math.min(W*.063,72); // ATK
+  const eS=Math.min(W*.056,62); // JET
+  const mS=Math.min(W*.066,74); // 移動
+  return{
+    left: {x:mg,                          y:H-mg-mS,      s:mS},
+    right:{x:mg+mS+14,                    y:H-mg-mS,      s:mS},
+    jump: {x:W-mg-jS,                     y:H-mg-jS,      s:jS},
+    atk:  {x:W-mg-jS-gap-aS,             y:H-mg-aS,      s:aS},
+    jet:  {x:W-mg-jS-gap-aS-gap-eS,      y:H-mg-eS+8,    s:eS},
+  };
 }
 function inC(tx,ty,bx,by,s){return Math.hypot(tx-bx-s/2,ty-by-s/2)<=s/2;}
 function updHeld(){
@@ -2436,46 +2448,54 @@ function drawHUD(){
 // ================================================================
 function drawBtns(){
   const z=getBtns();
-  const jetFlash=player&&player.jetActive&&Math.floor(Date.now()/60)%2;
-  [{z:z.left,lb:'<<',held:touchHeld.left||keys['ArrowLeft']||keys['a'],type:'mv'},
-   {z:z.right,lb:'>>',held:touchHeld.right||keys['ArrowRight']||keys['d'],type:'mv'},
-   {z:z.jump,lb:'JUMP',held:touchHeld.jumpHeld,type:'act'},
-   {z:z.atk, lb:'ATK', held:false,type:'act'},
-   {z:z.jet, lb:'JET', held:jetFlash,type:'jet'}
-  ].forEach(({z,lb,held,type})=>{
-    const base=type==='jet'?'#0a1a2a':type==='mv'?'#1a1a1a':'#1a1822';
-    const edge=type==='jet'?'#2255aa':type==='mv'?'#333':'#3a3066';
-    const activeBase=type==='jet'?'#1133aa':type==='mv'?'#334':'#334488';
-    const activeEdge=type==='jet'?'#55aaff':type==='mv'?'#6688cc':'#6688cc';
-    ctx.globalAlpha=held?.88:.28;
-    dr(z.x,z.y,z.s,z.s,held?activeBase:base);
-    dr(z.x,z.y,z.s,2,held?activeEdge:edge);
-    dr(z.x,z.y,2,z.s,held?activeEdge:edge);
-    dr(z.x,z.y+z.s-2,z.s,2,'#111');
+  const jetOn=player&&player.jetActive&&Math.floor(Date.now()/60)%2;
+  // [base色, アクティブ色, 枠色, ラベル] per button type
+  const btns=[
+    {b:z.left,  lb:'◀',   held:touchHeld.left||keys['ArrowLeft']||keys['a'],
+     bg:'#0f1828',hbg:'#2244aa',br:'#334466',hbr:'#55aaff',tc:'#8899cc'},
+    {b:z.right, lb:'▶',   held:touchHeld.right||keys['ArrowRight']||keys['d'],
+     bg:'#0f1828',hbg:'#2244aa',br:'#334466',hbr:'#55aaff',tc:'#8899cc'},
+    {b:z.jump,  lb:'JUMP',held:touchHeld.jumpHeld,
+     bg:'#0a1a44',hbg:'#1144dd',br:'#2255aa',hbr:'#66aaff',tc:'#6699ee'},
+    {b:z.atk,   lb:'ATK', held:false,
+     bg:'#2a0a08',hbg:'#bb2200',br:'#662200',hbr:'#ff6644',tc:'#cc4422'},
+    {b:z.jet,   lb:'JET', held:!!jetOn,
+     bg:'#081a12',hbg:'#116644',br:'#224433',hbr:'#33ffaa',tc:'#33bb88'},
+  ];
+  btns.forEach(({b,lb,held,bg,hbg,br,hbr,tc})=>{
+    ctx.globalAlpha=held?.92:.34;
+    dr(b.x,b.y,b.s,b.s,held?hbg:bg);
+    // 枠: 上・左ハイライト
+    dr(b.x,b.y,b.s,2,held?hbr:br);
+    dr(b.x,b.y,2,b.s,held?hbr:br);
+    // 枠: 下・右シャドウ
+    dr(b.x+b.s-2,b.y,2,b.s,'#080808');
+    dr(b.x,b.y+b.s-2,b.s,2,'#080808');
     ctx.globalAlpha=1;
-    const tc=type==='jet'?(held?'#88ccff':'#4488aa'):held?'#fff':'#888';
-    ctx.fillStyle=tc;ctx.font=`bold ${Math.min(z.s*.28,13)}px monospace`;
-    ctx.textAlign='center';ctx.fillText(lb,z.x+z.s/2,z.y+z.s/2+5);
+    ctx.fillStyle=held?'#ffffff':tc;
+    ctx.font=`bold ${Math.floor(Math.min(b.s*.32,15))}px monospace`;
+    ctx.textAlign='center';
+    ctx.fillText(lb,b.x+b.s/2,b.y+b.s/2+5);
   });
+  // ATKクールダウンオーバーレイ
   if(player&&player.atkCd>0){
-    const cd=CHARS[player.ci].atkCd,z2=getBtns().atk;
-    ctx.globalAlpha=.45;dr(z2.x,z2.y,z2.s,Math.floor(z2.s*(player.atkCd/cd)),'rgba(0,0,0,.7)');
-    ctx.globalAlpha=1;
+    const cd=CHARS[player.ci].atkCd,b=z.atk;
+    ctx.globalAlpha=.5;dr(b.x,b.y,b.s,Math.floor(b.s*(player.atkCd/cd)),'#000');ctx.globalAlpha=1;
   }
-  // コンボインジケーター (●●●)
+  // JETクールダウンオーバーレイ
+  if(player&&player.jetCd>0&&!player.jetActive){
+    const b=z.jet;
+    ctx.globalAlpha=.6;dr(b.x,b.y,b.s,Math.floor(b.s*(player.jetCd/100)),'#000');ctx.globalAlpha=1;
+  }
+  // コンボドット (ATKボタン上)
   if(player){
-    const z2=getBtns().atk;
-    ctx.globalAlpha=player.comboTimer>0?0.9:0.3;
+    const b=z.atk;
+    ctx.globalAlpha=player.comboTimer>0?.9:.28;
     for(let k=0;k<3;k++){
       const lit=player.comboTimer>0&&k<=player.comboStep;
-      ctx.fillStyle=lit?'#ffcc00':'#444';ctx.fillRect(z2.x+4+k*11,z2.y-16,8,8);
-      if(lit){ctx.fillStyle='#ffee88';ctx.fillRect(z2.x+5+k*11,z2.y-15,6,6);}
+      ctx.fillStyle=lit?'#ffcc00':'#333';ctx.fillRect(b.x+5+k*13,b.y-14,9,9);
+      if(lit){ctx.fillStyle='#ffee88';ctx.fillRect(b.x+6+k*13,b.y-13,7,7);}
     }
-    ctx.globalAlpha=1;
-  }
-  if(player&&player.jetCd>0&&!player.jetActive){
-    const z2=getBtns().jet;
-    ctx.globalAlpha=.55;dr(z2.x,z2.y,z2.s,Math.floor(z2.s*(player.jetCd/100)),'rgba(0,0,0,.85)');
     ctx.globalAlpha=1;
   }
 }
