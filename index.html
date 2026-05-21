@@ -25,6 +25,10 @@ function resize(){
   canvas.style.height=window.innerHeight+'px';
 }
 resize();window.addEventListener('resize',resize);
+function tryLockLandscape(){
+  try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{});}catch(e){}
+}
+tryLockLandscape();
 function toLogical(cx,cy){const r=canvas.getBoundingClientRect();return{x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height};}
 
 const GRAVITY = 0.32, WORLD_W = 7000, P = 3;
@@ -335,7 +339,7 @@ const STARS=Array.from({length:200},()=>({
 //  ゲーム変数
 // ================================================================
 let state='title', selChar=2, player=null, cam={x:0}, score=0;
-let storyStartTime=0;
+let storyStartTime=0, storyFast=false, storyDone=false;
 let enemies=[], projectiles=[], eProjectiles=[], effects=[], particles=[];
 let shards=[], o2tanks=[];
 let shardCount=0;
@@ -393,9 +397,10 @@ function updHeld(){
 }
 canvas.addEventListener('touchstart',e=>{
   e.preventDefault();
+  tryLockLandscape();
   for(const t of e.changedTouches){const lp=toLogical(t.clientX,t.clientY);activeTouches.set(t.identifier,{x:lp.x,y:lp.y});}
-  if(state==='title'){state='story';storyStartTime=Date.now();return;}
-  if(state==='story'){state='charselect';return;}
+  if(state==='title'){state='story';storyStartTime=Date.now();storyFast=false;storyDone=false;return;}
+  if(state==='story'){if(storyDone){state='charselect';}else{storyFast=true;}return;}
   if(state==='charselect'){handleCSTap(e);return;}
   if(state==='gameover'){state='charselect';return;}
   if(state==='stageclear'){
@@ -417,8 +422,8 @@ canvas.addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.chan
 canvas.addEventListener('touchend',e=>{e.preventDefault();for(const t of e.changedTouches)activeTouches.delete(t.identifier);updHeld();},{passive:false});
 document.addEventListener('keydown',e=>{
   if(keys[e.key])return;keys[e.key]=true;
-  if(state==='title'&&(e.key==='Enter'||e.key===' ')){state='story';storyStartTime=Date.now();return;}
-  if(state==='story'&&(e.key==='Enter'||e.key===' ')){state='charselect';return;}
+  if(state==='title'&&(e.key==='Enter'||e.key===' ')){state='story';storyStartTime=Date.now();storyFast=false;storyDone=false;return;}
+  if(state==='story'&&(e.key==='Enter'||e.key===' ')){if(storyDone){state='charselect';}else{storyFast=true;}return;}
   if(state==='charselect'){
     if(e.key==='ArrowLeft')selChar=(selChar-1+CHARS.length)%CHARS.length;
     if(e.key==='ArrowRight')selChar=(selChar+1)%CHARS.length;
@@ -555,26 +560,22 @@ function doAttack(){
       }
       break;
     }
-    case 3:{ // CHESTER 蟷螂 - 斬撃
+    case 3:{ // CHESTER 蟷螂 - 飛翔斬撃
+      const mkSlash=(vx,vy,w,h,col,dmg,opts={})=>{
+        const angle=(opts.angle!==undefined?opts.angle:f*-0.38);
+        projectiles.push({x:mx,y:my-(h/2),vx,vy,w,h,col,dmg,life:opts.life||52,hit:[],pierce:!!opts.pierce,homing:false,slash:true,slashAngle:angle});
+        burst(mx,my,col,opts.n||5);
+      };
       if(step<2){
-        const sw=step===0?62:74, ex2=f>0?px+pw:px-sw;
-        effects.push({type:'slash',x:ex2,y:py-4,w:sw,h:ph+step*14,col:step===0?'#66ffaa':'#22ffcc',dmg:1,timer:12,maxTimer:12,hit:[]});
-        burst(ex2+(f>0?sw*.5:sw*.5),py+ph*.4,'#44ffaa',step===0?5:7);
+        mkSlash(f*20,step===0?0:-0.7,30,8,step===0?'#44ffaa':'#22ffcc',1,{life:50});
       }else if(lv===0){
-        const sw=82,ex2=f>0?px+pw:px-sw;
-        effects.push({type:'slash',x:ex2,y:py-8,w:sw,h:ph+18,col:'#00ffaa',dmg:2,timer:15,maxTimer:15,hit:[]});
-        burst(ex2+(f>0?sw*.5:sw*.5),py+ph*.5,'#00ffaa',10);
+        mkSlash(f*24,0,40,10,'#00ffaa',2,{life:55,n:9});
       }else if(lv===1){
-        const sw=78,ex2=f>0?px+pw:px-sw;
-        effects.push({type:'slash',x:ex2,y:py-4,w:sw,h:ph+10,col:'#44ffcc',dmg:2,timer:14,maxTimer:14,hit:[]});
-        effects.push({type:'slash',x:px-12,y:py-20,w:pw+24,h:ph+40,col:'#88ffdd',dmg:1,timer:11,maxTimer:11,hit:[]});
-        burst(px+pw*.5,py+ph*.5,'#00ffcc',12);addShake(4);
+        mkSlash(f*22,-1.2,34,8,'#44ffcc',2,{life:52});
+        mkSlash(f*19,1.2,30,8,'#88ffdd',1,{life:48,angle:f*0.38});
       }else{
-        for(let k=0;k<5;k++){
-          const sw=56+k*10,ex2=f>0?px+pw:px-sw;
-          effects.push({type:'slash',x:ex2,y:py-2+k*5,w:sw,h:ph*.7,col:k%2===0?'#00ffaa':'#88ffdd',dmg:2,timer:7+k*3,maxTimer:7+k*3,hit:[]});
-        }
-        burst(px+pw*.5,py+ph*.5,'#00ffaa',16);addShake(6);
+        for(let k=0;k<4;k++) mkSlash(f*22,(k-1.5)*2.2,28+k*5,7+k*2,k%2===0?'#00ffaa':'#88ffdd',2,{life:46+k*4,pierce:true,angle:f*(k%2===0?-0.38:0.38)});
+        addShake(5);
       }
       break;
     }
@@ -2134,76 +2135,96 @@ function scanlines(){ctx.fillStyle='rgba(0,0,0,0.16)';for(let y=0;y<H;y+=3)ctx.f
 function drawStory(){
   dr(0,0,W,H,'#02020e');
   STARS.forEach(s=>{const sx=(s.x%W+W)%W;if(!(s.b&&Math.floor(Date.now()/500)%2))dr(sx,s.y,s.s,s.s,'#fff');});
-  const fs=Math.min(W*.034,14), lh=fs+7;
+  const fs=Math.min(W*.042,17), lh=fs+10;
   const lines=[
-    ['月の裏側','#c8d8ff',true],
-    ['THE RABBIT ORBS','#6677bb',false],
+    ['月の裏側','#d8eaff',true],
+    ['THE RABBIT ORBS','#8899cc',false],
     ['','',''],
-    ['人類は長年、「月には兎がいる」という','#9aabdd',false],
-    ['言い伝えをただの昔話だと考えていた。','#9aabdd',false],
+    ['人類は長年、「月には兎がいる」という','#b8ccff',false],
+    ['言い伝えをただの昔話だと考えていた。','#b8ccff',false],
     ['','',''],
-    ['しかしある日、月の裏側で','#9aabdd',false],
-    ['異常な磁気反応が観測される。','#9aabdd',false],
+    ['しかしある日、月の裏側で','#b8ccff',false],
+    ['異常な磁気反応が観測される。','#b8ccff',false],
     ['','',''],
-    ['調査の結果、月の裏側には"兎"の形をした','#aabbff',false],
-    ['7つの謎のオーブが存在していることが判明した。','#aabbff',false],
+    ['調査の結果、月の裏側には "兎" の形をした','#ccddff',false],
+    ['7つの謎のオーブが存在することが判明した。','#ccddff',false],
     ['','',''],
-    ['そのオーブは強力な磁気エネルギーを放ち続けており、','#8899cc',false],
-    ['このまま放置すれば太陽系の惑星すべてを','#8899cc',false],
-    ['崩壊へ導く危険性があるという。','#8899cc',false],
+    ['そのオーブは強力な磁気エネルギーを放ち続けており、','#aabbee',false],
+    ['このまま放置すれば太陽系の惑星すべてを','#aabbee',false],
+    ['崩壊へ導く危険性があるという。','#aabbee',false],
     ['','',''],
-    ['世界中の研究機関が調査を進めた結果、','#9aabdd',false],
-    ['唯一「海水」にだけオーブの力を','#9aabdd',false],
-    ['弱める性質があることが発見される。','#9aabdd',false],
+    ['世界中の研究機関が調査を進めた結果、','#b8ccff',false],
+    ['唯一 "海水" にだけオーブの力を','#b8ccff',false],
+    ['弱める性質があることが発見される。','#b8ccff',false],
     ['','',''],
-    ['人類は極秘任務を決行する。','#ffdd88',true],
+    ['人類は極秘任務を決行する。','#ffee99',true],
     ['','',''],
-    ['それは――','#8899cc',false],
-    ['月へ特殊部隊を送り込み、','#8899cc',false],
-    ['7つの兎オーブを回収し、','#8899cc',false],
-    ['地球最深部の深海へ沈め封印するという','#8899cc',false],
-    ['危険な計画だった。','#8899cc',false],
+    ['それは――','#aabbee',false],
+    ['月へ特殊部隊を送り込み、','#aabbee',false],
+    ['7つの兎オーブを回収し、','#aabbee',false],
+    ['地球最深部の深海へ沈め封印するという','#aabbee',false],
+    ['危険な計画だった。','#aabbee',false],
     ['','',''],
-    ['しかし月の裏側は、強烈な磁気嵐、','#cc9988',false],
-    ['低重力地帯、崩壊した月面遺跡、','#cc9988',false],
-    ['未知の生命反応など、','#cc9988',false],
-    ['人類が想定していた以上に危険な場所だった。','#cc9988',false],
+    ['しかし月の裏側は、強烈な磁気嵐、','#ddbbaa',false],
+    ['低重力地帯、崩壊した月面遺跡、','#ddbbaa',false],
+    ['未知の生命反応など、','#ddbbaa',false],
+    ['人類が想定していた以上に危険な場所だった。','#ddbbaa',false],
     ['','',''],
-    ['さらに通常の人間では任務に耐えられないことが判明。','#8899cc',false],
+    ['さらに通常の人間では任務に耐えられないことが判明。','#aabbee',false],
     ['','',''],
-    ['そこで研究者たちは、地球上のあらゆる生物の','#9aabdd',false],
-    ['DNAを組み込み、身体能力を極限まで強化した','#9aabdd',false],
-    ['特殊調査部隊を編成する。','#9aabdd',false],
+    ['そこで研究者たちは、地球上のあらゆる生物の','#b8ccff',false],
+    ['DNAを組み込み、身体能力を極限まで強化した','#b8ccff',false],
+    ['特殊調査部隊を編成する。','#b8ccff',false],
     ['','',''],
-    ['これは人類を救うための任務なのか。','#ffaaaa',false],
-    ['それとも――','#ddaabb',false],
-    ['決して触れてはならない','#ddaabb',false],
-    ['"月の真実"を目覚めさせる行為なのか。','#ff88cc',true],
+    ['これは人類を救うための任務なのか。','#ffbbbb',false],
+    ['それとも――','#eeccdd',false],
+    ['決して触れてはならない','#eeccdd',false],
+    ['"月の真実" を目覚めさせる行為なのか。','#ffaaee',true],
     ['','',''],
-    ['特殊部隊は月の裏側へ降り立つ。','#c8d8ff',true],
+    ['特殊部隊は月の裏側へ降り立つ。','#d8eaff',true],
     ['','',''],
-    ['人類、そして太陽系の未来を懸けて。','#ffdd88',true],
+    ['人類、そして太陽系の未来を懸けて。','#ffee99',true],
     ['','',''],['','',''],['','',''],
   ];
   const totalH=lines.length*lh;
+  const speed=storyFast?160:44;
   const elapsed=(Date.now()-storyStartTime)/1000;
-  const scrollY=elapsed*36;
-  // スクロール完了後にキャラ選択へ
-  if(scrollY>totalH+H*.1){state='charselect';return;}
+  const scrollY=elapsed*speed;
+  if(scrollY>totalH+H*.05&&!storyDone)storyDone=true;
+  // 背景オーバーレイ（文字の後ろを暗くして読みやすく）
   ctx.save();
-  ctx.beginPath();ctx.rect(0,H*.04,W,H*.88);ctx.clip();
+  ctx.beginPath();ctx.rect(W*.06,H*.04,W*.88,H*.90);ctx.clip();
+  ctx.globalAlpha=0.45;dr(W*.06,H*.04,W*.88,H*.90,'#000020');ctx.globalAlpha=1;
   ctx.textAlign='center';
   lines.forEach(([t,c,bold],i)=>{
     if(!t)return;
-    const y=H*.94+i*lh-scrollY;
-    if(y<H*.02||y>H*.96)return;
-    ctx.fillStyle=c;ctx.font=`${bold?'bold ':''} ${fs}px monospace`;
+    const y=H*.95+i*lh-scrollY;
+    if(y<H*.03||y>H*.94)return;
+    // シャドウ
+    ctx.fillStyle='#000010';ctx.font=`${bold?'bold ':''} ${fs}px monospace`;
+    ctx.fillText(t,W/2+1,y+1);
+    ctx.fillStyle=c;
     ctx.fillText(t,W/2,y);
   });
   ctx.restore();
-  if(Math.floor(Date.now()/500)%2){
-    ctx.fillStyle='#334455';ctx.font=`${Math.min(W*.016,11)}px monospace`;ctx.textAlign='center';
-    ctx.fillText('TAP TO SKIP',W/2,H*.975);
+  // フェードアウト上下マスク
+  const gTop=ctx.createLinearGradient(0,H*.04,0,H*.16);gTop.addColorStop(0,'#02020e');gTop.addColorStop(1,'transparent');
+  ctx.fillStyle=gTop;ctx.fillRect(0,H*.04,W,H*.12);
+  const gBot=ctx.createLinearGradient(0,H*.78,0,H*.94);gBot.addColorStop(0,'transparent');gBot.addColorStop(1,'#02020e');
+  ctx.fillStyle=gBot;ctx.fillRect(0,H*.78,W,H*.16);
+  if(storyDone){
+    // GAME START ボタン表示
+    const bw=Math.min(W*.5,220),bh=36,bx=W/2-bw/2,by=H*.87;
+    ctx.globalAlpha=0.7;dr(bx,by,bw,bh,'#001133');ctx.globalAlpha=1;
+    ctx.strokeStyle=Math.floor(Date.now()/350)%2?'#4488ff':'#88bbff';ctx.lineWidth=2;ctx.strokeRect(bx,by,bw,bh);
+    ctx.fillStyle=Math.floor(Date.now()/350)%2?'#88bbff':'#ffffff';
+    ctx.font=`bold ${Math.min(W*.036,15)}px monospace`;ctx.textAlign='center';
+    ctx.fillText('▼  GAME  START  ▼',W/2,by+bh*.68);
+  }else{
+    if(Math.floor(Date.now()/600)%2){
+      ctx.fillStyle='#445566';ctx.font=`${Math.min(W*.028,12)}px monospace`;ctx.textAlign='center';
+      ctx.fillText('TAP: 早送り',W/2,H*.975);
+    }
   }
   scanlines();
 }
@@ -2315,7 +2336,17 @@ function drawPlay(){
   effects.forEach(drawEffect);
   projectiles.forEach(p=>{
     const bx=Math.floor(p.x-cam.x),by=Math.floor(p.y);
-    if(p.arrow){
+    if(p.slash){
+      const angle=p.slashAngle||0;
+      ctx.save();
+      ctx.translate(bx+p.w/2,by+p.h/2);ctx.rotate(angle);
+      ctx.globalAlpha=0.22;ctx.fillStyle=p.col;ctx.fillRect(-p.w/2-5,-p.h/2-3,p.w+10,p.h+6);
+      ctx.globalAlpha=0.85;ctx.fillStyle=p.col;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.globalAlpha=1;ctx.fillStyle='#ffffff';ctx.fillRect(-p.w/2+5,-1,p.w-10,2);
+      ctx.globalAlpha=0.55;ctx.fillStyle='#aaffdd';ctx.fillRect(-p.w/2+2,-p.h/2+1,p.w-4,Math.max(1,p.h/2-1));
+      ctx.globalAlpha=1;
+      ctx.restore();
+    }else if(p.arrow){
       const dir=p.vx>=0?1:-1;
       const shaftX=dir>0?bx:bx+4;
       dr(shaftX,by+1,p.w-4,p.h-2,'#6b3a10');
@@ -2416,6 +2447,16 @@ function drawGameOver(){
 //  メインループ
 // ================================================================
 function draw(){
+  // 縦向き検出
+  if(window.innerWidth<window.innerHeight){
+    ctx.fillStyle='#000010';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#aaccff';ctx.textAlign='center';
+    ctx.font=`bold ${Math.min(W*.06,20)}px monospace`;
+    ctx.fillText('端末を横向きにしてください',W/2,H*.42);
+    ctx.font=`${Math.min(W*.046,16)}px monospace`;ctx.fillStyle='#6688aa';
+    ctx.fillText('Please rotate your device',W/2,H*.58);
+    return;
+  }
   ctx.save();
   if(shakeDx||shakeDy)ctx.translate(Math.round(shakeDx),Math.round(shakeDy));
   if(state==='title')drawTitle();
