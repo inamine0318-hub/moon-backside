@@ -281,15 +281,18 @@ const PILLARS=[
   {x:5000,h:150},{x:5450,h:140},{x:5900,h:160},{x:6300,h:100},
 ];
 
-// 敵 (type: patrol/turret/charger/flyer)
+// 敵 (type: patrol/turret/charger/flyer/jumper/sniper/bomber)
 const ENEMY_SPAWNS=[
-  {x:420, y:428,type:'patrol'}, {x:610, y:408,type:'patrol'}, {x:900, y:408,type:'turret'},
-  {x:1160,y:388,type:'patrol'}, {x:1380,y:413,type:'charger'},{x:1700,y:413,type:'turret'},
-  {x:1870,y:413,type:'patrol'}, {x:2100,y:398,type:'charger'},{x:2310,y:330,type:'flyer'},
-  {x:2610,y:378,type:'turret'}, {x:2920,y:403,type:'charger'},{x:3120,y:403,type:'patrol'},
-  {x:3310,y:240,type:'flyer'},  {x:3620,y:383,type:'turret'}, {x:3920,y:408,type:'charger'},
-  {x:4130,y:408,type:'patrol'}, {x:4360,y:245,type:'flyer'},  {x:4670,y:388,type:'charger'},
-  {x:5020,y:300,type:'flyer'},  {x:5320,y:413,type:'turret'}, {x:5520,y:275,type:'flyer'},
+  {x:420, y:428,type:'patrol'}, {x:610, y:428,type:'jumper'}, {x:900, y:408,type:'turret'},
+  {x:1160,y:388,type:'patrol'}, {x:1380,y:413,type:'charger'},{x:1500,y:390,type:'sniper'},
+  {x:1700,y:413,type:'turret'},{x:1870,y:413,type:'patrol'}, {x:2100,y:398,type:'charger'},
+  {x:2200,y:400,type:'jumper'},{x:2310,y:330,type:'flyer'},  {x:2600,y:382,type:'bomber'},
+  {x:2610,y:378,type:'turret'},{x:2920,y:403,type:'charger'},{x:3120,y:403,type:'patrol'},
+  {x:3200,y:405,type:'sniper'},{x:3310,y:240,type:'flyer'},  {x:3620,y:383,type:'turret'},
+  {x:3800,y:395,type:'jumper'},{x:3920,y:408,type:'charger'},{x:4130,y:408,type:'patrol'},
+  {x:4300,y:412,type:'bomber'},{x:4360,y:245,type:'flyer'},  {x:4670,y:388,type:'charger'},
+  {x:4800,y:398,type:'jumper'},{x:5020,y:300,type:'flyer'},  {x:5100,y:415,type:'sniper'},
+  {x:5320,y:413,type:'turret'},{x:5450,y:395,type:'bomber'}, {x:5520,y:275,type:'flyer'},
   {x:5820,y:398,type:'charger'},
 ];
 
@@ -338,13 +341,20 @@ let boss=null,bossTriggered=false;
 let hitStop=0;
 let currentStage=1;
 const STAGE_CFG=[
-  {name:'月面遺跡',  sub:'LUNAR RUINS',   bgMain:'#01010a',bossType:'susanoo',   bossHp:30, bossW:60,bossH:78,bossName:'スサノオ'},
-  {name:'雷峰',      sub:'THUNDER PEAK',  bgMain:'#020904',bossType:'takemikazu',bossHp:40, bossW:60,bossH:80,bossName:'タケミカヅチ'},
-  {name:'炎窟',      sub:'FIRE CAVERN',   bgMain:'#090100',bossType:'kagutsuchi',bossHp:50, bossW:62,bossH:72,bossName:'カグヅチ'},
-  {name:'深海神殿',  sub:'DEEP TEMPLE',   bgMain:'#000908',bossType:'yamata',    bossHp:60, bossW:70,bossH:62,bossName:'ヤマタノオロチ'},
-  {name:'月宮殿',    sub:'MOON PALACE',   bgMain:'#030109',bossType:'tsukuyomi', bossHp:70, bossW:56,bossH:88,bossName:'ツクヨミ'},
-  {name:'大地の果て',sub:'EARTH\'S END',  bgMain:'#060300',bossType:'tajikarao', bossHp:80, bossW:68,bossH:86,bossName:'タジカラオ'},
-  {name:'虚無',      sub:'THE VOID',      bgMain:'#000000',bossType:'izanami',   bossHp:90, bossW:68,bossH:94,bossName:'イザナミ'},
+  {name:'月面遺跡',  sub:'LUNAR RUINS',   bgMain:'#01010a',bossType:'susanoo',   bossHp:30, bossW:60,bossH:78,bossName:'スサノオ',
+   tMain:'#1e1e2a',tHL:'#3a3a4e',tHL2:'#5a5a70',tSide:'#2e2e3e',tAcc:'#2a1a3a',nebula:['#110033','#001133'],gimmick:null},
+  {name:'雷峰',      sub:'THUNDER PEAK',  bgMain:'#010208',bossType:'takemikazu',bossHp:40, bossW:60,bossH:80,bossName:'タケミカヅチ',
+   tMain:'#14182a',tHL:'#283050',tHL2:'#3a4868',tSide:'#101828',tAcc:'#0a1838',nebula:['#001144','#002266'],gimmick:'thunder'},
+  {name:'炎窟',      sub:'FIRE CAVERN',   bgMain:'#0a0100',bossType:'kagutsuchi',bossHp:50, bossW:62,bossH:72,bossName:'カグヅチ',
+   tMain:'#2a1006',tHL:'#4a2010',tHL2:'#6a3818',tSide:'#1e0c04',tAcc:'#3a1008',nebula:['#220800','#440a00'],gimmick:'lava'},
+  {name:'深海神殿',  sub:'DEEP TEMPLE',   bgMain:'#000a08',bossType:'yamata',    bossHp:60, bossW:70,bossH:62,bossName:'ヤマタノオロチ',
+   tMain:'#082820',tHL:'#104a30',tHL2:'#186a40',tSide:'#062016',tAcc:'#0a2a1a',nebula:['#002211','#003322'],gimmick:'water'},
+  {name:'月宮殿',    sub:'MOON PALACE',   bgMain:'#030109',bossType:'tsukuyomi', bossHp:70, bossW:46,bossH:62,bossName:'ツクヨミ',
+   tMain:'#1c1a38',tHL:'#2e2c58',tHL2:'#4040aa',tSide:'#141230',tAcc:'#2a1a50',nebula:['#110033','#220044'],gimmick:'wind'},
+  {name:'大地の果て',sub:'EARTH\'S END',  bgMain:'#060200',bossType:'tajikarao', bossHp:80, bossW:68,bossH:86,bossName:'タジカラオ',
+   tMain:'#2a1a0c',tHL:'#4a3010',tHL2:'#6a4820',tSide:'#1e1008',tAcc:'#381808',nebula:['#220a00','#110800'],gimmick:'quake'},
+  {name:'虚無',      sub:'THE VOID',      bgMain:'#000000',bossType:'izanami',   bossHp:90, bossW:68,bossH:94,bossName:'イザナミ',
+   tMain:'#080818',tHL:'#10102a',tHL2:'#181840',tSide:'#040410',tAcc:'#0a0828',nebula:['#080030','#040020'],gimmick:'void'},
 ];
 const TOTAL_STAGES=STAGE_CFG.length;
 
@@ -437,6 +447,9 @@ function spawnEnemies(){
     if(type==='turret') return{id,type,x:d.x,y:d.y-24,w:28,h:24,vy:0,vx:0,dir:1,startX:d.x,range:0,hp:5,maxHp:5,onGround:false,dmgCd:0,shotCd:0,shotMax:160,flashTimer:0,poisoned:0,poisonTimer:0};
     if(type==='charger') return{id,type,x:d.x,y:d.y-32,w:32,h:32,vy:0,vx:0.9,dir:Math.random()<.5?1:-1,startX:d.x,range:90+Math.random()*40,hp:4,maxHp:4,onGround:false,dmgCd:0,charging:false,chargeCd:0,chargeDir:1,flashTimer:0,poisoned:0,poisonTimer:0};
     if(type==='flyer')  return{id,type,x:d.x,y:d.y,   w:28,h:24,vy:0,vx:1.3+Math.random()*.4,dir:Math.random()<.5?1:-1,startX:d.x,range:110+Math.random()*60,hp:2,maxHp:2,onGround:false,dmgCd:0,baseY:d.y,bob:Math.random()*Math.PI*2,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='jumper') return{id,type,x:d.x,y:d.y-28,w:22,h:28,vy:0,vx:0,dir:1,startX:d.x,range:80,hp:3,maxHp:3,onGround:false,dmgCd:0,jumpCd:40,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='sniper') return{id,type,x:d.x,y:d.y-34,w:26,h:34,vy:0,vx:0.5,dir:Math.random()<.5?1:-1,startX:d.x,range:25,hp:4,maxHp:4,onGround:false,dmgCd:0,shotCd:0,shotMax:220,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='bomber') return{id,type,x:d.x,y:d.y-28,w:26,h:28,vy:0,vx:0,dir:1,startX:d.x,range:200,hp:2,maxHp:2,onGround:false,dmgCd:0,fuseTimer:0,fuseActive:false,flashTimer:0,poisoned:0,poisonTimer:0};
     return{id,type:'patrol',x:d.x,y:d.y-34,w:30,h:34,vy:0,vx:1.0+Math.random()*.6,dir:Math.random()<.5?1:-1,startX:d.x,range:70+Math.random()*50,hp:3,maxHp:3,onGround:false,dmgCd:0,flashTimer:0,poisoned:0,poisonTimer:0};
   });
 }
@@ -641,6 +654,37 @@ function update(){
   if(player.weaponLv===2)player.weaponGauge=Math.max(0,player.weaponGauge-0.15);
   else if(player.weaponLv===1)player.weaponGauge=Math.max(0,player.weaponGauge-0.05);
   if(player.weaponLv>0&&player.weaponGauge<=0){player.weaponLv--;player.weaponGauge=player.weaponLv>0?55:0;}
+  // ステージギミック
+  const gimmick=STAGE_CFG[currentStage-1].gimmick;
+  if(gimmick==='thunder'&&gameTimer%280===0&&Math.random()<0.55){
+    // 雷ストライク: プレイヤーの近くに落雷
+    const lx=player.x+player.w/2+(Math.random()-.5)*180;
+    effects.push({type:'explode',x:lx,y:H-60,r:55,maxTimer:14,timer:14,dmg:0,applied:true});
+    burst(lx,player.y,'#aabbff',12);addShake(4);
+    if(Math.abs(lx-(player.x+player.w/2))<50&&player.invincible===0){
+      player.hp--;player.invincible=55;damageWeapon();burst(player.x+player.w/2,player.y,'#ff4444',6);addShake(6);
+      if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);state='gameover';return;}
+    }
+  }
+  if(gimmick==='lava'&&gameTimer%5===0){ // 炎窟: 地面が熱い(O2追加消費)
+    player.oxygen=Math.max(0,player.oxygen-0.006);
+  }
+  if(gimmick==='water'){ // 深海: O2消費2倍
+    player.oxygen=Math.max(0,player.oxygen-0.018);
+  }
+  if(gimmick==='wind'){ // 月宮殿: 月面風(左方向ドリフト)
+    if(!player.onGround)player.vx-=0.08;
+  }
+  if(gimmick==='quake'&&gameTimer%380===0){ // 大地の果て: 地震
+    addShake(8+Math.floor(Math.random()*5));burst(player.x+player.w/2,player.y+player.h,'#8a8060',6);
+  }
+  if(gimmick==='void'&&gameTimer%220===0){ // 虚無: ランダム敵弾生成
+    if(enemies.length>0){
+      const re=enemies[Math.floor(Math.random()*enemies.length)];
+      if(re.hp>0){const dx=(player.x+player.w/2)-(re.x+re.w/2),dy=(player.y+player.h/2)-(re.y+re.h/2),dist=Math.hypot(dx,dy)||1;
+        eProjectiles.push({x:re.x+re.w/2,y:re.y+re.h*.3,vx:dx/dist*8,vy:dy/dist*8,w:9,h:9,life:90});}
+    }
+  }
 
   player.onGround=false;player.onWall=false;player.wallDir=0;
   for(const t of TERRAIN){
@@ -796,6 +840,55 @@ function update(){
       e.y=e.baseY+Math.sin(e.bob)*14;
       if(e.x<e.startX-e.range)e.dir=1;if(e.x>e.startX+e.range)e.dir=-1;
       e.x+=e.vx*e.dir;
+    } else if(e.type==='jumper'){
+      // 月面ホッパー: 低重力ジャンプで接近
+      e.vy+=GRAVITY*.52;if(e.vy>16)e.vy=16;
+      e.x+=e.vx;e.y+=e.vy;e.onGround=false;
+      for(const t of TERRAIN){if(e.x+e.w>t.x&&e.x<t.x+t.w&&e.vy>=0&&e.y+e.h>=t.y&&e.y+e.h<=t.y+t.h+16){e.y=t.y-e.h;e.vy=0;e.onGround=true;}}
+      if(e.onGround){
+        e.jumpCd--;
+        if(e.jumpCd<=0){
+          const dx=(player.x+player.w/2)-(e.x+e.w/2);
+          e.vx=Math.sign(dx)*Math.min(Math.abs(dx)*.04+2.5,4.5);
+          e.vy=-9.2+Math.random();e.jumpCd=52+Math.random()*22;
+          burst(e.x+e.w/2,e.y+e.h,'#8a8060',4);
+        } else { e.vx*=0.72; }
+        e.dir=e.vx>=0?1:-1;
+      }
+    } else if(e.type==='sniper'){
+      // 狙撃型: ゆっくり移動・高速弾
+      e.vy+=GRAVITY;if(e.vy>18)e.vy=18;
+      if(e.x<e.startX-e.range)e.dir=1;if(e.x>e.startX+e.range)e.dir=-1;
+      e.x+=e.vx*e.dir;e.y+=e.vy;e.onGround=false;
+      for(const t of TERRAIN){if(e.x+e.w>t.x&&e.x<t.x+t.w&&e.vy>=0&&e.y+e.h>=t.y&&e.y+e.h<=t.y+t.h+16){e.y=t.y-e.h;e.vy=0;e.onGround=true;}}
+      if(e.onGround){
+        e.dir=player.x>e.x+e.w/2?1:-1;
+        e.shotCd++;
+        if(e.shotCd>=e.shotMax){
+          e.shotCd=0;
+          const dx=(player.x+player.w/2)-(e.x+e.w/2);
+          const dy=(player.y+player.h/2)-(e.y+e.h/2);
+          const dist=Math.hypot(dx,dy)||1;
+          eProjectiles.push({x:e.x+e.w*(e.dir>0?1:0),y:e.y+e.h*.3,vx:dx/dist*9.5,vy:dy/dist*9.5,w:7,h:7,life:85});
+          burst(e.x+e.w*(e.dir>0?1:0),e.y+e.h*.3,'#ff2200',8);
+        }
+      }
+    } else if(e.type==='bomber'){
+      // 突撃自爆型: プレイヤーに近づき導火線点火後爆発
+      e.vy+=GRAVITY;if(e.vy>18)e.vy=18;
+      const pdx=(player.x+player.w/2)-(e.x+e.w/2);
+      const pd=Math.abs(pdx);
+      e.x+=e.vx;e.y+=e.vy;e.onGround=false;
+      for(const t of TERRAIN){if(e.x+e.w>t.x&&e.x<t.x+t.w&&e.vy>=0&&e.y+e.h>=t.y&&e.y+e.h<=t.y+t.h+16){e.y=t.y-e.h;e.vy=0;e.onGround=true;}}
+      if(e.onGround){if(pd<240){e.dir=Math.sign(pdx);e.vx=e.dir*2.2;}else{e.vx*=0.8;}}
+      if(pd<90)e.fuseActive=true;
+      if(e.fuseActive){
+        e.fuseTimer++;
+        if(e.fuseTimer>=95){
+          effects.push({type:'explode',x:e.x+e.w/2,y:e.y+e.h/2,r:82,maxTimer:22,timer:22,dmg:2,applied:false});
+          burst(e.x+e.w/2,e.y+e.h/2,'#ff8800',18);addShake(7);e.hp=0;continue;
+        }
+      }
     } else {
       // patrol (パトロール)
       e.vy+=GRAVITY;if(e.vy>18)e.vy=18;
@@ -1100,6 +1193,60 @@ function drawEnemies(){
       for(let k=0;k<3;k++){const tx=ex+5+k*8,tl=10+Math.sin(t/200+k)*5;dr(tx,ey+18,4,tl,'#1a0828');dr(tx+1,ey+20,2,tl-4,'#2a0a44');}
       // HPバー
       dr(ex,ey-9,e.w,3,'#1a0028');dr(ex,ey-9,Math.ceil(e.w*(e.hp/e.maxHp)),3,'#aa00ff');
+    } else if(e.type==='jumper'){
+      // 月面ホッパー (小型・ずんぐり)
+      const air=!e.onGround;
+      // 触角
+      dr(ex+4,ey,3,7,'#3a2200');dr(ex+15,ey,3,7,'#3a2200');
+      // 体
+      dr(ex,ey+6,e.w,14,'#5a3a10');dr(ex,ey+6,e.w,4,'#7a5a20');
+      // 脚 (ジャンプ中は伸びる)
+      const legY=air?16:14;const legH=air?14:10;
+      dr(ex+2,ey+legY,8,legH,'#3a2200');dr(ex+12,ey+legY,8,legH,'#3a2200');
+      // 複眼
+      dr(ex+3,ey+8,6,5,'#0a0200');dr(ex+13,ey+8,6,5,'#0a0200');
+      if(Math.floor(t/300)%3>0){dr(ex+4,ey+9,4,3,'#ff6600');dr(ex+14,ey+9,4,3,'#ff6600');}
+      // HPバー
+      dr(ex,ey-9,e.w,3,'#330008');dr(ex,ey-9,Math.ceil(e.w*(e.hp/e.maxHp)),3,'#ff8800');
+    } else if(e.type==='sniper'){
+      // 狙撃型 (スコープ付きのっぽ型)
+      const sc=e.shotCd/e.shotMax;
+      const pulse=sc>0.8&&Math.floor(t/80)%2;
+      // 脚
+      dr(ex+4,ey+24,9,10,'#1a0a00');dr(ex+13,ey+24,9,10,'#1a0a00');
+      // 胴体
+      dr(ex+2,ey+8,22,18,'#1e0e00');dr(ex+2,ey+8,22,4,'#3a2a10');
+      // 頭
+      dr(ex+6,ey+1,14,8,'#1e0e00');dr(ex+6,ey+1,14,3,'#3a2a10');
+      // スコープ/銃身
+      const gx2=e.dir>0?ex+22:ex-10;
+      dr(gx2,ey+12,12,4,'#111111');dr(e.dir>0?gx2+8:gx2,ey+11,4,6,'#cc1100');
+      // 目
+      dr(ex+8,ey+3,8,5,'#0a0200');
+      if(pulse)dr(ex+9,ey+4,6,3,'#ff0000');else dr(ex+10,ey+4,3,2,'#660000');
+      // チャージゲージ
+      dr(ex+2,ey,22,3,'#110008');dr(ex+2,ey,Math.floor(22*sc),3,'#ff3300');
+      // HPバー
+      dr(ex,ey-9,e.w,3,'#330008');dr(ex,ey-9,Math.ceil(e.w*(e.hp/e.maxHp)),3,'#ff1144');
+    } else if(e.type==='bomber'){
+      // 自爆型 (丸っこい胴体・導火線)
+      const fuse=e.fuseActive;
+      const flsh=fuse&&Math.floor(t/(fuse?Math.max(40,120-e.fuseTimer):120))%2;
+      // 脚
+      dr(ex+4,ey+18,8,10,'#330011');dr(ex+14,ey+18,8,10,'#330011');
+      // 丸い胴体
+      dr(ex+2,ey+4,22,16,'#550011');dr(ex,ey+8,26,8,'#550011');
+      dr(ex+2,ey+4,22,5,flsh?'#ff8800':'#881111');
+      // 爆弾マーク
+      dr(ex+10,ey+10,6,6,'#220008');dr(ex+11,ey+11,4,4,flsh?'#ff4400':'#882200');
+      // 導火線
+      dr(ex+11,ey,4,5,fuse?'#ffcc00':'#885522');
+      if(fuse&&flsh)dr(ex+10,ey-3,6,4,'#ffee44');
+      // 目
+      dr(ex+5,ey+7,6,5,'#1a0004');dr(ex+15,ey+7,6,5,'#1a0004');
+      if(flsh){dr(ex+6,ey+8,4,3,'#ff2200');dr(ex+16,ey+8,4,3,'#ff2200');}
+      // HPバー
+      dr(ex,ey-9,e.w,3,'#330008');dr(ex,ey-9,Math.ceil(e.w*(e.hp/e.maxHp)),3,'#ff1144');
     }
     // 毒インジケーター
     if(e.poisoned>0){
@@ -1339,36 +1486,37 @@ function drawBossTsukuyomi(bx,by,t){
   const ac=ph2?'#eeeeff':'#aabbff';
   const bd='#060614';
   const flk=Math.floor(t/220)%2;
+  const BW=boss.w,BH=boss.h;
   function _f(col,x,y,w,h){ctx.fillStyle=col;ctx.fillRect(bx+x,by+y,w,h);}
-  ctx.globalAlpha=Math.sin(t/240)*.2+.12;_f(ac,-14,-12,boss.w+28,boss.h+16);ctx.globalAlpha=1;
-  // ローブ(裾・幅広)
-  _f(bd,0,42,boss.w,50);_f('#0e0e28',2,44,boss.w-4,46);
-  for(let k=0;k<4;k++)_f(ac,4+k*11,40,8,4);
-  // 胴体
-  _f(bd,8,14,boss.w-16,32);_f('#0e0e28',10,16,boss.w-20,28);_f(ac,10,16,boss.w-20,3);
-  // 三日月(左腕)
-  _f(bd,-12,18,16,14);_f(ac,-14,14,20,6);_f(bd,-10,14,12,6);
-  _f('#ffee88',-18,10,24,4);_f('#fffacc',-16,12,20,2);
-  // 杖(右腕)
-  _f(bd,boss.w-4,10,10,52);_f('#3a3a60',boss.w-3,12,6,48);_f(ac,boss.w-4,8,10,4);
-  _f(ac,boss.w-8,4,16,6);_f('#fffacc',boss.w-5,6,10,2);
-  // 脚
-  _f(bd,6,70,18,24);_f('#0e0e28',8,72,14,22);
-  _f(bd,boss.w-22,70,18,24);_f('#0e0e28',boss.w-20,72,14,22);
-  // 首・頭
-  _f(bd,16,6,boss.w-32,10);_f(ac,18,6,boss.w-36,3);
-  _f(bd,4,-20,boss.w-8,28);_f('#0e0e28',6,-18,boss.w-12,26);_f(ac,4,-20,boss.w-8,5);
-  // 兎耳(長い)
-  _f(bd,8,-42,12,24);_f('#6655aa',10,-40,8,22);_f('#cc99ff',11,-38,6,18);
-  _f(bd,boss.w-20,-42,12,24);_f('#6655aa',boss.w-18,-40,8,22);_f('#cc99ff',boss.w-17,-38,6,18);
+  // グロー
+  ctx.globalAlpha=Math.sin(t/240)*.2+.12;_f(ac,-10,-10,BW+20,BH+14);ctx.globalAlpha=1;
+  // 兎耳 (ヒットボックス上に伸びる)
+  _f(bd, 6,-30,10,26);_f('#6655aa', 8,-28,6,24);_f('#cc99ff', 9,-26,4,20);
+  _f(bd,BW-16,-30,10,26);_f('#6655aa',BW-14,-28,6,24);_f('#cc99ff',BW-13,-26,4,20);
+  // 冠
+  for(let k=0;k<4;k++)_f(ac,3+k*10,-8,7,5);
+  _f('#fffacc',3,-8,BW-6,1);
+  // 頭
+  _f(bd,4,-6,BW-8,18);_f('#0e0e28',6,-4,BW-12,16);_f(ac,6,-4,BW-12,3);
   // 目(月光)
-  _f('#020218',10,-10,12,8);_f(flk?ac:'#6655aa',11,-9,10,6);_f('#ffffff',12,-8,4,3);
-  _f('#020218',boss.w-22,-10,12,8);_f(flk?ac:'#6655aa',boss.w-21,-9,10,6);_f('#ffffff',boss.w-20,-8,4,3);
-  // 冠(五芒星風)
-  for(let k=0;k<5;k++)_f(ac,6+k*9,-24,6,6);
-  _f('#fffacc',6,-24,boss.w-12,2);
-  if(boss.state==='charge'){ctx.globalAlpha=0.25+Math.random()*.1;_f('#9988ff',-8,0,boss.w+16,boss.h);ctx.globalAlpha=1;}
-  if(ph2){ctx.globalAlpha=0.16+Math.sin(t/120)*.08;_f('#ffffff',-6,-4,boss.w+12,boss.h+8);ctx.globalAlpha=1;}
+  _f('#020218', 8, 1,10,7);_f(flk?ac:'#6655aa', 9, 2, 8,5);_f('#ffffff',10, 3, 3,2);
+  _f('#020218',BW-18, 1,10,7);_f(flk?ac:'#6655aa',BW-17, 2, 8,5);_f('#ffffff',BW-16, 3, 3,2);
+  // 首
+  _f(bd,14,12,BW-28,6);
+  // 胴体
+  _f(bd,6,16,BW-12,22);_f('#0e0e28',8,18,BW-16,18);_f(ac,8,18,BW-16,3);
+  // 三日月飾り(左)
+  _f('#ffee88',-10,18,12,4);_f('#fffacc',-8,20,8,2);
+  // 杖(右腕)
+  _f(bd,BW-2,12,8,34);_f('#3a3a60',BW-1,14,4,30);_f(ac,BW-4,10,8,4);_f(ac,BW-7,6,14,5);
+  // ローブ裾
+  _f(bd,0,36,BW,26);_f('#0e0e28',2,38,BW-4,24);
+  for(let k=0;k<4;k++)_f(ac,3+k*10,35,6,4);
+  // 脚
+  _f(bd,6,50,14,12);_f('#0e0e28',7,51,12,10);
+  _f(bd,BW-20,50,14,12);_f('#0e0e28',BW-19,51,12,10);
+  if(boss.state==='charge'){ctx.globalAlpha=0.28+Math.random()*.1;_f('#9988ff',-6,0,BW+12,BH);ctx.globalAlpha=1;}
+  if(ph2){ctx.globalAlpha=0.16+Math.sin(t/120)*.08;_f('#ffffff',-4,-4,BW+8,BH+8);ctx.globalAlpha=1;}
 }
 
 // Stage6: タジカラオ (大地の熊神・力の化身)
@@ -1532,12 +1680,12 @@ function drawBg(){
   const scfg=STAGE_CFG[currentStage-1];
   dr(0,0,W,H,scfg?scfg.bgMain:'#01010a');
 
-  // 星雲ヒント (画面固定・極薄色帯)
+  // 星雲ヒント (ステージ別カラー)
   ctx.globalAlpha=0.07;
-  dr(W*.1,0,W*.32,H*.44,'#110033');
-  dr(W*.58,H*.06,W*.28,H*.36,'#001133');
+  dr(W*.1,0,W*.32,H*.44,scfg.nebula[0]);
+  dr(W*.58,H*.06,W*.28,H*.36,scfg.nebula[1]);
   ctx.globalAlpha=0.04;
-  dr(W*.38,H*.12,W*.24,H*.3,'#330011');
+  dr(W*.38,H*.12,W*.24,H*.3,scfg.nebula[0]);
   ctx.globalAlpha=1;
 
   const t=Date.now();
@@ -1612,43 +1760,121 @@ function drawBg(){
       ctx.globalAlpha=1;
     }
   });
+
+  // ステージ固有の背景エフェクト
+  const st=currentStage;
+  if(st===2){ // 雷峰: 遠景に稲妻フラッシュ
+    const lp=Math.floor(t/3200)%7;
+    if(Math.floor(t/3200)*3200+800>t){
+      ctx.globalAlpha=0.06+lp*.01;
+      dr(W*(.2+lp*.1),0,3,H*.7,'#8899ff');
+      ctx.globalAlpha=0.03;dr(W*(.2+lp*.1)-5,0,14,H*.5,'#4455cc');
+      ctx.globalAlpha=1;
+    }
+    // 暗雲帯
+    ctx.globalAlpha=0.09;dr(0,H*.05,W,H*.18,'#050510');ctx.globalAlpha=1;
+  }
+  if(st===3){ // 炎窟: 下部に溶岩グロー
+    const fl=Math.sin(t/350)*.3+.7;
+    ctx.globalAlpha=fl*.18;dr(0,H*.72,W,H*.28,'#ff4400');ctx.globalAlpha=1;
+    ctx.globalAlpha=fl*.10;dr(0,H*.82,W,H*.18,'#ff8800');ctx.globalAlpha=1;
+    // 揺れる炎パーティクル(背景)
+    for(let k=0;k<8;k++){
+      const fx=((k*137+t*.04)%W);
+      const fy=H*.7+Math.sin(t/200+k)*(H*.05);
+      ctx.globalAlpha=0.07;dr(fx,fy,4,12,'#ff6600');ctx.globalAlpha=1;
+    }
+  }
+  if(st===4){ // 深海神殿: 海中コースティクス光
+    for(let k=0;k<12;k++){
+      const cx=((k*211+t*.015)%W);
+      const cy=H*.2+Math.sin(t/400+k*0.8)*(H*.3);
+      ctx.globalAlpha=0.04+Math.sin(t/300+k)*.02;
+      dr(cx,cy,Math.floor(20+Math.sin(k)*10),2,'#22aaaa');ctx.globalAlpha=1;
+    }
+    // 深海の暗さ (下部)
+    ctx.globalAlpha=0.12;dr(0,H*.5,W,H*.5,'#002a20');ctx.globalAlpha=1;
+  }
+  if(st===5){ // 月宮殿: 浮遊する光の玉
+    for(let k=0;k<7;k++){
+      const ox=((k*293+t*.008)%W);
+      const oy=H*.15+Math.sin(t/600+k*1.1)*(H*.3);
+      const gl=Math.sin(t/400+k)*.4+.6;
+      ctx.globalAlpha=gl*.10;dr(ox-8,oy-8,16,16,'#aabbff');ctx.globalAlpha=1;
+      ctx.globalAlpha=gl*.06;dr(ox-14,oy-14,28,28,'#8899ee');ctx.globalAlpha=1;
+    }
+  }
+  if(st===6){ // 大地の果て: 土煙・赤い空
+    ctx.globalAlpha=0.08;dr(0,0,W,H*.4,'#440a00');ctx.globalAlpha=1;
+    for(let k=0;k<6;k++){
+      const dx=((k*181+t*.012)%W);
+      const dy=H*.5+Math.sin(t/500+k)*(H*.1);
+      ctx.globalAlpha=0.05;dr(dx,dy,Math.floor(30+k*8),6,'#884422');ctx.globalAlpha=1;
+    }
+  }
+  if(st===7){ // 虚無: ダークエネルギー渦
+    for(let k=0;k<10;k++){
+      const ex2=((k*173+t*.01)%W);
+      const ey2=H*.1+((k*97+t*.005)%(H*.6));
+      const gl=Math.sin(t/500+k)*.4+.4;
+      ctx.globalAlpha=gl*.07;dr(ex2,ey2,Math.floor(2+k%3),Math.floor(30+k*5),'#5500ff');ctx.globalAlpha=1;
+    }
+    // 全体に暗い霧
+    ctx.globalAlpha=0.05;dr(0,0,W,H,'#220033');ctx.globalAlpha=1;
+  }
 }
 
 // ================================================================
 //  地形描画 (古代遺跡石畳)
 // ================================================================
 function drawTerrain(){
-  TERRAIN.forEach(t=>{
-    const tx=t.x-cam.x;if(tx>W+60||tx+t.w<-60)return;
-    const isG=t.h>20;
-    // ベース石
-    dr(tx,t.y,t.w,t.h,isG?'#1e1e2a':'#181826');
-    // 石目(タイル割り)
+  const scfg=STAGE_CFG[currentStage-1];
+  const tM=scfg.tMain,tH=scfg.tHL,tH2=scfg.tHL2,tS=scfg.tSide,tA=scfg.tAcc;
+  const t=Date.now();
+  TERRAIN.forEach(ter=>{
+    const tx=ter.x-cam.x;if(tx>W+60||tx+ter.w<-60)return;
+    const isG=ter.h>20;
+    dr(tx,ter.y,ter.w,ter.h,isG?tM:'#12121e');
+    // タイル割り石目
     const tile=isG?32:24;
-    for(let bx=tx;bx<tx+t.w;bx+=tile){
-      dr(bx,t.y,1,t.h,'#111118');
-    }
-    // 上端 ハイライト(2層)
-    dr(tx,t.y,t.w,2,'#3a3a4e');
-    dr(tx,t.y,t.w,1,'#5a5a70');
+    for(let bx=tx;bx<tx+ter.w;bx+=tile)dr(bx,ter.y,1,ter.h,'#0a0a12');
+    // 上端ハイライト
+    dr(tx,ter.y,ter.w,2,tH);dr(tx,ter.y,ter.w,1,tH2);
     // 側面影
-    dr(tx,t.y,2,t.h,'#2e2e3e');
-    dr(tx+t.w-2,t.y,2,t.h,'#111118');
-    // 苔/古代汚れ
-    if(isG){
-      for(let gx=tx+8;gx<tx+t.w-8;gx+=48){
-        dr(gx,t.y+2,6,2,'#1a2a1a');
-      }
+    dr(tx,ter.y,2,ter.h,tS);dr(tx+ter.w-2,ter.y,2,ter.h,'#0a0a12');
+    // ステージ別装飾
+    if(currentStage===1&&isG){ // 遺跡: 苔・紋様
+      for(let gx=tx+8;gx<tx+ter.w-8;gx+=48)dr(gx,ter.y+2,6,2,'#1a2a1a');
+      if(ter.w>150){const gl=Math.floor(ter.x/500)%4,gx=tx+ter.w*.5,gy=ter.y+6;
+        if(gl===0){dr(gx-3,gy,6,2,tA);dr(gx-1,gy-2,2,6,tA);}
+        if(gl===1){dr(gx-3,gy,6,2,tA);dr(gx-3,gy+4,6,2,tA);}
+        if(gl===2)dr(gx-4,gy,8,4,tA);
+        if(gl===3)for(let k=0;k<3;k++)dr(gx-4+k*3,gy,2,6,tA);}
     }
-    // 古代紋様(ランダム位置)
-    if(isG&&t.w>150){
-      const glyph=Math.floor(t.x/500)%4;
-      const gx=tx+t.w*.5;
-      const gy=t.y+6;
-      if(glyph===0){dr(gx-3,gy,6,2,'#2a1a3a');dr(gx-1,gy-2,2,6,'#2a1a3a');}
-      if(glyph===1){dr(gx-3,gy,6,2,'#1a2a1a');dr(gx-3,gy+4,6,2,'#1a2a1a');}
-      if(glyph===2){dr(gx-3,gy+1,6,4,'#3a1a1a');}
-      if(glyph===3){for(let k=0;k<3;k++)dr(gx-4+k*3,gy,2,6,'#2a2a0a');}
+    if(currentStage===2&&isG){ // 雷峰: 稲妻紋様
+      for(let gx=tx+16;gx<tx+ter.w-16;gx+=56){
+        dr(gx,ter.y+2,2,4,'#2a3860');dr(gx+3,ter.y+4,2,4,'#2a3860');}
+    }
+    if(currentStage===3){ // 炎窟: 溶岩の縁が光る
+      const gl=Math.sin(t/300+ter.x*.002)*.4+.6;
+      ctx.globalAlpha=gl*.18;dr(tx,ter.y,ter.w,2,'#ff4400');ctx.globalAlpha=1;
+    }
+    if(currentStage===4&&isG){ // 深海神殿: 海藻・緑光
+      for(let gx=tx+10;gx<tx+ter.w-10;gx+=36){
+        const wv=Math.sin(t/600+gx*.1)*2;
+        dr(gx+wv,ter.y-8,3,10,'#0a3a20');dr(gx+wv+1,ter.y-7,1,8,'#1a6a30');}
+    }
+    if(currentStage===5){ // 月宮殿: 水晶・白縁
+      ctx.globalAlpha=0.22;dr(tx,ter.y,ter.w,1,'#9988ff');ctx.globalAlpha=1;
+      if(isG&&ter.w>80){const gx=tx+ter.w*.5-2;dr(gx,ter.y-4,4,6,'#6655aa');dr(gx+1,ter.y-3,2,4,'#cc99ff');}
+    }
+    if(currentStage===6&&isG){ // 大地の果て: ひび割れ
+      for(let gx=tx+20;gx<tx+ter.w-20;gx+=60){
+        dr(gx,ter.y+1,1,ter.h-1,'#1a0800');dr(gx+1,ter.y+2,1,ter.h-3,'#0e0600');}
+    }
+    if(currentStage===7){ // 虚無: エネルギー線が流れる
+      const fl=Math.sin(t/200+ter.x*.003)*.5+.5;
+      ctx.globalAlpha=fl*.15;dr(tx,ter.y,ter.w,1,'#4400ff');ctx.globalAlpha=1;
     }
   });
 }
