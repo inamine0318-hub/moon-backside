@@ -49,7 +49,9 @@ function snd(freq,dur,vol,type,freqEnd){
   g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
   o.start();o.stop(ac.currentTime+dur+0.01);
 }
+let muted=false, paused=false;
 function sfx(name){
+  if(muted)return;
   switch(name){
     case 'arrow':  snd(880,0.07,0.08,'square',1200);break;
     case 'bomb':   snd(160,0.12,0.15,'sawtooth',80);break;
@@ -66,6 +68,75 @@ function sfx(name){
     case 'dead':   snd(440,0.08,0.15,'sawtooth',200);setTimeout(()=>snd(200,0.25,0.18,'sawtooth',80),100);break;
   }
 }
+
+// ================================================================
+//  BGM (Web Audio チップチューン シーケンサー)
+// ================================================================
+// 音符: [Hz, 拍数]  0=休符
+const _BGM={
+  title:{ bpm:88, seq:[
+    [220,2],[262,1],[330,1],[392,2],[330,1],[262,1],[220,4],
+    [196,2],[220,1],[262,1],[294,2],[262,1],[220,1],[196,4],
+    [220,1],[262,1],[330,1],[392,1],[440,2],[392,1],[330,1],[262,1],
+    [220,2],[196,1],[165,1],[220,4],[0,4],
+  ]},
+  play:{ bpm:138, seq:[
+    [330,1],[330,0.5],[370,0.5],[330,1],[294,1],[330,2],
+    [262,1],[294,0.5],[330,0.5],[294,1],[262,1],[220,2],
+    [330,1],[392,0.5],[440,0.5],[392,1],[370,1],[330,2],
+    [294,1],[330,0.5],[370,0.5],[330,1],[294,1],[220,2],[0,2],
+  ]},
+  boss:{ bpm:168, seq:[
+    [440,0.5],[440,0.5],[494,0.5],[440,0.5],[415,1],[392,1],[370,1],[330,1],
+    [370,0.5],[370,0.5],[415,0.5],[370,0.5],[349,1],[330,1],[294,1],[262,1],
+    [330,0.5],[330,0.5],[370,0.5],[330,0.5],[294,1],[262,1],[220,1],[196,1],
+    [220,0.5],[220,0.5],[262,0.5],[220,0.5],[196,1],[175,1],[165,1],[0,1],
+  ]},
+  clear:{ bpm:110, seq:[
+    [523,1],[659,1],[784,1],[1047,2],[784,1],[659,1],[523,2],[0,2],
+  ]},
+};
+let _bgmKey=null,_bgmStep=0,_bgmTid=null;
+function bgmNote(freq,dur){
+  if(muted||!freq)return;
+  const ac=getAC();if(!ac)return;
+  const o=ac.createOscillator(),g=ac.createGain();
+  o.connect(g);g.connect(ac.destination);
+  o.type='square';o.frequency.value=freq;
+  g.gain.setValueAtTime(0.038,ac.currentTime);
+  g.gain.setValueAtTime(0.022,ac.currentTime+dur*0.55);
+  g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur*0.9);
+  o.start();o.stop(ac.currentTime+dur);
+  // 三角波でバス(1オクターブ下)を薄く重ねる
+  if(freq>200){
+    const ob=ac.createOscillator(),gb=ac.createGain();
+    ob.connect(gb);gb.connect(ac.destination);
+    ob.type='triangle';ob.frequency.value=freq/2;
+    gb.gain.setValueAtTime(0.018,ac.currentTime);
+    gb.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur*0.8);
+    ob.start();ob.stop(ac.currentTime+dur);
+  }
+}
+function _bgmTick(){
+  if(!_bgmKey)return;
+  const pat=_BGM[_bgmKey];if(!pat)return;
+  const[freq,beats]=pat.seq[_bgmStep%pat.seq.length];
+  const dur=beats*(60000/pat.bpm);
+  if(!paused)bgmNote(freq,dur/1000*0.9);
+  _bgmStep++;
+  _bgmTid=setTimeout(_bgmTick,dur);
+}
+function bgmPlay(key){
+  if(_bgmKey===key)return;
+  bgmStop();
+  _bgmKey=key;_bgmStep=0;
+  _bgmTick();
+}
+function bgmStop(){
+  if(_bgmTid){clearTimeout(_bgmTid);_bgmTid=null;}
+  _bgmKey=null;
+}
+
 let W, H, isPortrait=false;
 function resize(){
   // screen.width/height はアドレスバー影響を受けないので向き判定に使う
@@ -552,6 +623,13 @@ const TOTAL_STAGES=STAGE_CFG.length;
 const keys={}, touchHeld={left:false,right:false,jumpHeld:false};
 const activeTouches=new Map();
 
+function getSysBtns(){
+  // ポーズ・ミュートはHUD上部右端の小ボタン
+  return{
+    pause:{x:W-34,y:2,w:30,h:24},
+    mute: {x:W-68,y:2,w:30,h:24},
+  };
+}
 function getBtns(){
   const mg=18,gap=20;
   const jS=Math.min(W*.075,86); // JUMP: 最大
@@ -579,7 +657,17 @@ function updHeld(){
 canvas.addEventListener('touchstart',e=>{
   e.preventDefault();
   for(const t of e.changedTouches){const lp=toLogical(t.clientX,t.clientY);activeTouches.set(t.identifier,{x:lp.x,y:lp.y});}
-  if(state==='title'){tryFullscreen();state='story';storyStartTime=Date.now();storyHeld=false;storyDone=false;return;}
+  // システムボタン（全画面共通: ポーズ・ミュート）
+  {const t0=e.changedTouches[0];const lp0=toLogical(t0.clientX,t0.clientY);
+    const sb=getSysBtns();
+    if(lp0.x>=sb.mute.x&&lp0.x<=sb.mute.x+sb.mute.w&&lp0.y>=sb.mute.y&&lp0.y<=sb.mute.y+sb.mute.h){
+      muted=!muted;if(muted)bgmStop();else if(state==='play'){bgmPlay(bossTriggered&&boss&&boss.hp>0?'boss':'play');}else if(state==='title'||state==='charselect')bgmPlay('title');return;
+    }
+    if(lp0.x>=sb.pause.x&&lp0.x<=sb.pause.x+sb.pause.w&&lp0.y>=sb.pause.y&&lp0.y<=sb.pause.y+sb.pause.h){
+      if(state==='play'){paused=!paused;if(paused)bgmStop();else bgmPlay(bossTriggered&&boss&&boss.hp>0?'boss':'play');}return;
+    }
+  }
+  if(state==='title'){tryFullscreen();bgmPlay('title');state='story';storyStartTime=Date.now();storyHeld=false;storyDone=false;return;}
   if(state==='story'){
     // SKIPボタン判定
     const t0=e.changedTouches[0];const lp0=toLogical(t0.clientX,t0.clientY);
@@ -588,12 +676,12 @@ canvas.addEventListener('touchstart',e=>{
     storyHeld=true;return;
   }
   if(state==='charselect'){handleCSTap(e);return;}
-  if(state==='gameover'){state='charselect';return;}
+  if(state==='gameover'){state='charselect';bgmPlay('title');return;}
   if(state==='stageclear'){
     if(currentStage<TOTAL_STAGES){currentStage++;startGame();}
-    else{currentStage=1;state='charselect';}return;
+    else{currentStage=1;state='charselect';bgmPlay('title');}return;
   }
-  if(state==='play'){
+  if(state==='play'&&!paused){
     const z=getBtns();
     for(const t of e.changedTouches){
       const lp=toLogical(t.clientX,t.clientY);
@@ -617,19 +705,24 @@ canvas.addEventListener('touchend',e=>{
 },{passive:false});
 document.addEventListener('keydown',e=>{
   if(keys[e.key])return;keys[e.key]=true;
-  if(state==='title'&&(e.key==='Enter'||e.key===' ')){state='story';storyStartTime=Date.now();storyHeld=false;storyDone=false;return;}
+  // ミュート/ポーズ (全状態共通)
+  if(e.key==='m'||e.key==='M'){muted=!muted;if(muted)bgmStop();else if(state==='play')bgmPlay(bossTriggered&&boss&&boss.hp>0?'boss':'play');return;}
+  if((e.key==='p'||e.key==='P'||e.key==='Escape')&&state==='play'){
+    paused=!paused;if(paused)bgmStop();else bgmPlay(bossTriggered&&boss&&boss.hp>0?'boss':'play');return;
+  }
+  if(state==='title'&&(e.key==='Enter'||e.key===' ')){bgmPlay('title');state='story';storyStartTime=Date.now();storyHeld=false;storyDone=false;return;}
   if(state==='story'){if(e.key==='Enter'||e.key===' '){if(storyDone)state='charselect';else storyHeld=true;}return;}
   if(state==='charselect'){
     if(e.key==='ArrowLeft')selChar=(selChar-1+CHARS.length)%CHARS.length;
     if(e.key==='ArrowRight')selChar=(selChar+1)%CHARS.length;
     if(e.key==='Enter')startGame(true);return;
   }
-  if(state==='gameover'&&e.key==='Enter'){state='charselect';return;}
+  if(state==='gameover'&&e.key==='Enter'){state='charselect';bgmPlay('title');return;}
   if(state==='stageclear'&&(e.key==='Enter'||e.key===' ')){
     if(currentStage<TOTAL_STAGES){currentStage++;startGame();}
-    else{currentStage=1;state='charselect';}return;
+    else{currentStage=1;state='charselect';bgmPlay('title');}return;
   }
-  if(state==='play'){
+  if(state==='play'&&!paused){
     if(e.key==='ArrowUp'||e.key==='w'||e.key===' ')doJump();
     if(e.key==='z'||e.key==='Z'||e.key==='x'||e.key==='X')doAttack();
     if(e.key==='c'||e.key==='C'||e.key==='Shift')doJet();
@@ -655,13 +748,13 @@ function spawnEnemies(){
   _eid=0;
   enemies=ENEMY_SPAWNS.map(d=>{
     const id=_eid++,type=d.type||'patrol';
-    if(type==='turret') return{id,type,x:d.x,y:d.y-24,w:28,h:24,vy:0,vx:0,dir:1,startX:d.x,range:0,hp:4,maxHp:4,onGround:false,dmgCd:0,shotCd:0,shotMax:200,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='turret') return{id,type,x:d.x,y:d.y-24,w:28,h:24,vy:0,vx:0,dir:1,startX:d.x,range:0,hp:5,maxHp:5,onGround:false,dmgCd:0,shotCd:0,shotMax:200,flashTimer:0,poisoned:0,poisonTimer:0};
     if(type==='charger') return{id,type,x:d.x,y:d.y-32,w:32,h:32,vy:0,vx:0.7,dir:Math.random()<.5?1:-1,startX:d.x,range:90+Math.random()*40,hp:3,maxHp:3,onGround:false,dmgCd:0,charging:false,chargeCd:0,chargeDir:1,flashTimer:0,poisoned:0,poisonTimer:0};
     if(type==='flyer')  return{id,type,x:d.x,y:d.y,   w:28,h:24,vy:0,vx:1.1+Math.random()*.3,dir:Math.random()<.5?1:-1,startX:d.x,range:110+Math.random()*60,hp:2,maxHp:2,onGround:false,dmgCd:0,baseY:d.y,bob:Math.random()*Math.PI*2,flashTimer:0,poisoned:0,poisonTimer:0};
     if(type==='jumper') return{id,type,x:d.x,y:d.y-28,w:22,h:28,vy:0,vx:0,dir:1,startX:d.x,range:80,hp:2,maxHp:2,onGround:false,dmgCd:0,jumpCd:55,flashTimer:0,poisoned:0,poisonTimer:0};
     if(type==='sniper') return{id,type,x:d.x,y:d.y-34,w:26,h:34,vy:0,vx:0.5,dir:Math.random()<.5?1:-1,startX:d.x,range:25,hp:3,maxHp:3,onGround:false,dmgCd:0,shotCd:0,shotMax:260,flashTimer:0,poisoned:0,poisonTimer:0};
     if(type==='bomber') return{id,type,x:d.x,y:d.y-28,w:26,h:28,vy:0,vx:0,dir:1,startX:d.x,range:200,hp:2,maxHp:2,onGround:false,dmgCd:0,fuseTimer:0,fuseActive:false,flashTimer:0,poisoned:0,poisonTimer:0};
-    return{id,type:'patrol',x:d.x,y:d.y-34,w:30,h:34,vy:0,vx:0.9+Math.random()*.5,dir:Math.random()<.5?1:-1,startX:d.x,range:70+Math.random()*50,hp:2,maxHp:2,onGround:false,dmgCd:0,flashTimer:0,poisoned:0,poisonTimer:0};
+    return{id,type:'patrol',x:d.x,y:d.y-34,w:30,h:34,vy:0,vx:0.9+Math.random()*.5,dir:Math.random()<.5?1:-1,startX:d.x,range:70+Math.random()*50,hp:3,maxHp:3,onGround:false,dmgCd:0,flashTimer:0,poisoned:0,poisonTimer:0};
   });
 }
 function startGame(resetStage){
@@ -683,7 +776,8 @@ function startGame(resetStage){
   });
   damageNums=[];drops=[];comboTexts=[];shakeAmt=0;hitStop=0;
   bossDefeated=false;boss=null;bossTriggered=false;
-  gameTimer=0;
+  gameTimer=0;paused=false;
+  bgmPlay('play');
   state='play';
 }
 function handleCSTap(e){
@@ -867,7 +961,7 @@ function spawnBoss(){
 //  UPDATE
 // ================================================================
 function update(){
-  if(state!=='play'||!player)return;
+  if(state!=='play'||!player||paused)return;
   if(hitStop>0){hitStop--;return;}
   gameTimer++;
   const left=keys['ArrowLeft']||keys['a']||touchHeld.left;
@@ -910,7 +1004,7 @@ function update(){
     burst(lx,player.y,'#aabbff',12);addShake(4);
     if(Math.abs(lx-(player.x+player.w/2))<50&&player.invincible===0){
       player.hp--;player.invincible=55;damageWeapon();burst(player.x+player.w/2,player.y,'#ff4444',6);addShake(6);
-      if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);state='gameover';return;}
+      if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);bgmStop();state='gameover';return;}
     }
   }
   if(gimmick==='lava'&&gameTimer%5===0){ // 炎窟: 地面が熱い(O2追加消費)
@@ -956,7 +1050,7 @@ function update(){
   if(player.oxygen<0)player.oxygen=0;
   if(player.oxygen===0){
     player.o2dmgTimer=(player.o2dmgTimer||0)+1;
-    if(player.o2dmgTimer>=120){player.o2dmgTimer=0;player.hp--;burst(player.x+player.w/2,player.y,'#4488ff',6);addShake(3);if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);state='gameover';return;}}
+    if(player.o2dmgTimer>=120){player.o2dmgTimer=0;player.hp--;burst(player.x+player.w/2,player.y,'#4488ff',6);addShake(3);if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);bgmStop();state='gameover';return;}}
   } else player.o2dmgTimer=0;
 
   // --- シャード収集 ---
@@ -1153,9 +1247,9 @@ function update(){
     if(e.hp<=0)continue;
     if(e.dmgCd>0){e.dmgCd--;continue;}
     if(player.invincible===0&&ov(e,player)){
-      player.hp--;player.invincible=90;player.vy=-6;player.vx=(player.x>e.x?1:-1)*4;
+      player.hp--;player.invincible=75;player.vy=-6;player.vx=(player.x>e.x?1:-1)*4;
       sfx('phit');burst(player.x+player.w/2,player.y,'#ff4444',6);e.dmgCd=40;addShake(5);damageWeapon();
-      if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);state='gameover';return;}
+      if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);bgmStop();state='gameover';return;}
     }
   }
   // 死亡した敵を一括削除
@@ -1166,9 +1260,9 @@ function update(){
     const p=eProjectiles[i];p.x+=p.vx;p.y+=p.vy;p.life--;
     if(p.life<=0||p.y>H+100){eProjectiles.splice(i,1);continue;}
     if(player.invincible===0&&ov({x:p.x-p.w/2,y:p.y-p.h/2,w:p.w,h:p.h},player)){
-      player.hp--;player.invincible=85;sfx('phit');burst(p.x,p.y,'#ff4400',6);addShake(5);damageWeapon();
+      player.hp--;player.invincible=65;sfx('phit');burst(p.x,p.y,'#ff4400',6);addShake(5);damageWeapon();
       eProjectiles.splice(i,1);
-      if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);state='gameover';return;}
+      if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);bgmStop();state='gameover';return;}
     }
   }
   // damageNums UPDATE
@@ -1204,13 +1298,13 @@ function update(){
     shakeAmt*=0.82;if(shakeAmt<0.4)shakeAmt=0;
   }else{shakeDx=0;shakeDy=0;}
   // ボストリガー
-  if(!bossTriggered&&player&&player.x>5200){bossTriggered=true;spawnBoss();}
+  if(!bossTriggered&&player&&player.x>5200){bossTriggered=true;spawnBoss();bgmPlay('boss');addShake(5);}
   // ボス更新
   if(boss&&boss.hp>0)updateBoss();
   else if(boss&&boss.hp<=0&&!bossDefeated){bossDefeated=true;score+=1000;addShake(10);}
   // ゴール判定
   if(bossDefeated&&player&&player.x>=GOAL_X){
-    saveScore(score,CHARS[player.ci].nick);state='stageclear';sfx('clear');
+    saveScore(score,CHARS[player.ci].nick);bgmStop();state='stageclear';sfx('clear');
   }
 }
 function hitE(j,dmg){
@@ -1442,10 +1536,10 @@ function updateBoss(){
   if(boss.dmgCd>0)boss.dmgCd--;
   if(boss.flashTimer>0)boss.flashTimer--;
   if(player.invincible===0&&ov(boss,player)){
-    player.hp--;player.invincible=100;player.vy=-7;
+    player.hp--;player.invincible=80;player.vy=-7;
     player.vx=(player.x>boss.x+boss.w/2?1:-1)*5;
     sfx('phit');burst(player.x+player.w/2,player.y,'#ff4444',8);addShake(7);damageWeapon();
-    if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);state='gameover';return;}
+    if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);bgmStop();state='gameover';return;}
   }
 }
 function hitBoss(dmg){
@@ -2403,9 +2497,25 @@ function drawHUD(){
   ctx.fillStyle='#445566';ctx.font='bold 9px monospace';ctx.textAlign='center';
   ctx.fillText(`ST.${currentStage}/${TOTAL_STAGES} ${scfg.name}`,W/2,19);
 
-  // スコア (右上)
+  // ポーズ・ミュートボタン (右上角)
+  {const sb=getSysBtns();
+    // ミュートボタン
+    dr(sb.mute.x,sb.mute.y,sb.mute.w,sb.mute.h,muted?'#440000':'#001122');
+    dr(sb.mute.x,sb.mute.y,sb.mute.w,1,muted?'#ff4444':'#334466');
+    dr(sb.mute.x,sb.mute.y,1,sb.mute.h,muted?'#ff4444':'#334466');
+    ctx.fillStyle=muted?'#ff4444':'#88aacc';ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText(muted?'🔇':'♪',sb.mute.x+sb.mute.w/2,sb.mute.y+16);
+    // ポーズボタン
+    dr(sb.pause.x,sb.pause.y,sb.pause.w,sb.pause.h,paused?'#330033':'#001122');
+    dr(sb.pause.x,sb.pause.y,sb.pause.w,1,paused?'#cc44ff':'#334466');
+    dr(sb.pause.x,sb.pause.y,1,sb.pause.h,paused?'#cc44ff':'#334466');
+    ctx.fillStyle=paused?'#cc44ff':'#88aacc';ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText(paused?'▶':'⏸',sb.pause.x+sb.pause.w/2,sb.pause.y+16);
+  }
+
+  // スコア (右上) — ポーズボタン分左にずらす
   ctx.fillStyle='#ffdd00';ctx.font='bold 12px monospace';ctx.textAlign='right';
-  ctx.fillText('SCORE '+String(score).padStart(6,'0'),W-10,19);
+  ctx.fillText('SCORE '+String(score).padStart(6,'0'),W-76,19);
 
   // キャラ名・ニックネーム (左上)
   const c=CHARS[player.ci];
@@ -2888,6 +2998,17 @@ function drawPlay(){
   });
   drawBtns();
   drawHUD();
+  // ポーズオーバーレイ
+  if(paused){
+    ctx.fillStyle='rgba(0,0,20,0.72)';ctx.fillRect(0,0,W,H);
+    ctx.textAlign='center';
+    ctx.fillStyle='#cc44ff';ctx.font=`bold ${Math.min(W*.07,44)}px monospace`;
+    ctx.fillText('PAUSE',W/2,H*.42);
+    ctx.fillStyle='#6677aa';ctx.font=`${Math.min(W*.025,16)}px monospace`;
+    ctx.fillText('▶ or P to resume',W/2,H*.55);
+    ctx.fillStyle='#445566';ctx.font=`${Math.min(W*.018,12)}px monospace`;
+    ctx.fillText('M = mute / ESC = pause',W/2,H*.63);
+  }
   scanlines();
 }
 
