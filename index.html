@@ -2458,16 +2458,6 @@ function drawGameOver(){
 //  メインループ
 // ================================================================
 function draw(){
-  // 縦向き検出
-  if(window.innerWidth<window.innerHeight){
-    ctx.fillStyle='#000010';ctx.fillRect(0,0,W,H);
-    ctx.fillStyle='#aaccff';ctx.textAlign='center';
-    ctx.font=`bold ${Math.min(W*.06,20)}px monospace`;
-    ctx.fillText('端末を横向きにしてください',W/2,H*.42);
-    ctx.font=`${Math.min(W*.046,16)}px monospace`;ctx.fillStyle='#6688aa';
-    ctx.fillText('Please rotate your device',W/2,H*.58);
-    return;
-  }
   ctx.save();
   if(shakeDx||shakeDy)ctx.translate(Math.round(shakeDx),Math.round(shakeDy));
   if(state==='title')drawTitle();
@@ -2476,6 +2466,12 @@ function draw(){
   else if(state==='play')drawPlay();
   else if(state==='stageclear')drawStageClear();
   else if(state==='gameover')drawGameOver();
+  // 縦向き時は非ブロッキングバナーのみ
+  if(window.innerWidth<window.innerHeight){
+    ctx.globalAlpha=0.82;ctx.fillStyle='#000020';ctx.fillRect(0,0,W,32);ctx.globalAlpha=1;
+    ctx.fillStyle='#88aaff';ctx.font=`bold ${Math.min(W*.05,13)}px monospace`;ctx.textAlign='center';
+    ctx.fillText('横向きにすると快適に遊べます',W/2,21);
+  }
   ctx.restore();
 }
 function loop(){update();draw();requestAnimationFrame(loop);}
