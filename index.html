@@ -2,12 +2,24 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>月の裏側 - THE RABBIT ORBS</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; touch-action:none; }
-body { background:#000; overflow:hidden; width:100vw; height:100vh; display:flex; justify-content:center; align-items:center; }
-canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; }
+html,body { margin:0; padding:0; width:100%; height:100%; background:#000; overflow:hidden; overscroll-behavior:none; touch-action:none; }
+* { box-sizing:border-box; }
+canvas {
+  display:block;
+  position:fixed;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+  touch-action:none;
+}
 </style>
 </head>
 <body>
@@ -56,25 +68,34 @@ function sfx(name){
 }
 let W, H, isPortrait=false;
 function resize(){
-  const vw=window.innerWidth, vh=window.innerHeight;
+  // screen.width/height はアドレスバー影響を受けないので向き判定に使う
+  const vw=window.innerWidth||screen.width;
+  const vh=window.innerHeight||screen.height;
   isPortrait = vw < vh;
-  // canvasは常に画面全体に固定 - CSS回転なし
-  canvas.style.position='fixed';
-  canvas.style.top='0'; canvas.style.left='0';
-  canvas.style.width=vw+'px'; canvas.style.height=vh+'px';
-  canvas.style.transform=''; canvas.style.transformOrigin='';
+  // canvas物理解像度をviewportに合わせる (CSSはposition:fixed 100%で自動フィット)
+  canvas.width=vw; canvas.height=vh;
   if(isPortrait){
-    // 縦画面: ゲームは横向き(H=520)、物理canvas=縦のまま
-    const sc=vw/520;
-    H=520; W=Math.ceil(vh/sc);
-    canvas.width=vw; canvas.height=vh;
+    const sc=vw/520; H=520; W=Math.ceil(vh/sc);
   } else {
-    const sc=vh/520;
-    H=520; W=Math.ceil(vw/sc);
-    canvas.width=vw; canvas.height=vh;
+    const sc=vh/520; H=520; W=Math.ceil(vw/sc);
   }
 }
-resize(); window.addEventListener('resize',resize);
+function tryFullscreen(){
+  const el=document.documentElement;
+  const req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen||el.msRequestFullscreen;
+  if(req){
+    req.call(el).then(()=>{
+      // フルスクリーン成功後に横画面ロック試行 (Android Chrome対応)
+      if(screen.orientation&&screen.orientation.lock){
+        screen.orientation.lock('landscape').catch(()=>{});
+      }
+      resize();
+    }).catch(()=>{});
+  }
+}
+resize();
+window.addEventListener('resize',resize);
+window.addEventListener('orientationchange',()=>setTimeout(resize,150));
 function toLogical(cx,cy){
   if(isPortrait){
     // ctx変換の逆: canvas_x=y*s, canvas_y=vh-x*s (s=canvas.width/H)
@@ -546,7 +567,7 @@ function updHeld(){
 canvas.addEventListener('touchstart',e=>{
   e.preventDefault();
   for(const t of e.changedTouches){const lp=toLogical(t.clientX,t.clientY);activeTouches.set(t.identifier,{x:lp.x,y:lp.y});}
-  if(state==='title'){state='story';storyStartTime=Date.now();storyHeld=false;storyDone=false;return;}
+  if(state==='title'){tryFullscreen();state='story';storyStartTime=Date.now();storyHeld=false;storyDone=false;return;}
   if(state==='story'){
     // SKIPボタン判定
     const t0=e.changedTouches[0];const lp0=toLogical(t0.clientX,t0.clientY);
@@ -659,7 +680,7 @@ function handleCSTap(e){
     const lp=toLogical(t.clientX,t.clientY);
     const tx=lp.x,ty=lp.y;
     CHARS.forEach((_,i)=>{const b=z.chars[i];if(tx>=b.x&&tx<=b.x+b.w&&ty>=b.y&&ty<=b.y+b.h)selChar=i;});
-    const s=z.start;if(tx>=s.x&&tx<=s.x+s.w&&ty>=s.y&&ty<=s.y+s.h)startGame(true);
+    const s=z.start;if(tx>=s.x&&tx<=s.x+s.w&&ty>=s.y&&ty<=s.y+s.h){tryFullscreen();startGame(true);}
   }
 }
 
