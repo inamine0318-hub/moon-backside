@@ -25,10 +25,6 @@ function resize(){
   canvas.style.height=window.innerHeight+'px';
 }
 resize();window.addEventListener('resize',resize);
-function tryLockLandscape(){
-  try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(()=>{});}catch(e){}
-}
-tryLockLandscape();
 function toLogical(cx,cy){const r=canvas.getBoundingClientRect();return{x:(cx-r.left)*W/r.width,y:(cy-r.top)*H/r.height};}
 
 const GRAVITY = 0.32, WORLD_W = 7000, P = 3;
@@ -397,7 +393,6 @@ function updHeld(){
 }
 canvas.addEventListener('touchstart',e=>{
   e.preventDefault();
-  tryLockLandscape();
   for(const t of e.changedTouches){const lp=toLogical(t.clientX,t.clientY);activeTouches.set(t.identifier,{x:lp.x,y:lp.y});}
   if(state==='title'){state='story';storyStartTime=Date.now();storyFast=false;storyDone=false;return;}
   if(state==='story'){if(storyDone){state='charselect';}else{storyFast=true;}return;}
@@ -2466,12 +2461,6 @@ function draw(){
   else if(state==='play')drawPlay();
   else if(state==='stageclear')drawStageClear();
   else if(state==='gameover')drawGameOver();
-  // 縦向き時は非ブロッキングバナーのみ
-  if(window.innerWidth<window.innerHeight){
-    ctx.globalAlpha=0.82;ctx.fillStyle='#000020';ctx.fillRect(0,0,W,32);ctx.globalAlpha=1;
-    ctx.fillStyle='#88aaff';ctx.font=`bold ${Math.min(W*.05,13)}px monospace`;ctx.textAlign='center';
-    ctx.fillText('横向きにすると快適に遊べます',W/2,21);
-  }
   ctx.restore();
 }
 function loop(){update();draw();requestAnimationFrame(loop);}
