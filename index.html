@@ -1704,26 +1704,35 @@ function drawBg(){
     dr(sx,s.y,s.s,s.s,scol);
   });
 
-  // 地球 (左上固定・大気圏グロー付き)
-  const EX=80,EY=60,ER=45;
-  // 大気グロー (2段重ね矩形)
-  ctx.globalAlpha=0.11;dr(EX-ER-8,EY-ER-8,(ER+8)*2,(ER+8)*2,'#2255ff');
-  ctx.globalAlpha=0.06;dr(EX-ER-16,EY-ER-16,(ER+16)*2,(ER+16)*2,'#1133cc');
+  // 地球 (左上・遠景の青い球体)
+  const EX=70,EY=52,ER=34;
+  // 大気グロー (arc=真円)
+  ctx.globalAlpha=0.07;ctx.fillStyle='#2255ff';
+  ctx.beginPath();ctx.arc(EX,EY,ER+14,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=0.05;ctx.fillStyle='#1144dd';
+  ctx.beginPath();ctx.arc(EX,EY,ER+7,0,Math.PI*2);ctx.fill();
   ctx.globalAlpha=1;
-  // 地球本体 (陸・海・雲・ハイライト 1パス)
+  // 地球本体 pixel by pixel (海・陸・雲)
   for(let dy=-ER;dy<=ER;dy+=2)for(let dx=-ER;dx<=ER;dx+=2){
     const d2=dx*dx+dy*dy;if(d2>ER*ER)continue;
-    const sh=Math.sqrt(d2)/ER;
-    const v=(dx*0.7+dy*0.5+ER*1.6)%20;
-    const cloud=(dx*.5-dy*.4+ER)%16;
-    const hlDist=(dx+14)*(dx+14)+(dy+12)*(dy+12);
+    const r=Math.sqrt(d2)/ER;
+    const edge=r>0.86;
+    const v=(dx*.65+dy*.4+ER*1.4)%16;
+    const cloud=(dx*.5-dy*.35+ER)%12;
     let col;
-    if(hlDist<(ER*.48)*(ER*.48)&&cloud<2)col='#cce8ff';
-    else if(cloud<3)col='#b8d8f0';
-    else if(v<7)col=sh>.72?'#0a2a12':'#1a6a28';
-    else col=sh>.72?'#091f44':'#1a4a90';
-    dr(EX+dx,EY+dy,2,2,col);
+    if(cloud<2.2)    col=edge?'#8ab4cc':'#c0d8f2';
+    else if(v<5)     col=edge?'#0a2a10':'#1a6a28';
+    else             col=edge?'#071535':'#1a4a90';
+    ctx.fillStyle=col;ctx.fillRect(EX+dx,EY+dy,2,2);
   }
+  // 大気の縁リング
+  ctx.globalAlpha=0.20;ctx.strokeStyle='#4488ff';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.arc(EX,EY,ER+1,0,Math.PI*2);ctx.stroke();
+  ctx.globalAlpha=1;
+  // 光沢ハイライト
+  ctx.globalAlpha=0.18;ctx.fillStyle='#ddeeff';
+  ctx.beginPath();ctx.arc(EX-ER*.28,EY-ER*.28,ER*.26,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=1;
 
   // 遠景月面山脈 (視差0.08・サイン合成)
   const hY=H-60;
