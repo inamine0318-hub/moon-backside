@@ -667,17 +667,22 @@ function getSysBtns(){
   };
 }
 function getBtns(){
-  const mg=18,gap=20;
-  const jS=Math.min(W*.075,86); // JUMP: 最大
-  const aS=Math.min(W*.063,72); // ATK
-  const eS=Math.min(W*.056,62); // JET
-  const mS=Math.min(W*.066,74); // 移動
+  const mg=14, gap=16;
+  const jS=Math.min(W*.128,112); // JUMP
+  const aS=Math.min(W*.112,98);  // ATK
+  const eS=Math.min(W*.100,88);  // JET
+  const mS=Math.min(W*.115,100); // 移動
+  // 右クラスタ: ATK(左下) JUMP(右下) JET(中央上・三角配置)
+  const jmpX=W-mg-jS, jmpY=H-mg-jS;
+  const atkX=W-mg-jS-gap-aS, atkY=H-mg-aS;
+  const jetCX=(atkX+aS/2+jmpX+jS/2)/2;
+  const jetY=Math.min(atkY,jmpY)-gap-eS;
   return{
-    left: {x:mg,                          y:H-mg-mS,      s:mS},
-    right:{x:mg+mS+14,                    y:H-mg-mS,      s:mS},
-    jump: {x:W-mg-jS,                     y:H-mg-jS,      s:jS},
-    atk:  {x:W-mg-jS-gap-aS,             y:H-mg-aS,      s:aS},
-    jet:  {x:W-mg-jS-gap-aS-gap-eS,      y:H-mg-eS+8,    s:eS},
+    left: {x:mg,           y:H-mg-mS, s:mS},
+    right:{x:mg+mS+gap,    y:H-mg-mS, s:mS},
+    jump: {x:jmpX,         y:jmpY,    s:jS},
+    atk:  {x:atkX,         y:atkY,    s:aS},
+    jet:  {x:jetCX-eS/2,   y:jetY,    s:eS},
   };
 }
 function inC(tx,ty,bx,by,s){return Math.hypot(tx-bx-s/2,ty-by-s/2)<=s/2;}
@@ -954,7 +959,7 @@ function doJet(){
   player.jetTimer=jtTimer;
   player._jetSpd=jtSpd; // update()で参照
   player.invincible=Math.max(player.invincible,22);
-  player.jetCd=100;
+  player.jetCd=180;
   player.vx=player.facing*player.spd*jtSpd;
   if(!player.onGround)player.vy=Math.min(player.vy,-1);
   // ジェット使用でO2も少し消費
@@ -1017,7 +1022,10 @@ function update(){
     if(player.jetTimer%4===0)burst(player.x+player.w*.5,player.y+player.h*.45,jc,2);
     if(player.jetTimer<=0){player.jetActive=false;player.vx=player.facing*player.spd*.5;}
   } else {
-    if(left)player.vx=-player.spd;else if(right)player.vx=player.spd;else player.vx*=.65;
+    const tVx=left?-player.spd:right?player.spd:0;
+    const acc=player.onGround?0.30:0.16;
+    player.vx+=(tVx-player.vx)*acc;
+    if(Math.abs(player.vx)<0.08)player.vx=0;
   }
   player.vy+=GRAVITY;
   if(player.glide&&!player.onGround&&jHeld&&player.vy>.5)player.vy=Math.min(player.vy,2.2);
@@ -2708,16 +2716,23 @@ function drawBtns(){
     ctx.closePath();ctx.fillStyle='#000';ctx.fill();
     ctx.globalAlpha=1;
   }
-  // JETクールダウン: 円弧
+  // JETクールダウン: 円弧 + 残秒数
   if(player&&player.jetCd>0&&!player.jetActive){
     const b=z.jet;
     const cx=b.x+b.s/2,cy=b.y+b.s/2,r=b.s/2;
-    const ratio=player.jetCd/100;
-    ctx.globalAlpha=0.62;
+    const ratio=player.jetCd/180;
+    ctx.globalAlpha=0.65;
     ctx.beginPath();ctx.moveTo(cx,cy);
     ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+ratio*Math.PI*2);
     ctx.closePath();ctx.fillStyle='#000';ctx.fill();
     ctx.globalAlpha=1;
+    // 残り秒数テキスト
+    const secs=Math.ceil(player.jetCd/60);
+    ctx.save();ctx.globalAlpha=0.92;
+    ctx.fillStyle='#ffffff';ctx.font=`bold ${Math.floor(r*.52)}px monospace`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(secs,cx,cy+1);
+    ctx.restore();
   }
   // コンボドット (ATKボタン上・丸ドット)
   if(player){
@@ -3055,7 +3070,37 @@ function drawPlay(){
   drawEnemies();
   if(boss&&boss.hp>0)drawBoss();
   if(player){
-    if(!(player.invincible>0&&Math.floor(player.invincible/4)%2===0)){
+    // ジェットシールド (jetActive中は常に表示・点滅なし)
+    if(player.jetActive){
+      const scx=Math.floor(player.x-cam.x)+player.w/2;
+      const scy=Math.floor(player.y)+player.h/2;
+      const pulse=Math.sin(Date.now()*.022);
+      const sr=player.w*1.1+pulse*4;
+      const o2r=player.oxygen/player.maxOxygen;
+      const sc=o2r>=0.5?'#5599ff':o2r>=0.25?'#ffaa44':'#ff5533';
+      ctx.save();
+      // 外リング光
+      ctx.globalAlpha=0.18+pulse*.06;
+      ctx.beginPath();ctx.arc(scx,scy,sr+8,0,Math.PI*2);
+      const grd=ctx.createRadialGradient(scx,scy,sr*.2,scx,scy,sr+8);
+      grd.addColorStop(0,'rgba(0,0,0,0)');grd.addColorStop(0.65,sc+'33');grd.addColorStop(1,sc+'aa');
+      ctx.fillStyle=grd;ctx.fill();
+      // 縁ライン
+      ctx.globalAlpha=0.55+pulse*.20;
+      ctx.beginPath();ctx.arc(scx,scy,sr,0,Math.PI*2);
+      ctx.strokeStyle=sc;ctx.lineWidth=2.5;ctx.stroke();
+      // 六角形ハニカム模様 (シールド感)
+      ctx.globalAlpha=0.22+pulse*.08;
+      ctx.strokeStyle=sc;ctx.lineWidth=1;
+      for(let a=0;a<6;a++){
+        const ang=a*Math.PI/3+Date.now()*.0004;
+        const x1=scx+Math.cos(ang)*(sr*.6),y1=scy+Math.sin(ang)*(sr*.6);
+        const x2=scx+Math.cos(ang+Math.PI/3)*(sr*.6),y2=scy+Math.sin(ang+Math.PI/3)*(sr*.6);
+        ctx.beginPath();ctx.moveTo(scx,scy);ctx.lineTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+      }
+      ctx.restore();
+    }
+    if(!(player.invincible>0&&!player.jetActive&&Math.floor(player.invincible/4)%2===0)){
       const atkAnim=player.atkCd>0?player.comboStep+1:0;
       drawCharacter(Math.floor(player.x-cam.x),Math.floor(player.y),player.ci,player.facing,player.frame,player.moving,atkAnim,player.jetActive);
     }
