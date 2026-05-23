@@ -1858,6 +1858,58 @@ function drawGoal(){
 }
 
 // ================================================================
+//  ボス部位破壊オーバーレイ
+// ================================================================
+function drawBossDamageOverlay(bx,by,bw,bh,hpRatio,t){
+  if(hpRatio>=0.75)return;
+  const sa=ctx.globalAlpha;
+  const lv2=hpRatio<0.5,lv3=hpRatio<0.25;
+  // Level1: 亀裂（HP<75%）
+  const C1=[
+    [0.28,0.18,10,2],[0.30,0.16,2,6],
+    [0.55,0.42,8,2],[0.57,0.40,2,5],
+    [0.18,0.60,9,2],[0.20,0.58,2,5],
+    [0.66,0.28,7,2],[0.68,0.26,2,4],
+    [0.40,0.72,8,2],
+  ];
+  ctx.fillStyle='#111111';ctx.globalAlpha=0.50;
+  for(const [rx,ry,w,h] of C1)ctx.fillRect(bx+Math.round(bw*rx),by+Math.round(bh*ry),w,h);
+  if(lv2){
+    // Level2: 深い亀裂＋焦げ（HP<50%）
+    const C2=[
+      [0.12,0.38,10,2],[0.14,0.36,2,6],
+      [0.50,0.60,9,2],[0.52,0.58,2,5],
+      [0.72,0.50,8,2],
+      [0.35,0.85,10,2],[0.37,0.83,2,5],
+    ];
+    ctx.fillStyle='#000000';ctx.globalAlpha=0.55;
+    for(const [rx,ry,w,h] of C2)ctx.fillRect(bx+Math.round(bw*rx),by+Math.round(bh*ry),w,h);
+    ctx.globalAlpha=0.18;ctx.fillStyle='#220800';ctx.fillRect(bx,by,bw,bh);
+  }
+  if(lv3){
+    // Level3: 激しい亀裂＋赤点滅＋煙（HP<25%）
+    const C3=[
+      [0.08,0.12,12,2],[0.10,0.10,2,7],
+      [0.42,0.05,10,2],[0.44,0.03,2,6],
+      [0.65,0.62,11,2],[0.67,0.60,2,7],
+      [0.05,0.75,9,2],
+      [0.75,0.15,8,2],[0.77,0.13,2,5],
+    ];
+    ctx.fillStyle='#110000';ctx.globalAlpha=0.65;
+    for(const [rx,ry,w,h] of C3)ctx.fillRect(bx+Math.round(bw*rx),by+Math.round(bh*ry),w,h);
+    const p=Math.sin(t/160)*0.08+0.20;
+    ctx.globalAlpha=p;ctx.fillStyle='#ff2200';ctx.fillRect(bx-2,by-2,bw+4,bh+4);
+    ctx.globalAlpha=0.40;ctx.fillStyle='#2a2a2a';
+    for(let k=0;k<5;k++){
+      const sx=bx+Math.floor(bw*(.12+k*.16));
+      const sy=by-Math.floor(((t/60+k*18)%28));
+      ctx.fillRect(sx,sy,2+k%3,2+k%3);
+    }
+  }
+  ctx.globalAlpha=sa;
+}
+
+// ================================================================
 //  ボス描画 (ステージ別ディスパッチ)
 // ================================================================
 function drawBoss(){
@@ -1874,6 +1926,7 @@ function drawBoss(){
     case 'tajikarao':  drawBossTajikarao(bx,by,t);break;
     case 'izanami':    drawBossIzanami(bx,by,t);break;
   }
+  drawBossDamageOverlay(bx,by,boss.w,boss.h,boss.hp/boss.maxHp,t);
   // ヒットフラッシュ
   if(boss.flashTimer>0){ctx.globalAlpha=boss.flashTimer/8*0.7;dr(Math.floor(boss.x-cam.x)-8,Math.floor(boss.y)-8,boss.w+16,boss.h+16,'#ffffff');ctx.globalAlpha=1;}
   // HPバー共通
