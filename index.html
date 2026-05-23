@@ -1016,7 +1016,7 @@ function mkPlayer(ci){
     spd:c.spd,jmp:c.jmp,djump:c.djump,canDjump:false,
     glide:c.glide,wallSlide:c.wallSlide,
     atkCd:0,jetCd:0,jetActive:false,jetTimer:0,comboStep:0,comboTimer:0,invincible:0,col:c.col,name:c.name,dna:c.dna,ci,frame:0,moving:false,
-    charging:false,chargeTimer:0,chargeDir:1,
+    charging:false,chargeTimer:0,chargeDir:1,chargeSpd:14,chargeAir:false,
     weaponLv:0,weaponGauge:0,weaponArmor:3};
 }
 function spawnEnemies(){
@@ -1151,11 +1151,16 @@ function doAttack(){
       }
       break;
     }
-    case 4:{ // REX サイ - 強パンチ＋突進
-      if(!player.onGround){ // 空中: 踏みつけ
-        projectiles.push({x:px-6,y:py+ph,vx:0,vy:0,w:pw+12,h:22,col:'#667788',dmg:3,life:16,hit:[],pierce:true,homing:false,stomp:true});
-        player.vy=Math.max(player.vy,8);
-        burst(px+pw/2,py+ph,'#99bbcc',10);addShake(6);sfx('bomb');
+    case 4:{ // REX サイ - 強パンチ＋空中タックル
+      if(!player.onGround){ // 空中: 水平タックル
+        if(!player.charging){
+          player.charging=true;player.chargeTimer=20;player.chargeDir=f;
+          player.chargeSpd=17;player.chargeAir=true;
+          player.invincible=Math.max(player.invincible,22);
+          player.vy=Math.min(player.vy,1.2); // 急落下を抑える
+          for(let k=0;k<12;k++){const a=(Math.random()-.5)*1.1+(f>0?Math.PI:0),sp=Math.random()*5+3;particles.push({x:px+pw*.5,y:py+ph*.4,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-0.8,col:k%2?'#99bbcc':'#ffffff',life:20});}
+          addShake(4);sfx('bomb');
+        }
         break;
       }
       const pdmg=step<2?2:lv>=2?4:3;
@@ -1168,6 +1173,7 @@ function doAttack(){
       }
       if(step===2&&lv>=2&&!player.charging){ // lv2: 突進発動
         player.charging=true;player.chargeTimer=22;player.chargeDir=f;
+        player.chargeSpd=14;player.chargeAir=false;
         player.invincible=Math.max(player.invincible,24);
         addShake(4);
       }
@@ -1341,11 +1347,36 @@ function update(){
   if(player.invincible>0)player.invincible--;
   if(player.charging){
     player.chargeTimer--;
-    player.vx=player.chargeDir*14;
-    if(player.chargeTimer<=0){player.charging=false;burst(player.x+player.w/2,player.y+player.h/2,'#99bbcc',8);}
+    const cspd=player.chargeSpd||14;
+    player.vx=player.chargeDir*cspd;
+    if(player.chargeAir){
+      player.vy=Math.min(player.vy,2.2); // タックル中は緩やかに落下
+      if(player.chargeTimer%3===0)particles.push({x:player.x+player.w/2,y:player.y+player.h*.4,vx:-player.chargeDir*2+(Math.random()-.5)*1.5,vy:(Math.random()-.5)*0.8,col:'#667788',life:14});
+    }
+    if(player.chargeTimer<=0){
+      player.charging=false;
+      if(player.chargeAir){ // 空中タックル終了: 後方へ反動
+        player.vx=-player.chargeDir*5.5;player.vy=-4.5;
+        burst(player.x+player.w/2,player.y+player.h/2,'#99bbcc',10);addShake(4);
+      } else {
+        burst(player.x+player.w/2,player.y+player.h/2,'#99bbcc',8);
+      }
+      player.chargeAir=false;player.chargeSpd=14;
+    }
+    let chargeHit=false;
     for(let j=enemies.length-1;j>=0;j--){
+      if(chargeHit)break;
       const e=enemies[j];if(e.hp<=0)continue;
-      if(ov({x:player.x,y:player.y,w:player.w,h:player.h},e))hitE(j,3);
+      if(ov({x:player.x,y:player.y,w:player.w,h:player.h},e)){
+        hitE(j,3);
+        if(player.chargeAir){ // 敵ヒット: タックル即停止＋後方反動
+          player.charging=false;
+          player.vx=-player.chargeDir*7;player.vy=-6;
+          burst(e.x+e.w/2,e.y+e.h/2,'#aabbcc',14);addShake(6);
+          player.chargeAir=false;player.chargeSpd=14;
+          chargeHit=true;
+        }
+      }
     }
   }
   // ステージギミック
