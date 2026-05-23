@@ -849,7 +849,7 @@ function doAttack(){
   player.comboStep=step;player.comboTimer=30;
   player.atkCd=step<2?13:CHARS[player.ci].atkCd;
   const f=player.facing,px=player.x,py=player.y,pw=player.w,ph=player.h;
-  const mx=f>0?px+pw+2:px-2, my=py+ph*.28;
+  const mx=f>0?px+pw+2:px-2, my=py+ph*.5;
   if(step===2){comboTexts.push({x:px+pw*.5,y:py-18,life:45,vy:-0.85});addShake(4);}
   const lv=player.weaponLv,ci=player.ci;
 
@@ -3104,8 +3104,6 @@ function drawPlay(){
       const atkAnim=player.atkCd>0?player.comboStep+1:0;
       drawCharacter(Math.floor(player.x-cam.x),Math.floor(player.y),player.ci,player.facing,player.frame,player.moving,atkAnim,player.jetActive);
     }
-    const bx=Math.floor(player.x-cam.x-4),by=Math.floor(player.y-14);
-    dr(bx,by,player.w+8,7,'#330000');dr(bx,by,(player.w+8)*(player.hp/player.maxHp),7,'#ff4466');dr(bx,by,player.w+8,1,'#ff8899');
   }
   // damageNums 描画
   damageNums.forEach(d=>{
