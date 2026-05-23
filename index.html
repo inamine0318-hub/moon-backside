@@ -202,8 +202,8 @@ function drawSprite(ox,oy,flip){
 // ================================================================
 //  キャラクター描画 (二足歩行宇宙服 手続き型 fillRect)
 // ================================================================
-const SC_SUIT  =['#c07828','#7a4a22','#3a4aaa','#1a6a22','#1a6a1a'];
-const SC_ACCNT =['#ff8800','#cc3300','#5566ee','#44ff88','#00dd44'];
+const SC_SUIT  =['#c07828','#7a4a22','#3a4aaa','#aa7722','#556677'];
+const SC_ACCNT =['#ff8800','#cc3300','#5566ee','#ffcc00','#99bbcc'];
 
 function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirborne){
   ctx.save();
@@ -340,13 +340,16 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirb
     _r(OL,-7,25+ts, 6,10);_r('#3a4aaa',-6,26+ts, 4, 8);_r('#5566ee',-6,28+ts, 4, 4);
     _r(OL,-9,18+ts, 6, 9);_r('#5566ee',-8,19+ts, 5, 7);
     _r(OL,-9,12+ts, 5, 8);_r('#8899ff',-8,13+ts, 4, 6);
-  } else if(ci===4){ // ヘビ - 毒の雫 (攻撃時は大量噴射)
-    const dp=Math.floor(t2/380)%2;
-    const vx=atk>0?ext:0;
-    _r('#33cc00',30+vx,17, 2, 6);if(dp||atk>0)_r('#55ff22',30+vx,22, 2, 4);
-    _r('#22aa00',34+vx,15, 2, 7);if(!dp||atk>0)_r('#44ee00',34+vx,21, 2, 4);
-    _r('#006600',31+vx,24, 2, 2);_r('#006600',35+vx,23, 2, 2);
-    if(atk>=3){_r('#00ff44',38,14, 3, 10);_r('#55ff44',40,12, 3, 8);} // 毒爆発
+  } else if(ci===3){ // サル - 尻尾 (ムチ攻撃時はしなる)
+    const swg=atk>0?Math.floor(ext*.25):Math.sin(t2/250)*3|0;
+    _r(OL,-4,30+swg, 5, 6);_r('#aa7722',-3,31+swg, 4, 5);
+    _r(OL,-7,23+swg, 5, 9);_r('#cc9933',-6,24+swg, 4, 7);
+    _r(OL,-9,17+swg, 5, 8);_r('#cc9933',-8,18+swg, 4, 6);
+    _r('#ffddaa',-8,16+swg, 3, 3);
+  } else if(ci===4){ // サイ - 追加肩装甲 (突進時は衝撃ライン)
+    _r(OL,-5,15, 6,18);_r('#445566',-4,16, 5,16);_r('#99bbcc',-4,16, 5, 2);
+    _r(OL,28,15, 8,18);_r('#445566',29,16, 6,16);_r('#99bbcc',29,16, 6, 2);
+    if(atk>=3){_r('#aabbcc',37,15, 4,14);_r('#bbccdd',40,13, 3,16);_r('#ccddee',43,11, 2,18);}
   }}
 
   // スーツカラー (首リング)
@@ -433,48 +436,52 @@ function drawAnimalHead(ci,_r,AC,atk){
     _r('#334477',22,13, 6, 2); _r('#fff',24,13, 2, 1); // 牙
     break;
   }
-  case 3: { // ===== カマキリ CHESTER =====
-    // 後頭部 (細い三角)
-    _r(OL, 5, 1,10,15); _r('#1a6a22', 6, 2, 8,13); _r('#2a8a32', 6, 2, 8, 1);
-    // 頭上の三角突起
-    _r(OL,13,-6, 8, 8); _r('#0a6a0a',14,-5, 6, 7); _r('#0d9a0d',15,-4, 4, 5); _r('#22dd22',16,-3, 2, 3);
-    // 前頭部
-    _r(OL,14,-1,14,17); _r('#1a6a22',15, 0,12,16); _r('#2a8a32',15, 0,12, 1);
-    // 左複眼 (背面・暗め)
-    _r('#550000', 7, 2, 6, 9); _r('#880000', 8, 3, 4, 8); _r('#aa1100', 9, 3, 3, 5);
-    _r('#ffffff', 8, 3, 2, 2); // 白反射
-    // 右複眼 (前面・鮮やか・大): 白目＋赤虹彩＋黒瞳＋ハイライト
-    _r('#ffffff',17, 0, 9,13);
-    _r('#880000',18, 1, 7,11); _r('#cc0000',18, 1, 7, 4);
-    _r('#ff3300',19, 1, 5, 7); _r('#ff7700',20, 1, 3, 4);
-    _r('#111111',21, 4, 2, 5);
-    _r('#ffffff',18, 1, 3, 3); // 大きめハイライト
-    // 下顎・牙
-    _r(OL,21,11, 8, 6); _r('#005500',22,12, 6, 5); _r('#00aa00',23,12, 4, 4);
-    _r('#88ff44',23,12, 2, 1); // 顎ハイライト
+  case 3: { // ===== サル KIBA =====
+    // 丸い小耳
+    _r(OL, 3,-4, 7, 7); _r('#885522', 4,-3, 5, 6); _r('#cc8844', 5,-2, 3, 4); _r('#ddaa88', 6,-1, 2, 2);
+    _r(OL,18,-4, 7, 7); _r('#885522',19,-3, 5, 6); _r('#cc8844',20,-2, 3, 4); _r('#ddaa88',21,-1, 2, 2);
+    // 頭本体 (丸い)
+    ctx.fillStyle=OL;ctx.beginPath();ctx.ellipse(13,8,12,11,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#aa7722';ctx.beginPath();ctx.ellipse(13,8,11,10,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#cc9933';ctx.beginPath();ctx.ellipse(13,4,11,6,0,0,Math.PI*2);ctx.fill();
+    // 目: 大きく丸い (好奇心旺盛)
+    _r('#1a1a00',14, 2, 8, 8);
+    _r('#ffffff',15, 3, 6, 6);
+    _r('#223388',16, 3, 4, 6); _r('#001166',16, 3, 4, 1);
+    _r('#111111',18, 4, 1, 4);
+    _r('#ffffff',16, 3, 2, 2);
+    // 眉 (アーチ状)
+    _r('#552200',14, 2,10, 2);
+    // マズル (丸く突出)
+    _r(OL,16, 9,12, 8); _r('#ddaa88',17,10,10, 7); _r('#eebb99',17,10,10, 1);
+    // 鼻 (平たい2穴)
+    _r('#441100',18,11, 3, 3); _r('#441100',22,11, 3, 3);
+    _r('#220800',19,12, 2, 2); _r('#220800',23,12, 2, 2);
+    // 口 (ニヤリ)
+    _r('#552211',19,14, 7, 2); _r('#ffffff',20,14, 2, 1); _r('#ffffff',24,14, 1, 1);
     break;
   }
-  case 4: { // ===== ヘビ SCAR =====
-    // 後頭部 (鱗模様)
-    _r(OL, 3, 1,15,15); _r('#1a5a1a', 4, 2,13,13); _r('#2a7a2a', 4, 2,13, 1);
-    _r('#0a4a0a', 5, 3, 4, 4); _r('#0a4a0a', 9, 6, 4, 4); _r('#0a4a0a', 5, 8, 4, 4);
-    // 前頭部 (くさび形)
-    _r(OL,15, 0,16,16); _r('#1a6a1a',16, 1,14,14); _r('#2a8a2a',16, 1,14, 1);
-    _r('#0a4a0a',17, 4, 4, 4); _r('#0a4a0a',21, 6, 4, 4);
-    // 目: 眼窩＋白目＋黄緑虹彩＋縦スリット瞳孔＋ハイライト
-    _r('#003300',16, 2, 7, 9); _r('#224422',17, 3, 5, 7);
-    _r('#ffffff',17, 3, 5, 7);
-    _r('#88ff00',18, 3, 3, 7); _r('#ccff44',18, 3, 2, 2);
-    _r('#000000',19, 3, 1, 7);
-    _r('#ffffff',18, 3, 2, 2); // ハイライト
-    // くさびスナウト (前方突出)
-    _r(OL,21, 5,11, 9); _r('#1a8a1a',22, 6, 9, 8); _r('#22aa22',22, 6, 9, 1);
-    _r('#0d600d',23, 8, 7, 6);
-    // 鼻孔
-    _r('#003300',24, 9, 2, 1); _r('#003300',27, 9, 2, 1);
-    // 二股舌 (攻撃時伸びる)
-    {const tx=atk>0?Math.min(atk*4,8):0;
-    _r('#ee1100',27+tx, 9, 5, 1); _r('#ee1100',26+tx,11, 2, 4); _r('#ee1100',30+tx,11, 2, 4);}
+  case 4: { // ===== サイ REX =====
+    // 頭本体 (四角く巨大)
+    _r(OL, 2, 0,25,18); _r('#445566', 3, 1,23,16); _r('#667788', 3, 1,23, 2);
+    // 前額の太い角
+    _r(OL,20,-8, 7,10); _r('#334455',21,-7, 5, 9); _r('#667788',22,-6, 3, 8);
+    _r('#aabbcc',22,-8, 2, 3);
+    // 目 (小さく鋭い)
+    _r('#001122', 5, 4, 7, 6);
+    _r('#ffffff', 6, 5, 5, 4);
+    _r('#ff6600', 7, 5, 3, 4); _r('#cc4400', 7, 5, 3, 1);
+    _r('#111111', 9, 5, 1, 4);
+    _r('#ffffff', 7, 5, 2, 1);
+    // 太い険しい眉
+    _r('#1a2233', 4, 3,10, 3); _r('#000a11', 5, 2, 8, 2);
+    // 分厚い鼻面
+    _r(OL,16, 6,16,10); _r('#334455',17, 7,14, 9); _r('#556677',17, 7,14, 2);
+    // 大きな鼻孔
+    _r('#001122',19, 9, 4, 4); _r('#001122',25, 9, 4, 4);
+    _r('#000000',20,10, 3, 3); _r('#000000',26,10, 3, 3);
+    // 固く閉じた口
+    _r('#223344',18,15,14, 2); _r('#334455',19,15,12, 1);
     break;
   }
   }
@@ -487,8 +494,8 @@ const CHARS=[
   {name:'タカ型',   nick:'BRUCE',   dna:'鷹DNA',  col:'#c07828',w:30,h:42,spd:5.2,jmp:-8.8,maxHp:4,atkCd:18,atkLabel:'急降下斬',  glide:true, djump:true, wallSlide:false,ability:'滑空＋二段ジャンプ'},
   {name:'クマ型',   nick:'LARC',    dna:'熊DNA',  col:'#7a4a22',w:34,h:46,spd:3.2,jmp:-8.5,maxHp:8,atkCd:30,atkLabel:'熊パンチ',  glide:false,djump:true, wallSlide:false,ability:'高HP×2・攻撃力2倍・二段J'},
   {name:'オオカミ型',nick:'MIGUEL', dna:'狼DNA',  col:'#3a4aaa',w:30,h:48,spd:5.5,jmp:-9.0,maxHp:5,atkCd:16,atkLabel:'三連爪',    glide:false,djump:true, wallSlide:true, ability:'二段ジャンプ・壁張付き【主人公】'},
-  {name:'カマキリ型',nick:'CHESTER',dna:'蟷螂DNA',col:'#1a6a22',w:24,h:48,spd:6.0,jmp:-8.5,maxHp:4,atkCd:12,atkLabel:'大鎌斬撃', glide:false,djump:true, wallSlide:true, ability:'長リーチ斬・壁張付き・二段J'},
-  {name:'ヘビ型',   nick:'SCAR',    dna:'蛇DNA',  col:'#1a6a1a',w:24,h:42,spd:4.5,jmp:-8.5,maxHp:4,atkCd:45,atkLabel:'毒ガス雲',  glide:false,djump:true, wallSlide:false,ability:'毒ガス持続ダメージ・二段J'},
+  {name:'サル型',   nick:'KIBA',    dna:'猿DNA',  col:'#aa7722',w:28,h:44,spd:6.8,jmp:-10.0,maxHp:3,atkCd:14,atkLabel:'電磁ムチ',  glide:false,djump:true, wallSlide:true, ability:'最速・電磁ムチ引寄せ・壁張付き・二段J'},
+  {name:'サイ型',   nick:'REX',     dna:'犀DNA',  col:'#556677',w:36,h:46,spd:2.8,jmp:-7.5, maxHp:10,atkCd:28,atkLabel:'猛突進',    glide:false,djump:false,wallSlide:false,ability:'最高HP・強パンチ衝撃波・突進無敵貫通'},
 ];
 
 // ================================================================
@@ -932,6 +939,7 @@ function mkPlayer(ci){
     spd:c.spd,jmp:c.jmp,djump:c.djump,canDjump:false,
     glide:c.glide,wallSlide:c.wallSlide,
     atkCd:0,jetCd:0,jetActive:false,jetTimer:0,comboStep:0,comboTimer:0,invincible:0,col:c.col,name:c.name,dna:c.dna,ci,frame:0,moving:false,
+    charging:false,chargeTimer:0,chargeDir:1,
     weaponLv:0,weaponGauge:0,weaponArmor:3};
 }
 function spawnEnemies(){
@@ -1050,38 +1058,40 @@ function doAttack(){
       }
       break;
     }
-    case 3:{ // CHESTER 蟷螂 - 飛翔斬撃
-      const mkSlash=(vx,vy,sz,col,dmg,opts={})=>{
-        projectiles.push({x:mx,y:my-sz/2,vx,vy,w:sz,h:sz,col,dmg,life:opts.life||52,hit:[],pierce:!!opts.pierce,homing:false,slash:true});
-        burst(mx,my,col,opts.n||5);sfx('slash');
-      };
-      if(step<2){
-        mkSlash(f*18,step===0?0:-0.6,22,step===0?'#44ffaa':'#22ffcc',1,{life:50});
-      }else if(lv===0){
-        mkSlash(f*22,0,30,'#00ffaa',2,{life:56,n:9});
-      }else if(lv===1){
-        mkSlash(f*20,-1.0,26,'#44ffcc',2,{life:52});
-        mkSlash(f*17,1.0,24,'#88ffdd',1,{life:48});
-      }else{
-        for(let k=0;k<4;k++) mkSlash(f*20,(k-1.5)*2.0,22+k*4,k%2===0?'#00ffaa':'#88ffdd',2,{life:44+k*4,pierce:true});
-        addShake(5);
+    case 3:{ // KIBA サル - 電磁ムチ (近接引寄せ)
+      const wr=step<2?36:52;
+      const wpull=lv>=1&&step===2;
+      const wdmg=step<2?1:lv>=2?3:2;
+      const wx=f>0?px+pw:px-wr, wy=py+6;
+      projectiles.push({x:wx,y:wy,vx:f*1,vy:0,w:wr,h:ph-12,col:'#ffcc00',dmg:wdmg,life:9,hit:[],pierce:true,homing:false,whip:true,pull:wpull});
+      burst(wx+wr/2,wy+ph/2,'#ffdd44',step<2?4:9);sfx('slash');
+      if(lv>=2&&step===2){
+        // lv2: 前後両方向ムチ
+        const wx2=f>0?px-38:px+pw;
+        projectiles.push({x:wx2,y:wy,vx:-f*1,vy:0,w:38,h:ph-12,col:'#ffee66',dmg:2,life:7,hit:[],pierce:true,homing:false,whip:true,pull:true});
+        addShake(3);
       }
       break;
     }
-    case 4:{ // SCAR ヘビ - 毒針
-      if(step<2){
-        projectiles.push({x:mx,y:my,vx:f*17,vy:step===0?0:-0.5,w:20,h:3,col:'#22cc00',dmg:1,life:54,hit:[],pierce:false,homing:false,needle:true,poison:true});
-        if(step===1)projectiles.push({x:mx,y:my+5,vx:f*16,vy:0.6,w:18,h:3,col:'#33dd00',dmg:1,life:50,hit:[],pierce:false,homing:false,needle:true,poison:true});
-        burst(mx,my,'#44ff22',3);sfx('needle');
-      }else if(lv===0){
-        projectiles.push({x:mx,y:my,vx:f*19,vy:0,w:26,h:4,col:'#44ff00',dmg:2,life:56,hit:[],pierce:false,homing:false,needle:true,poison:true});
-        burst(mx,my,'#44ff22',7);
-      }else if(lv===1){
-        for(let k=0;k<3;k++)projectiles.push({x:mx,y:my+(k-1)*6,vx:f*17,vy:(k-1)*1.2,w:20,h:3,col:'#66ff22',dmg:1,life:52,hit:[],pierce:false,homing:false,needle:true,poison:true});
-        burst(mx,my,'#44ff22',8);
-      }else{
-        for(let k=0;k<6;k++){const a=k/6*Math.PI*1.5-Math.PI*.4;projectiles.push({x:mx,y:my,vx:f*7+Math.cos(a)*4,vy:Math.sin(a)*4,w:18,h:3,col:'#88ff44',dmg:1,life:90,hit:[],pierce:false,homing:true,needle:true,poison:true});}
-        burst(mx,my,'#44ff22',14);addShake(4);
+    case 4:{ // REX サイ - 強パンチ＋突進
+      if(!player.onGround){ // 空中: 踏みつけ
+        projectiles.push({x:px-6,y:py+ph,vx:0,vy:0,w:pw+12,h:22,col:'#667788',dmg:3,life:16,hit:[],pierce:true,homing:false,stomp:true});
+        player.vy=Math.max(player.vy,8);
+        burst(px+pw/2,py+ph,'#99bbcc',10);addShake(6);sfx('bomb');
+        break;
+      }
+      const pdmg=step<2?2:lv>=2?4:3;
+      const pw2=step<2?30:44;
+      projectiles.push({x:f>0?px+pw:px-pw2,y:py+8,vx:f*1,vy:0,w:pw2,h:ph-16,col:'#667788',dmg:pdmg,life:8,hit:[],pierce:step>=2,homing:false,punch:true});
+      burst(f>0?px+pw+4:px-4,py+ph/2,'#aabbcc',pdmg>=3?9:5);
+      sfx('hit');
+      if(step===2&&lv>=1){ // フィニッシャー: 衝撃波
+        effects.push({type:'explode',x:px+pw/2,y:py+ph,r:lv>=2?90:68,maxTimer:18,timer:18,dmg:lv>=2?3:2,applied:false});
+      }
+      if(step===2&&lv>=2&&!player.charging){ // lv2: 突進発動
+        player.charging=true;player.chargeTimer=22;player.chargeDir=f;
+        player.invincible=Math.max(player.invincible,24);
+        addShake(4);
       }
       break;
     }
@@ -1245,6 +1255,15 @@ function update(){
   if(player.jetCd>0)player.jetCd--;
   if(player.comboTimer>0)player.comboTimer--;else player.comboStep=0;
   if(player.invincible>0)player.invincible--;
+  if(player.charging){
+    player.chargeTimer--;
+    player.vx=player.chargeDir*14;
+    if(player.chargeTimer<=0){player.charging=false;burst(player.x+player.w/2,player.y+player.h/2,'#99bbcc',8);}
+    for(let j=enemies.length-1;j>=0;j--){
+      const e=enemies[j];if(e.hp<=0)continue;
+      if(ov({x:player.x,y:player.y,w:player.w,h:player.h},e))hitE(j,3);
+    }
+  }
   // ステージギミック
   const gimmick=STAGE_CFG[currentStage-1].gimmick;
   if(gimmick==='thunder'&&gameTimer%280===0&&Math.random()<0.55){
@@ -1417,6 +1436,7 @@ function update(){
       if(ov({x:p.x,y:p.y,w:p.w,h:p.h},e)){
         if(p.bomb){effects.push({type:'explode',x:p.x+p.w/2,y:p.y+p.h/2,r:p.rad||70,maxTimer:22,timer:22,dmg:p.dmg,applied:false});projectiles.splice(i,1);removed=true;break;}
         p.hit.push(e.id);if(p.dmg>0){hitE(j,p.dmg);if(p.poison&&e.hp>0){e.poisoned=Math.min((e.poisoned||0)+3,3);e.poisonTimer=0;}}
+        if(p.pull&&e.hp>0){const pd=player.x+player.w/2>e.x+e.w/2?1:-1;e.vx=pd*8;}
         if(!p.pierce){projectiles.splice(i,1);removed=true;break;}
       }
     }
@@ -3643,6 +3663,40 @@ function drawPlay(){
       const tx=dir>0?bx+p.w-2:bx;
       dr(tx,by,2,p.h,'#aaffaa');
       dr(dir>0?bx+p.w-1:bx,by+1,1,Math.max(1,p.h-2),'#ffffff');
+    }else if(p.whip){
+      // 電磁ムチ: 放電アーク
+      const dir=p.vx>=0?1:-1;
+      const cx2=bx+p.w/2, cy2=by+p.h/2;
+      ctx.save();ctx.translate(cx2,cy2);if(dir<0)ctx.scale(-1,1);
+      ctx.globalAlpha=0.85;
+      ctx.strokeStyle='#ffcc00';ctx.lineWidth=2.5;
+      ctx.beginPath();ctx.moveTo(-p.w/2,0);
+      for(let k=1;k<=8;k++){
+        const t=k/8;const wx2=-p.w/2+t*p.w;
+        const wy2=Math.sin(t*Math.PI)*p.h*.45*(k%2===0?1:-1);
+        ctx.lineTo(wx2,wy2);
+      }
+      ctx.stroke();
+      ctx.globalAlpha=0.35;ctx.strokeStyle='#ffffff';ctx.lineWidth=5;
+      ctx.beginPath();ctx.moveTo(-p.w/2,0);ctx.lineTo(p.w/2,0);ctx.stroke();
+      ctx.globalAlpha=0.18;ctx.fillStyle='#ffee88';
+      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.globalAlpha=1;ctx.restore();
+    }else if(p.punch){
+      // 拳衝撃フラッシュ
+      const alpha=(p.life/8)*0.75;
+      ctx.globalAlpha=alpha;dr(bx,by,p.w,p.h,'#aabbcc');
+      ctx.globalAlpha=alpha*0.4;dr(bx-2,by-2,p.w+4,p.h+4,'#ffffff');
+      ctx.globalAlpha=1;
+    }else if(p.stomp){
+      // 踏みつけ衝撃波: 横楕円
+      const alpha=(p.life/16)*0.8;
+      ctx.globalAlpha=alpha;
+      ctx.fillStyle='#667788';
+      ctx.beginPath();ctx.ellipse(bx+p.w/2,by+p.h/2,p.w/2,p.h/2,0,0,Math.PI*2);ctx.fill();
+      ctx.globalAlpha=alpha*0.55;ctx.fillStyle='#99bbcc';
+      ctx.beginPath();ctx.ellipse(bx+p.w/2,by+p.h/2,p.w/2-3,p.h/2-3,0,0,Math.PI*2);ctx.fill();
+      ctx.globalAlpha=1;
     }else if(p.pierce&&p.w>=30){
       ctx.globalAlpha=0.35;dr(bx-2,by-3,p.w+4,p.h+6,p.col);ctx.globalAlpha=1;
       dr(bx,by,p.w,p.h,p.col);dr(bx,by+Math.floor(p.h*.35),p.w,Math.floor(p.h*.3),'#ffffff');
