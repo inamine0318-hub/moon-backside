@@ -204,7 +204,7 @@ function drawSprite(ox,oy,flip){
 const SC_SUIT  =['#c07828','#7a4a22','#3a4aaa','#1a6a22','#1a6a1a'];
 const SC_ACCNT =['#ff8800','#cc3300','#5566ee','#44ff88','#00dd44'];
 
-function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting){
+function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirborne){
   ctx.save();
   // 視覚スケール: ヒットボックス変えずに見た目を大きく (全キャラ統一)
   const VS=1.28;
@@ -233,7 +233,15 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting){
   _r(OL, 0,20, 6,14); _r('#3a1a00', 1,21, 4,12);
   _r('#cc5500', 1,21, 4, 2); _r(OL, 2,16, 2, 6); _r('#884400', 2,17, 2, 4);
 
-  // 足 (蹴りポーズ時は前足を跳ね上げる)
+  // 足 (空中=膝曲げ, 蹴り=跳ね上げ, 通常=歩行)
+  if(isAirborne&&!atk&&!isJetting){
+    // 空中ポーズ: 前足の膝を曲げる
+    _r(OL, 4+lx,40,10, 7); _r(SC, 5+lx,41, 8, 5); _r(HL, 5+lx,41, 8, 2); // 後足 (少し上がる)
+    _r(OL, 3+lx,46,11, 3); _r('#111122', 4+lx,46, 9, 2); _r(AC, 4+lx,46, 9, 1);
+    _r(OL,16+rx,33,10, 9); _r(SC,17+rx,34, 8, 7); _r(HL,17+rx,34, 8, 2); // 前足太もも (上がる)
+    _r(OL,23+rx,40,10, 7); _r(SC,24+rx,41, 8, 5); _r(HL,24+rx,41, 8, 2); // 膝下 (後ろへ)
+    _r(OL,21+rx,46,14, 3); _r('#111122',22+rx,46,12, 2); _r(AC,22+rx,46,12, 1); // ブーツ
+  } else {
   _r(OL, 4+lx,38,10, 9); _r(SC, 5+lx,39, 8, 7); _r(HL, 5+lx,39, 8, 2);
   _r(OL, 2+lx,45,13, 4); _r('#111122', 3+lx,45,11, 3); _r(AC, 3+lx,45,11, 1);
   if(!kick){
@@ -245,6 +253,7 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting){
     _r(OL,22+rx,18,14, 9); _r(SC,23+rx,19,12, 7); _r(HL,23+rx,19,12, 2);
     _r(OL,32+rx,16,14, 5); _r('#111122',33+rx,16,12, 4); _r(AC,33+rx,16,12, 1);
   }
+  } // end airborne else
 
   // 胴体 (クマスラムは少し前傾)
   const bodyX=bearSlam?2:0;
@@ -3276,7 +3285,7 @@ function drawPlay(){
     }
     if(!(player.invincible>0&&!player.jetActive&&Math.floor(player.invincible/4)%2===0)){
       const atkAnim=player.atkCd>0?player.comboStep+1:0;
-      drawCharacter(Math.floor(player.x-cam.x),Math.floor(player.y),player.ci,player.facing,player.frame,player.moving,atkAnim,player.jetActive);
+      drawCharacter(Math.floor(player.x-cam.x),Math.floor(player.y),player.ci,player.facing,player.frame,player.moving,atkAnim,player.jetActive,!player.onGround);
     }
   }
   // damageNums 描画
