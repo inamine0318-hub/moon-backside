@@ -602,11 +602,11 @@ function buildStageData(){
       T(5200,315,130);P(5380,370,110);
       E(420,428,'patrol');E(610,428,'jumper');E(900,408,'turret');
       E(1160,388,'patrol');E(1380,413,'charger');E(1500,355,'sniper');
-      E(1750,408,'turret');E(1950,253,'flyer');E(2100,398,'charger');
-      E(2380,323,'flyer');E(2600,378,'bomber');E(2820,403,'charger');
-      E(3100,308,'flyer');E(3280,263,'sniper');E(3650,293,'turret');
-      E(3850,343,'patrol');E(4280,268,'flyer');E(4580,303,'sniper');
-      E(4780,253,'flyer');E(5000,323,'jumper');E(5200,283,'turret');
+      E(1750,408,'charger');E(1950,253,'flyer');E(2100,398,'charger');
+      E(2380,323,'flyer');E(2600,378,'patrol');E(2820,403,'charger');
+      E(3100,308,'flyer');E(3280,263,'jumper');E(3650,293,'turret');
+      E(3850,343,'patrol');E(4280,268,'flyer');E(4580,303,'charger');
+      E(4780,253,'flyer');E(5000,323,'jumper');E(5200,283,'patrol');
       IT(480,308,'hp');IT(1360,323,'hp');IT(2440,293,'hp');IT(3715,293,'hp');IT(5050,323,'hp');
       IT(150,435,'o2');IT(880,415,'o2');IT(1650,395,'o2');IT(2960,410,'o2');IT(3580,390,'o2');IT(5180,420,'o2');
       IT(230,348,'chip');IT(860,323,'chip');IT(1320,333,'chip');IT(1790,318,'chip');
@@ -614,7 +614,7 @@ function buildStageData(){
       // 上昇セクション (ascending climbing section)
       G(5580,440,200);G(5900,415,160);G(6200,385,160);G(6500,355,160);G(6790,320,180);G(6990,380,190);
       P(5750,365,120);P(6050,325,120);P(6350,285,120);P(6640,245,120);P(6930,305,120);
-      E(5630,408,'patrol');E(5810,333,'flyer');E(6010,393,'charger');E(6120,293,'sniper');E(6330,353,'patrol');E(6440,253,'flyer');E(6590,323,'charger');E(6720,213,'flyer');E(6810,288,'turret');E(6970,273,'patrol');E(7050,348,'jumper');
+      E(5630,408,'patrol');E(5810,333,'flyer');E(6010,393,'charger');E(6120,293,'sniper');E(6330,353,'patrol');E(6440,253,'flyer');E(6590,323,'charger');E(6720,213,'flyer');E(6810,288,'charger');E(6970,273,'patrol');E(7050,348,'jumper');
       IT(5800,340,'chip');IT(6090,300,'chip');IT(6390,260,'chip');IT(6700,220,'hp');IT(5870,415,'o2');IT(6260,360,'o2');IT(6880,355,'hp');IT(6560,300,'chip');
       break;
     case 2: // 雷峰: 山岳・大きな高低差
@@ -628,18 +628,18 @@ function buildStageData(){
       P(3150,308,75);P(3640,388,75);P(4200,328,75);P(4790,262,75);
       P(5220,368,75);
       E(200,428,'patrol');E(460,398,'sniper');E(730,368,'charger');
-      E(1010,333,'flyer');E(1300,363,'sniper');E(1610,398,'charger');
+      E(1010,333,'flyer');E(1300,363,'charger');E(1610,398,'charger');
       E(1940,428,'patrol');E(2290,383,'flyer');E(2590,343,'sniper');
       E(2870,308,'charger');E(3150,343,'turret');E(3460,383,'flyer');
-      E(3800,423,'sniper');E(4160,393,'charger');E(4480,358,'flyer');
-      E(4780,323,'sniper');E(5090,363,'turret');E(5400,403,'charger');
+      E(3800,423,'jumper');E(4160,393,'charger');E(4480,358,'flyer');
+      E(4780,323,'sniper');E(5090,363,'jumper');E(5400,403,'charger');
       IT(300,340,'hp');IT(900,240,'hp');IT(1650,350,'hp');IT(2700,208,'hp');IT(4500,262,'hp');
       IT(100,435,'o2');IT(510,405,'o2');IT(760,375,'o2');IT(1900,435,'o2');IT(3800,430,'o2');IT(5200,410,'o2');
       IT(200,370,'chip');IT(580,320,'chip');IT(1100,248,'chip');IT(1490,335,'chip');
       IT(2100,300,'chip');IT(2550,237,'chip');IT(3200,318,'chip');IT(4200,335,'chip');
       G(5560,418,280);G(5890,395,260);G(6200,418,300);G(6560,438,280);G(6890,420,280);
       P(5630,348,75);P(5990,295,75);P(6380,295,75);P(6820,350,75);
-      E(5670,386,'sniper');E(5870,290,'flyer');E(6060,238,'sniper');E(6270,263,'charger');E(6490,386,'patrol');E(6700,290,'flyer');E(6930,388,'charger');E(6650,263,'brute');
+      E(5670,386,'charger');E(5870,290,'flyer');E(6060,238,'sniper');E(6270,263,'charger');E(6490,386,'patrol');E(6700,290,'flyer');E(6930,388,'charger');E(6650,263,'brute');
       IT(5670,323,'chip');IT(5990,270,'chip');IT(6270,243,'chip');IT(6620,297,'chip');IT(5870,260,'hp');IT(6570,297,'hp');IT(5620,393,'o2');IT(6300,393,'o2');
       // 天井 (ceiling)
       C(0,95,820);C(860,95,820);C(1730,95,820);C(2600,95,820);C(3470,95,820);C(4340,95,820);C(5210,95,330);C(5590,95,420);C(6060,95,420);C(6530,95,420);C(7000,95,180);
@@ -657,11 +657,11 @@ function buildStageData(){
       P(4140,368,90);P(4480,328,90);P(4870,368,90);
       P(5090,368,90);P(5380,330,90);
       E(250,423,'charger');E(700,418,'bomber');E(860,310,'turret');
-      E(1160,428,'charger');E(1380,342,'flyer');E(1680,302,'bomber');
-      E(2080,428,'charger');E(2340,340,'flyer');E(2560,423,'bomber');
+      E(1160,428,'charger');E(1380,342,'flyer');E(1680,302,'charger');
+      E(2080,428,'charger');E(2340,340,'flyer');E(2560,423,'patrol');
       E(3040,428,'patrol');E(3240,320,'flyer');E(3530,418,'charger');
-      E(3760,340,'bomber');E(4020,428,'turret');E(4300,320,'flyer');
-      E(4560,423,'charger');E(4860,340,'bomber');E(5080,428,'turret');
+      E(3760,340,'bomber');E(4020,428,'charger');E(4300,320,'flyer');
+      E(4560,423,'charger');E(4860,340,'patrol');E(5080,428,'turret');
       E(5290,320,'charger');
       E(920,428,'brute');E(2200,428,'brute');E(3800,428,'brute');
       IT(650,326,'hp');IT(1500,318,'hp');IT(2500,318,'hp');IT(3600,318,'hp');IT(4800,336,'hp');
@@ -670,7 +670,7 @@ function buildStageData(){
       IT(2400,343,'chip');IT(2730,305,'chip');IT(3280,323,'chip');IT(4520,308,'chip');
       G(5610,453,300);G(5970,450,300);G(6330,453,320);G(6710,450,300);G(7060,453,200);
       P(5700,368,90);P(6050,328,90);P(6440,368,90);P(6850,328,90);
-      E(5710,421,'charger');E(5900,320,'flyer');E(6100,300,'bomber');E(6320,421,'charger');E(6560,320,'flyer');E(6760,300,'bomber');
+      E(5710,421,'charger');E(5900,320,'flyer');E(6100,300,'bomber');E(6320,421,'charger');E(6560,320,'flyer');E(6760,300,'patrol');
       E(6960,421,'brute');E(6200,421,'brute');
       IT(5740,343,'chip');IT(6090,303,'chip');IT(6470,343,'chip');IT(5900,316,'hp');IT(6680,316,'hp');IT(5660,428,'o2');IT(6380,428,'o2');
       // 天井 (ceiling) - 炎窟は低い天井で圧迫感
@@ -690,10 +690,10 @@ function buildStageData(){
       P(2380,292,100);P(2960,292,100);P(3600,292,100);P(4200,312,100);P(4820,292,100);
       E(200,426,'patrol');E(450,426,'flyer');E(700,426,'patrol');
       E(940,360,'flyer');E(1200,282,'turret');E(1480,426,'patrol');
-      E(1800,360,'flyer');E(2100,282,'sniper');E(2380,426,'charger');
+      E(1800,360,'flyer');E(2100,282,'charger');E(2380,426,'charger');
       E(2680,282,'flyer');E(2980,426,'patrol');E(3300,360,'turret');
       E(3620,282,'flyer');E(3920,426,'charger');E(4220,360,'sniper');
-      E(4530,282,'flyer');E(4840,426,'patrol');E(5130,360,'turret');
+      E(4530,282,'flyer');E(4840,426,'patrol');E(5130,360,'charger');
       E(600,426,'brute');E(2100,426,'brute');E(4200,426,'brute');
       IT(500,350,'hp');IT(1400,340,'hp');IT(2500,330,'hp');IT(3700,350,'hp');IT(5000,423,'hp');
       IT(200,433,'o2');IT(800,433,'o2');IT(1600,427,'o2');IT(2400,433,'o2');IT(3100,430,'o2');IT(4600,427,'o2');
@@ -702,7 +702,7 @@ function buildStageData(){
       G(5600,458,340);G(6000,452,340);G(6400,458,360);G(6820,452,340);G(7200,458,200);
       P(5720,388,150);P(6170,356,150);P(6640,388,150);
       P(5790,308,100);P(6310,278,100);P(6890,308,100);
-      E(5730,426,'patrol');E(5960,360,'flyer');E(6200,282,'turret');E(6430,426,'charger');E(6680,360,'flyer');E(6910,282,'sniper');
+      E(5730,426,'patrol');E(5960,360,'flyer');E(6200,282,'turret');E(6430,426,'charger');E(6680,360,'flyer');E(6910,282,'charger');
       E(5820,426,'brute');E(6520,426,'brute');
       IT(5750,363,'chip');IT(6050,267,'chip');IT(6390,357,'chip');IT(6630,267,'chip');IT(5980,277,'hp');IT(6620,263,'hp');IT(5660,433,'o2');IT(6450,433,'o2');
       // 天井 (ceiling) - 深海神殿
@@ -722,10 +722,10 @@ function buildStageData(){
       P(2960,338,85);P(3450,298,85);P(3950,358,85);P(4510,378,85);
       P(4990,378,85);P(5360,425,85);
       E(180,430,'jumper');E(400,410,'sniper');E(660,390,'jumper');
-      E(920,370,'sniper');E(1180,350,'patrol');E(1440,330,'sniper');
+      E(920,370,'jumper');E(1180,350,'patrol');E(1440,330,'charger');
       E(1700,308,'jumper');E(1920,260,'turret');E(2200,280,'sniper');
-      E(2520,300,'patrol');E(2820,320,'jumper');E(3100,340,'sniper');
-      E(3390,360,'patrol');E(3680,380,'jumper');E(4010,400,'sniper');
+      E(2520,300,'patrol');E(2820,320,'jumper');E(3100,340,'charger');
+      E(3390,360,'patrol');E(3680,380,'jumper');E(4010,400,'charger');
       E(4330,420,'patrol');E(4700,410,'jumper');E(5050,400,'sniper');
       E(700,426,'brute');E(2200,426,'brute');E(4000,426,'brute');E(5200,426,'brute');
       IT(400,280,'hp');IT(1200,340,'hp');IT(2800,300,'hp');IT(3900,330,'hp');IT(5000,310,'hp');
@@ -734,7 +734,7 @@ function buildStageData(){
       IT(1740,230,'chip');IT(2130,253,'chip');IT(2540,273,'chip');IT(3700,293,'chip');
       G(5460,444,280);G(5800,452,280);G(6140,448,280);G(6480,452,280);G(6820,448,300);G(7160,452,200);
       P(5530,398,85);P(5870,422,85);P(6240,390,85);P(6450,372,85);P(6900,405,85);
-      E(5560,412,'jumper');E(5750,420,'sniper');E(5940,428,'patrol');E(6130,408,'jumper');E(6330,358,'sniper');E(6530,420,'patrol');E(6750,356,'sniper');
+      E(5560,412,'jumper');E(5750,420,'sniper');E(5940,428,'patrol');E(6130,408,'jumper');E(6330,358,'charger');E(6530,420,'patrol');E(6750,356,'sniper');
       E(6680,426,'brute');E(7100,426,'brute');
       IT(5580,373,'chip');IT(5880,397,'chip');IT(6270,363,'chip');IT(6690,360,'chip');IT(5790,387,'hp');IT(6510,347,'hp');IT(5510,419,'o2');IT(6180,423,'o2');
       break;
@@ -750,10 +750,10 @@ function buildStageData(){
       P(4770,238,62);P(5280,360,52);
       E(140,430,'charger');E(380,400,'jumper');E(640,368,'charger');
       E(940,330,'bomber');E(1200,366,'charger');E(1510,403,'jumper');
-      E(1840,430,'bomber');E(2220,376,'charger');E(2520,330,'jumper');
-      E(2820,286,'sniper');E(3100,330,'bomber');E(3400,376,'charger');
+      E(1840,430,'charger');E(2220,376,'charger');E(2520,330,'jumper');
+      E(2820,286,'sniper');E(3100,330,'patrol');E(3400,376,'charger');
       E(3730,418,'jumper');E(4100,398,'bomber');E(4440,366,'charger');
-      E(4740,330,'jumper');E(5070,368,'sniper');E(5400,408,'bomber');
+      E(4740,330,'jumper');E(5070,368,'sniper');E(5400,408,'jumper');
       E(800,426,'brute');E(2500,426,'brute');E(3800,426,'brute');E(5000,426,'brute');
       IT(500,290,'hp');IT(1400,340,'hp');IT(2500,310,'hp');IT(3500,280,'hp');IT(5000,330,'hp');
       IT(80,437,'o2');IT(430,407,'o2');IT(940,337,'o2');IT(1500,410,'o2');IT(2830,293,'o2');IT(4480,337,'o2');
@@ -761,7 +761,7 @@ function buildStageData(){
       IT(2400,217,'chip');IT(2900,213,'chip');IT(3960,227,'chip');IT(4840,213,'chip');
       G(5600,432,160);G(5890,398,160);G(6200,362,165);G(6500,330,160);G(6780,362,165);G(7060,402,210);
       P(5680,392,58);P(5970,330,62);P(6320,268,52);P(6710,268,58);P(6910,300,52);
-      E(5650,400,'charger');E(5860,368,'jumper');E(6060,330,'bomber');E(6270,298,'sniper');E(6510,298,'charger');E(6720,236,'sniper');E(6940,330,'bomber');
+      E(5650,400,'charger');E(5860,368,'jumper');E(6060,330,'charger');E(6270,298,'sniper');E(6510,298,'charger');E(6720,236,'sniper');E(6940,330,'jumper');
       E(5750,426,'brute');E(6380,426,'brute');
       IT(5730,367,'chip');IT(6000,305,'chip');IT(6350,243,'chip');IT(6750,243,'chip');IT(5860,337,'hp');IT(6550,223,'hp');IT(5650,407,'o2');IT(6250,337,'o2');
       break;
@@ -775,11 +775,11 @@ function buildStageData(){
       P(1440,268,65);P(1870,228,65);P(2240,228,65);P(2720,268,65);
       P(3240,230,65);P(3800,268,65);P(4470,268,65);P(5110,268,65);
       E(100,430,'flyer');E(440,410,'sniper');E(650,390,'charger');
-      E(880,410,'bomber');E(1120,430,'flyer');E(1380,410,'sniper');
-      E(1620,390,'charger');E(1880,368,'flyer');E(2140,350,'sniper');
+      E(880,410,'charger');E(1120,430,'flyer');E(1380,410,'sniper');
+      E(1620,390,'charger');E(1880,368,'flyer');E(2140,350,'charger');
       E(2420,368,'charger');E(2720,390,'bomber');E(3020,410,'flyer');
-      E(3290,390,'sniper');E(3580,368,'charger');E(3880,350,'bomber');
-      E(4180,330,'flyer');E(4480,350,'sniper');E(4800,370,'charger');
+      E(3290,390,'sniper');E(3580,368,'charger');E(3880,350,'patrol');
+      E(4180,330,'flyer');E(4480,350,'charger');E(4800,370,'charger');
       E(5130,390,'bomber');E(5380,410,'flyer');
       E(700,426,'brute');E(1800,426,'brute');E(3200,426,'brute');E(4400,426,'brute');E(5200,426,'brute');
       IT(500,300,'hp');IT(1400,270,'hp');IT(2600,290,'hp');IT(3800,260,'hp');IT(5100,300,'hp');
@@ -788,7 +788,7 @@ function buildStageData(){
       IT(1700,203,'chip');IT(2320,203,'chip');IT(4200,223,'chip');IT(4850,223,'chip');
       G(5570,420,130);G(5840,402,120);G(6090,382,120);G(6350,400,130);G(6640,420,140);G(6940,440,220);
       P(5610,378,65);P(6010,338,65);P(6440,298,65);P(6900,258,65);P(7100,278,58);
-      E(5660,388,'flyer');E(5880,370,'bomber');E(6110,350,'sniper');E(6370,368,'charger');E(6680,388,'bomber');E(6920,408,'flyer');E(7130,246,'sniper');
+      E(5660,388,'flyer');E(5880,370,'charger');E(6110,350,'sniper');E(6370,368,'charger');E(6680,388,'bomber');E(6920,408,'flyer');E(7130,246,'sniper');
       E(5760,426,'brute');E(6310,426,'brute');E(6830,426,'brute');
       IT(5660,353,'chip');IT(5990,313,'chip');IT(6310,273,'chip');IT(6710,253,'chip');IT(5830,333,'hp');IT(6480,263,'hp');IT(5630,395,'o2');IT(6190,357,'o2');
       break;
@@ -1004,14 +1004,14 @@ function spawnEnemies(){
   _eid=0;
   enemies=ENEMY_SPAWNS.map(d=>{
     const id=_eid++,type=d.type||'patrol';
-    if(type==='turret') return{id,type,x:d.x,y:d.y-34,w:28,h:34,vy:0,vx:0,dir:1,startX:d.x,range:0,hp:5,maxHp:5,onGround:false,dmgCd:0,shotCd:0,shotMax:200,flashTimer:0,poisoned:0,poisonTimer:0};
-    if(type==='charger') return{id,type,x:d.x,y:d.y-34,w:32,h:34,vy:0,vx:0.7,dir:Math.random()<.5?1:-1,startX:d.x,range:90+Math.random()*40,hp:3,maxHp:3,onGround:false,dmgCd:0,charging:false,chargeCd:0,chargeDir:1,flashTimer:0,poisoned:0,poisonTimer:0};
-    if(type==='flyer')  return{id,type,x:d.x,y:d.y,   w:28,h:34,vy:0,vx:1.1+Math.random()*.3,dir:Math.random()<.5?1:-1,startX:d.x,range:110+Math.random()*60,hp:2,maxHp:2,onGround:false,dmgCd:0,baseY:d.y,bob:Math.random()*Math.PI*2,flashTimer:0,poisoned:0,poisonTimer:0};
-    if(type==='jumper') return{id,type,x:d.x,y:d.y-34,w:22,h:34,vy:0,vx:0,dir:1,startX:d.x,range:80,hp:2,maxHp:2,onGround:false,dmgCd:0,jumpCd:55,flashTimer:0,poisoned:0,poisonTimer:0};
-    if(type==='sniper') return{id,type,x:d.x,y:d.y-34,w:26,h:34,vy:0,vx:0.5,dir:Math.random()<.5?1:-1,startX:d.x,range:25,hp:3,maxHp:3,onGround:false,dmgCd:0,shotCd:0,shotMax:260,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='turret') return{id,type,x:d.x,y:d.y-34,w:28,h:34,vy:0,vx:0,dir:1,startX:d.x,range:0,hp:3,maxHp:3,onGround:false,dmgCd:0,shotCd:0,shotMax:300,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='charger') return{id,type,x:d.x,y:d.y-34,w:32,h:34,vy:0,vx:0.7,dir:Math.random()<.5?1:-1,startX:d.x,range:90+Math.random()*40,hp:2,maxHp:2,onGround:false,dmgCd:0,charging:false,chargeCd:0,chargeDir:1,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='flyer')  return{id,type,x:d.x,y:d.y,   w:28,h:34,vy:0,vx:1.1+Math.random()*.3,dir:Math.random()<.5?1:-1,startX:d.x,range:110+Math.random()*60,hp:1,maxHp:1,onGround:false,dmgCd:0,baseY:d.y,bob:Math.random()*Math.PI*2,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='jumper') return{id,type,x:d.x,y:d.y-34,w:22,h:34,vy:0,vx:0,dir:1,startX:d.x,range:80,hp:1,maxHp:1,onGround:false,dmgCd:0,jumpCd:55,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='sniper') return{id,type,x:d.x,y:d.y-34,w:26,h:34,vy:0,vx:0.5,dir:Math.random()<.5?1:-1,startX:d.x,range:25,hp:2,maxHp:2,onGround:false,dmgCd:0,shotCd:0,shotMax:380,flashTimer:0,poisoned:0,poisonTimer:0};
     if(type==='bomber') return{id,type,x:d.x,y:d.y-34,w:26,h:34,vy:0,vx:0,dir:1,startX:d.x,range:200,hp:2,maxHp:2,onGround:false,dmgCd:0,fuseTimer:0,fuseActive:false,flashTimer:0,poisoned:0,poisonTimer:0};
-    if(type==='brute') return{id,type,x:d.x,y:d.y-34,w:38,h:34,vy:0,vx:1.0,dir:Math.random()<.5?1:-1,startX:d.x,range:70,hp:8,maxHp:8,onGround:false,dmgCd:0,punchCd:0,flashTimer:0,poisoned:0,poisonTimer:0};
-    return{id,type:'patrol',x:d.x,y:d.y-34,w:30,h:34,vy:0,vx:0.9+Math.random()*.5,dir:Math.random()<.5?1:-1,startX:d.x,range:70+Math.random()*50,hp:3,maxHp:3,onGround:false,dmgCd:0,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='brute') return{id,type,x:d.x,y:d.y-34,w:38,h:34,vy:0,vx:1.0,dir:Math.random()<.5?1:-1,startX:d.x,range:70,hp:4,maxHp:4,onGround:false,dmgCd:0,punchCd:0,flashTimer:0,poisoned:0,poisonTimer:0};
+    return{id,type:'patrol',x:d.x,y:d.y-34,w:30,h:34,vy:0,vx:0.9+Math.random()*.5,dir:Math.random()<.5?1:-1,startX:d.x,range:70+Math.random()*50,hp:2,maxHp:2,onGround:false,dmgCd:0,flashTimer:0,poisoned:0,poisonTimer:0};
   });
 }
 function startGame(resetStage){
