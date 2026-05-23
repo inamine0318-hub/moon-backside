@@ -268,54 +268,104 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirb
   _r('#0a0a12',13+bodyX,24, 3, 3); _r('#00ff44',14+bodyX,25, 1, 1);
   _r(OL, 3+bodyX,35,24, 4); _r(AC, 4+bodyX,36,22, 2); _r(HL, 4+bodyX,36,10, 1);
 
-  // ===== 腕 アニメーション =====
-  // ext: 拳の前方延伸量  bkPull: 後腕の引き量
+  // ===== 腕 アニメーション (キャラ別) =====
   const ext=atk===1?7:atk===2?13:atk>=3?19:0;
   const bkPull=atk>0?4:0;
 
-  if(atk===0){
-    // 両手武器構えスタンス
-    const sw=moving?(wf===0?1:-1):0;
-    // 後腕 (前に出し、バレル下を支持)
-    _r(OL, 1,24, 5, 9); _r(SC, 2,25, 3, 7); _r(AC, 2,25, 3, 3);
-    _r(OL, 5,20, 9, 6); _r(SC, 6,21, 7, 4); _r(AC, 6,21, 7, 2);
-    _r(OL,13,18,10, 6); _r('#1c1c2e',14,19, 8, 4); _r(AC,14,19, 8, 2);
-    // 前腕 (グリップを握る)
-    _r(OL,22+sw,18, 7, 6); _r(SC,23+sw,19, 5, 4); _r(AC,23+sw,19, 5, 2);
-    _r(OL,28+sw,15, 8, 7); _r(SC,29+sw,16, 6, 5); _r(AC,29+sw,16, 6, 2);
-    _r(OL,35+sw,14,10, 7); _r('#1c1c2e',36+sw,15, 8, 5);
-    _r(AC,36+sw,15, 8, 2); _r(HL,36+sw,15, 4, 1);
-    // コンパクトライフル
-    _r('#222c3a',44+sw,16,20, 4);
-    _r('#1a2230',44+sw,15,20, 1);
-    _r('#334455',47+sw,14, 5, 2);
-    _r('#556677',62+sw,15, 4, 7);
-    _r('#1c2a38',48+sw,20, 8, 4);
-    _r('#2a3a4a',50+sw,21, 3, 3);
-  } else if(kick){
-    // 蹴りポーズ: 両腕をバランス用に広げる
-    _r(OL,-2,20, 5,14); _r(SC,-1,21, 3,12); _r(AC,-1,21, 3, 3);
-    _r(OL,-3,32, 8, 5); _r('#1c1c2e',-2,33, 6, 3);
-    _r(OL,24,14, 8, 7); _r(SC,25,15, 6, 5); _r(AC,25,15, 6, 2);
-    _r(OL,30, 8, 8, 8); _r(SC,31, 9, 6, 6); _r(AC,31, 9, 6, 2);
-    _r(OL,36, 6,10, 8); _r('#1c1c2e',37, 7, 8, 6); _r(AC,37, 7, 8, 2); _r(HL,37, 7, 4, 1);
-  } else {
-    // パンチ延伸 (step1/2/finisher共通、段階的に伸びる)
-    // 後腕: 大きく引く
-    _r(OL,-bkPull,22, 5,13); _r(SC,1-bkPull,23, 3,11); _r(AC,1-bkPull,23, 3, 3);
-    _r(OL,-1-bkPull,33, 7, 5); _r('#1c1c2e',-bkPull,34, 5, 3);
-    // 前腕: 水平方向に延伸
-    const eA=Math.floor(ext*.22), eB=Math.floor(ext*.38);
-    _r(OL,23,22, 8+eA, 5); _r(SC,24,23, 6+eA, 3); _r(AC,24,23, 6+eA, 2);
-    _r(OL,29+eB,18, 8+eA, 7); _r(SC,30+eB,19, 6+eA, 5); _r(AC,30+eB,19, 6+eA, 2);
-    // 拳: 大きく前に出る (フィニッシャーは巨大拳)
-    const fw=atk>=3?14:11, fy=atk>=3?-1:0;
-    _r(OL,35+ext,17+fy, fw, 8); _r('#1c1c2e',36+ext,18+fy,fw-2, 6);
-    _r(AC,36+ext,18+fy,fw-2, 2); _r(HL,36+ext,18+fy, 5, 1);
-    // フィニッシャー: 拳の衝撃ライン
-    if(atk>=3){
-      _r('#ffffff',49,14, 2, 3); _r('#ffffff',51,16, 2, 5);
-      _r(HL,   50,12, 4, 2); _r(AC,    52,11, 2, 4);
+  if(ci===3){ // ===== サル KIBA - 電磁ムチ格闘 =====
+    if(atk===0){
+      // ムチ構え: 前腕を前方に伸ばしてハンドル握り
+      const sw=moving?(wf===0?1:-1):0;
+      _r(OL, 0,24, 5,10); _r(SC, 1,25, 3, 8); _r(AC, 1,25, 3, 3);
+      _r(OL, 4,21, 9, 5); _r(SC, 5,22, 7, 3); _r(AC, 5,22, 7, 2);
+      _r(OL,12,19, 8, 5); _r(SC,13,20, 6, 3); _r(AC,13,20, 6, 2);
+      _r(OL,19+sw,20, 7, 6); _r(SC,20+sw,21, 5, 4); _r(AC,20+sw,21, 5, 2);
+      _r(OL,25+sw,17, 8, 6); _r(SC,26+sw,18, 6, 4); _r(AC,26+sw,18, 6, 2);
+      // ムチハンドル
+      _r(OL,32+sw,15, 9, 8); _r('#886600',33+sw,16, 7, 6); _r('#ffcc00',33+sw,15, 7, 2);
+      // 垂れたムチ
+      _r('#aa8800',40+sw,17, 2, 6); _r('#886600',39+sw,22, 3, 3); _r('#664400',38+sw,24, 2, 3);
+    } else {
+      // ムチ攻撃: 腕を前方へ振りムチを鞭打つ
+      _r(OL,-bkPull,23, 5,12); _r(SC,1-bkPull,24, 3,10); _r(AC,1-bkPull,24, 3, 3);
+      _r(OL,-1-bkPull,33, 7, 5); _r('#1c1c2e',-bkPull,34, 5, 3);
+      const eA=Math.floor(ext*.22),eB=Math.floor(ext*.38);
+      _r(OL,22,19, 8+eA, 6); _r(SC,23,20, 6+eA, 4); _r(AC,23,20, 6+eA, 2);
+      _r(OL,28+eB,15, 8+eA, 8); _r(SC,29+eB,16, 6+eA, 6); _r(AC,29+eB,16, 6+eA, 2);
+      const hx=36+ext;
+      _r(OL,hx,14,10, 8); _r('#886600',hx+1,15, 8, 6); _r('#ffcc00',hx+1,14, 8, 2);
+      // 電磁ムチ本体 (拳から長く伸びる)
+      const wlen=atk>=3?52:34;
+      ctx.save();
+      ctx.strokeStyle='#ffcc00';ctx.lineWidth=2.5;ctx.globalAlpha=0.92;
+      ctx.beginPath();ctx.moveTo(hx+9,18);
+      for(let k=1;k<=6;k++){const t=k/6;ctx.lineTo(hx+9+t*wlen,18+Math.sin(t*Math.PI*3)*(atk>=3?6:3)*(k%2===0?1:-1));}
+      ctx.stroke();
+      ctx.globalAlpha=0.22;ctx.strokeStyle='#ffffff';ctx.lineWidth=6;
+      ctx.beginPath();ctx.moveTo(hx+9,18);ctx.lineTo(hx+9+wlen,18);ctx.stroke();
+      ctx.globalAlpha=0.9;ctx.fillStyle='#ffffff';
+      ctx.beginPath();ctx.arc(hx+9+wlen,18,3,0,Math.PI*2);ctx.fill();
+      ctx.globalAlpha=1;ctx.restore();
+    }
+  } else if(ci===4){ // ===== サイ REX - ボクシング素手 =====
+    if(atk===0){
+      // ボクシングガード: 両拳を顔の前に構える
+      const sw=moving?(wf===0?1:-1):0;
+      // 後腕 (肘を曲げて拳を頬横)
+      _r(OL, 0,20, 7,14); _r(SC, 1,21, 5,12); _r(AC, 1,21, 5, 3);
+      _r(OL, 6,14, 9, 8); _r(SC, 7,15, 7, 6); _r(AC, 7,15, 7, 2);
+      _r(OL,13,10,12, 9); _r(SC,14,11,10, 7); _r(AC,14,11,10, 2);
+      // 前腕 (前方に出して拳を顔前)
+      _r(OL,16+sw,18, 7,14); _r(SC,17+sw,19, 5,12); _r(AC,17+sw,19, 5, 3);
+      _r(OL,22+sw,12, 9, 8); _r(SC,23+sw,13, 7, 6); _r(AC,23+sw,13, 7, 2);
+      _r(OL,29+sw, 8,14,10); _r(SC,30+sw, 9,12, 8); _r(AC,30+sw, 9,12, 2);
+    } else {
+      // 強パンチ: 後腕を引いて前拳を射出
+      _r(OL,-bkPull-2,20, 7,14); _r(SC,1-bkPull-2,21, 5,12); _r(AC,1-bkPull-2,21, 5, 3);
+      _r(OL,-bkPull-2,32, 9, 6); _r(SC,-bkPull-1,33, 7, 4); _r(AC,-bkPull-1,33, 7, 2);
+      const eA=Math.floor(ext*.22),eB=Math.floor(ext*.38);
+      _r(OL,22,22,10+eA, 6); _r(SC,23,23, 8+eA, 4); _r(AC,23,23, 8+eA, 2);
+      _r(OL,29+eB,18,10+eA, 8); _r(SC,30+eB,19, 8+eA, 6); _r(AC,30+eB,19, 8+eA, 2);
+      // 巨大な拳 (サイの重いパンチ)
+      const fw=atk>=3?18:14, fy=atk>=3?-2:0;
+      _r(OL,37+ext,17+fy, fw,10); _r(SC,38+ext,18+fy,fw-2, 8); _r(AC,38+ext,18+fy,fw-2, 2);
+      if(atk>=3){
+        _r('#ffffff',55,13, 3, 4); _r('#ffffff',58,15, 3, 6); _r('#ffffff',61,12, 2, 9);
+        _r(AC,54,11, 4, 2); _r(HL,57,10, 3, 2);
+      }
+    }
+  } else { // ===== 鷹/熊/狼 - 銃戦闘 =====
+    if(atk===0){
+      const sw=moving?(wf===0?1:-1):0;
+      _r(OL, 1,24, 5, 9); _r(SC, 2,25, 3, 7); _r(AC, 2,25, 3, 3);
+      _r(OL, 5,20, 9, 6); _r(SC, 6,21, 7, 4); _r(AC, 6,21, 7, 2);
+      _r(OL,13,18,10, 6); _r('#1c1c2e',14,19, 8, 4); _r(AC,14,19, 8, 2);
+      _r(OL,22+sw,18, 7, 6); _r(SC,23+sw,19, 5, 4); _r(AC,23+sw,19, 5, 2);
+      _r(OL,28+sw,15, 8, 7); _r(SC,29+sw,16, 6, 5); _r(AC,29+sw,16, 6, 2);
+      _r(OL,35+sw,14,10, 7); _r('#1c1c2e',36+sw,15, 8, 5);
+      _r(AC,36+sw,15, 8, 2); _r(HL,36+sw,15, 4, 1);
+      _r('#222c3a',44+sw,16,20, 4); _r('#1a2230',44+sw,15,20, 1);
+      _r('#334455',47+sw,14, 5, 2); _r('#556677',62+sw,15, 4, 7);
+      _r('#1c2a38',48+sw,20, 8, 4); _r('#2a3a4a',50+sw,21, 3, 3);
+    } else if(kick){
+      _r(OL,-2,20, 5,14); _r(SC,-1,21, 3,12); _r(AC,-1,21, 3, 3);
+      _r(OL,-3,32, 8, 5); _r('#1c1c2e',-2,33, 6, 3);
+      _r(OL,24,14, 8, 7); _r(SC,25,15, 6, 5); _r(AC,25,15, 6, 2);
+      _r(OL,30, 8, 8, 8); _r(SC,31, 9, 6, 6); _r(AC,31, 9, 6, 2);
+      _r(OL,36, 6,10, 8); _r('#1c1c2e',37, 7, 8, 6); _r(AC,37, 7, 8, 2); _r(HL,37, 7, 4, 1);
+    } else {
+      _r(OL,-bkPull,22, 5,13); _r(SC,1-bkPull,23, 3,11); _r(AC,1-bkPull,23, 3, 3);
+      _r(OL,-1-bkPull,33, 7, 5); _r('#1c1c2e',-bkPull,34, 5, 3);
+      const eA=Math.floor(ext*.22), eB=Math.floor(ext*.38);
+      _r(OL,23,22, 8+eA, 5); _r(SC,24,23, 6+eA, 3); _r(AC,24,23, 6+eA, 2);
+      _r(OL,29+eB,18, 8+eA, 7); _r(SC,30+eB,19, 6+eA, 5); _r(AC,30+eB,19, 6+eA, 2);
+      const fw=atk>=3?14:11, fy=atk>=3?-1:0;
+      _r(OL,35+ext,17+fy, fw, 8); _r('#1c1c2e',36+ext,18+fy,fw-2, 6);
+      _r(AC,36+ext,18+fy,fw-2, 2); _r(HL,36+ext,18+fy, 5, 1);
+      if(atk>=3){
+        _r('#ffffff',49,14, 2, 3); _r('#ffffff',51,16, 2, 5);
+        _r(HL,50,12, 4, 2); _r(AC,52,11, 2, 4);
+      }
     }
   }
 
@@ -1057,7 +1107,7 @@ function doAttack(){
       break;
     }
     case 3:{ // KIBA サル - 電磁ムチ (近接引寄せ)
-      const wr=step<2?36:52;
+      const wr=step<2?58:80;
       const wpull=lv>=1&&step===2;
       const wdmg=step<2?1:lv>=2?3:2;
       const wx=f>0?px+pw:px-wr, wy=py+6;
