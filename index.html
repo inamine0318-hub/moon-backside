@@ -787,22 +787,20 @@ const keys={}, touchHeld={left:false,right:false,jumpHeld:false};
 const activeTouches=new Map();
 
 function getSysBtns(){
-  // ポーズ=中央上、ミュート=右上
   return{
-    pause:{x:W/2-24,y:3,w:48,h:32},
-    mute: {x:W-50,  y:3,w:44,h:32},
+    pause:{x:W/2-30,y:2,w:60,h:38},
+    mute: {x:W-52,  y:2,w:48,h:38},
   };
 }
 function getBtns(){
-  const mg=18, lgap=22, rgap=28;
-  const jS=68;  // JUMP (大きく)
-  const aS=60;  // ATK
-  const eS=52;  // JET
-  const mS=60;  // 移動 (やや大きく、中央寄り)
-  // 右クラスタ: JUMP右下, ATK左(間隔広め), JET ATK上(間隔広め)
+  const mg=10, lgap=14, rgap=18;
+  const jS=86;  // JUMP
+  const aS=76;  // ATK
+  const eS=64;  // JET
+  const mS=76;  // 移動
   const jmpX=W-mg-jS, jmpY=H-mg-jS;
   const atkX=jmpX-rgap-aS, atkY=H-mg-aS;
-  const jetX=atkX+(aS-eS)/2, jetY=atkY-rgap*1.8-eS;
+  const jetX=atkX+(aS-eS)/2, jetY=atkY-rgap*1.6-eS;
   return{
     left: {x:lgap,           y:H-mg-mS, s:mS},
     right:{x:lgap+mS+lgap,   y:H-mg-mS, s:mS},
@@ -3008,42 +3006,57 @@ function drawEffect(ef){
 // ================================================================
 function drawHUD(){
   // 上バー背景
-  dr(0,0,W,30,'#000014');dr(0,30,W,1,'#223');
+  dr(0,0,W,42,'#000014');dr(0,42,W,1,'#223');
 
   // ステージ番号 (ポーズボタン右側)
   const scfg=STAGE_CFG[currentStage-1];
   const sb=getSysBtns();
-  ctx.fillStyle='#334455';ctx.font='bold 8px monospace';ctx.textAlign='left';
-  ctx.fillText(`ST.${currentStage}/${TOTAL_STAGES} ${scfg.name}`,sb.pause.x+sb.pause.w+6,21);
+  ctx.fillStyle='#556677';ctx.font='bold 9px monospace';ctx.textAlign='left';
+  ctx.fillText(`ST.${currentStage}/${TOTAL_STAGES} ${scfg.name}`,sb.pause.x+sb.pause.w+6,28);
 
   // ポーズ・ミュートボタン
   {
     // ミュートボタン (右)
-    ctx.globalAlpha=0.82;dr(sb.mute.x,sb.mute.y,sb.mute.w,sb.mute.h,muted?'#440000':'#000e1a');ctx.globalAlpha=1;
-    dr(sb.mute.x,sb.mute.y,sb.mute.w,2,muted?'#ff4444':'#334466');
-    ctx.fillStyle=muted?'#ff4444':'#88aacc';ctx.font='bold 11px monospace';ctx.textAlign='center';
-    ctx.fillText(muted?'🔇':'♪',sb.mute.x+sb.mute.w/2,sb.mute.y+21);
-    // ポーズボタン (中央)
-    ctx.globalAlpha=0.88;dr(sb.pause.x,sb.pause.y,sb.pause.w,sb.pause.h,paused?'#1a0033':'#000e1a');ctx.globalAlpha=1;
-    dr(sb.pause.x,sb.pause.y,sb.pause.w,2,paused?'#cc44ff':'#4455aa');
-    ctx.fillStyle=paused?'#dd88ff':'#aabbee';ctx.font='bold 12px monospace';ctx.textAlign='center';
-    ctx.fillText(paused?'▶':'⏸',sb.pause.x+sb.pause.w/2,sb.pause.y+22);
+    const mcx=sb.mute.x+sb.mute.w/2, mcy=sb.mute.y+sb.mute.h/2;
+    ctx.globalAlpha=0.88;dr(sb.mute.x,sb.mute.y,sb.mute.w,sb.mute.h,muted?'#330000':'#0a1a2a');ctx.globalAlpha=1;
+    dr(sb.mute.x,sb.mute.y,sb.mute.w,3,muted?'#ff4444':'#336688');
+    dr(sb.mute.x,sb.mute.y,2,sb.mute.h,'#224455');
+    dr(sb.mute.x+sb.mute.w-2,sb.mute.y,2,sb.mute.h,'#224455');
+    ctx.fillStyle=muted?'#ff6666':'#88bbdd';ctx.font='bold 14px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(muted?'🔇':'♪',mcx,mcy);
+    ctx.textBaseline='alphabetic';
+    // ポーズボタン (中央) - 目立つデザイン
+    const pcx=sb.pause.x+sb.pause.w/2, pcy=sb.pause.y+sb.pause.h/2;
+    // 背景 + 角丸っぽいfillRect
+    ctx.globalAlpha=0.92;
+    dr(sb.pause.x,sb.pause.y,sb.pause.w,sb.pause.h,paused?'#2a004a':'#0a1a3a');
+    ctx.globalAlpha=1;
+    // 太い上フチ
+    dr(sb.pause.x,sb.pause.y,sb.pause.w,3,paused?'#ff44ff':'#44aaff');
+    // 左右フチ(細)
+    dr(sb.pause.x,sb.pause.y,2,sb.pause.h,paused?'#cc44ff':'#2266aa');
+    dr(sb.pause.x+sb.pause.w-2,sb.pause.y,2,sb.pause.h,paused?'#cc44ff':'#2266aa');
+    // アイコン
+    ctx.fillStyle=paused?'#ff88ff':'#88ddff';
+    ctx.font=`bold 15px monospace`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(paused?'▶ GO':'❚❚',pcx,pcy);
+    ctx.textBaseline='alphabetic';
   }
 
   // スコア (左寄り中央)
   ctx.fillStyle='#ffdd00';ctx.font='bold 11px monospace';ctx.textAlign='right';
-  ctx.fillText('SCORE '+String(score).padStart(6,'0'),sb.pause.x-6,21);
+  ctx.fillText('SCORE '+String(score).padStart(6,'0'),sb.pause.x-6,28);
 
   // キャラ名・ニックネーム (左上)
   const c=CHARS[player.ci];
   ctx.textAlign='left';
   ctx.fillStyle='#ffffff';ctx.font='bold 12px monospace';
-  ctx.fillText(c.nick,8,19);
+  ctx.fillText(c.nick,8,22);
   ctx.fillStyle='#5566aa';ctx.font='8px monospace';
-  ctx.fillText(c.name,8,29);
+  ctx.fillText(c.name,8,33);
 
   // HPバー
-  const hbx=10,hby=33,hbw=100;
+  const hbx=10,hby=37,hbw=100;
   ctx.fillStyle='#440011';ctx.fillRect(hbx,hby,hbw,7);
   ctx.fillStyle='#ff3355';ctx.fillRect(hbx,hby,Math.floor(hbw*(player.hp/player.maxHp)),7);
   ctx.fillStyle='#ff8899';ctx.fillRect(hbx,hby,hbw,1);
@@ -3051,7 +3064,7 @@ function drawHUD(){
   ctx.fillText('HP',hbx,hby-1);
 
   // JET FUELバー
-  const o2x=10,o2y=48,o2w=100;
+  const o2x=10,o2y=52,o2w=100;
   const o2r=player.oxygen/player.maxOxygen;
   const o2col=o2r>0.5?'#ff8800':o2r>0.25?'#cc4400':'#ff2200';
   ctx.fillStyle='#1a0800';ctx.fillRect(o2x,o2y,o2w,7);
@@ -3066,7 +3079,7 @@ function drawHUD(){
   }
 
   // 武器レベル・ゲージ
-  const wlv=player.weaponLv,wgx=10,wgy=62,wgw=100;
+  const wlv=player.weaponLv,wgx=10,wgy=66,wgw=100;
   const wgr=player.weaponGauge/100;
   const wgcol=wlv===2?'#ff8800':wlv===1?'#ffcc00':'#55aa44';
   dr(wgx,wgy,wgw,6,'#110a00');
@@ -3153,20 +3166,20 @@ function drawCircleBtn(b,held,bg,hbg,br,hbr,tc,lb){
     ctx.fillStyle=hbr;ctx.fill();
   }
   // 本体
-  ctx.globalAlpha=held?0.96:0.40;
+  ctx.globalAlpha=held?0.97:0.70;
   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
   ctx.fillStyle=held?hbg:bg;ctx.fill();
   // 上半分ハイライト (立体感)
   const grd=ctx.createLinearGradient(cx,cy-r,cx,cy+r);
-  grd.addColorStop(0,`rgba(255,255,255,${held?0.22:0.10})`);
+  grd.addColorStop(0,`rgba(255,255,255,${held?0.28:0.18})`);
   grd.addColorStop(0.45,'rgba(255,255,255,0)');
-  grd.addColorStop(1,`rgba(0,0,0,${held?0.25:0.15})`);
+  grd.addColorStop(1,`rgba(0,0,0,${held?0.28:0.18})`);
   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
   ctx.fillStyle=grd;ctx.fill();
   // リング
-  ctx.globalAlpha=held?0.9:0.45;
+  ctx.globalAlpha=held?0.95:0.75;
   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-  ctx.strokeStyle=held?hbr:br;ctx.lineWidth=held?2:1.5;ctx.stroke();
+  ctx.strokeStyle=held?hbr:br;ctx.lineWidth=held?2.5:2;ctx.stroke();
   // ラベル
   ctx.globalAlpha=1;
   ctx.fillStyle=held?'#ffffff':tc;
