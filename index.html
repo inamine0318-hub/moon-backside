@@ -786,12 +786,12 @@ function spawnEnemies(){
   _eid=0;
   enemies=ENEMY_SPAWNS.map(d=>{
     const id=_eid++,type=d.type||'patrol';
-    if(type==='turret') return{id,type,x:d.x,y:d.y-24,w:28,h:24,vy:0,vx:0,dir:1,startX:d.x,range:0,hp:5,maxHp:5,onGround:false,dmgCd:0,shotCd:0,shotMax:200,flashTimer:0,poisoned:0,poisonTimer:0};
-    if(type==='charger') return{id,type,x:d.x,y:d.y-32,w:32,h:32,vy:0,vx:0.7,dir:Math.random()<.5?1:-1,startX:d.x,range:90+Math.random()*40,hp:3,maxHp:3,onGround:false,dmgCd:0,charging:false,chargeCd:0,chargeDir:1,flashTimer:0,poisoned:0,poisonTimer:0};
-    if(type==='flyer')  return{id,type,x:d.x,y:d.y,   w:28,h:24,vy:0,vx:1.1+Math.random()*.3,dir:Math.random()<.5?1:-1,startX:d.x,range:110+Math.random()*60,hp:2,maxHp:2,onGround:false,dmgCd:0,baseY:d.y,bob:Math.random()*Math.PI*2,flashTimer:0,poisoned:0,poisonTimer:0};
-    if(type==='jumper') return{id,type,x:d.x,y:d.y-28,w:22,h:28,vy:0,vx:0,dir:1,startX:d.x,range:80,hp:2,maxHp:2,onGround:false,dmgCd:0,jumpCd:55,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='turret') return{id,type,x:d.x,y:d.y-34,w:28,h:34,vy:0,vx:0,dir:1,startX:d.x,range:0,hp:5,maxHp:5,onGround:false,dmgCd:0,shotCd:0,shotMax:200,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='charger') return{id,type,x:d.x,y:d.y-34,w:32,h:34,vy:0,vx:0.7,dir:Math.random()<.5?1:-1,startX:d.x,range:90+Math.random()*40,hp:3,maxHp:3,onGround:false,dmgCd:0,charging:false,chargeCd:0,chargeDir:1,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='flyer')  return{id,type,x:d.x,y:d.y,   w:28,h:34,vy:0,vx:1.1+Math.random()*.3,dir:Math.random()<.5?1:-1,startX:d.x,range:110+Math.random()*60,hp:2,maxHp:2,onGround:false,dmgCd:0,baseY:d.y,bob:Math.random()*Math.PI*2,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='jumper') return{id,type,x:d.x,y:d.y-34,w:22,h:34,vy:0,vx:0,dir:1,startX:d.x,range:80,hp:2,maxHp:2,onGround:false,dmgCd:0,jumpCd:55,flashTimer:0,poisoned:0,poisonTimer:0};
     if(type==='sniper') return{id,type,x:d.x,y:d.y-34,w:26,h:34,vy:0,vx:0.5,dir:Math.random()<.5?1:-1,startX:d.x,range:25,hp:3,maxHp:3,onGround:false,dmgCd:0,shotCd:0,shotMax:260,flashTimer:0,poisoned:0,poisonTimer:0};
-    if(type==='bomber') return{id,type,x:d.x,y:d.y-28,w:26,h:28,vy:0,vx:0,dir:1,startX:d.x,range:200,hp:2,maxHp:2,onGround:false,dmgCd:0,fuseTimer:0,fuseActive:false,flashTimer:0,poisoned:0,poisonTimer:0};
+    if(type==='bomber') return{id,type,x:d.x,y:d.y-34,w:26,h:34,vy:0,vx:0,dir:1,startX:d.x,range:200,hp:2,maxHp:2,onGround:false,dmgCd:0,fuseTimer:0,fuseActive:false,flashTimer:0,poisoned:0,poisonTimer:0};
     return{id,type:'patrol',x:d.x,y:d.y-34,w:30,h:34,vy:0,vx:0.9+Math.random()*.5,dir:Math.random()<.5?1:-1,startX:d.x,range:70+Math.random()*50,hp:3,maxHp:3,onGround:false,dmgCd:0,flashTimer:0,poisoned:0,poisonTimer:0};
   });
 }
