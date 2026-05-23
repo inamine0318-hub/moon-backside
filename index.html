@@ -780,29 +780,28 @@ const keys={}, touchHeld={left:false,right:false,jumpHeld:false};
 const activeTouches=new Map();
 
 function getSysBtns(){
-  // ポーズ・ミュートはHUD上部右端の小ボタン
+  // ポーズ=中央上、ミュート=右上
   return{
-    pause:{x:W-34,y:2,w:30,h:24},
-    mute: {x:W-68,y:2,w:30,h:24},
+    pause:{x:W/2-24,y:3,w:48,h:32},
+    mute: {x:W-50,  y:3,w:44,h:32},
   };
 }
 function getBtns(){
-  const mg=14, gap=16;
-  const jS=Math.min(W*.128,112); // JUMP
-  const aS=Math.min(W*.112,98);  // ATK
-  const eS=Math.min(W*.100,88);  // JET
-  const mS=Math.min(W*.115,100); // 移動
-  // 右クラスタ: ATK(左下) JUMP(右下) JET(中央上・三角配置)
+  const mg=18, lgap=22, rgap=28;
+  const jS=68;  // JUMP (大きく)
+  const aS=60;  // ATK
+  const eS=52;  // JET
+  const mS=60;  // 移動 (やや大きく、中央寄り)
+  // 右クラスタ: JUMP右下, ATK左(間隔広め), JET ATK上(間隔広め)
   const jmpX=W-mg-jS, jmpY=H-mg-jS;
-  const atkX=W-mg-jS-gap-aS, atkY=H-mg-aS;
-  const jetCX=(atkX+aS/2+jmpX+jS/2)/2;
-  const jetY=Math.min(atkY,jmpY)-gap-eS;
+  const atkX=jmpX-rgap-aS, atkY=H-mg-aS;
+  const jetX=atkX+(aS-eS)/2, jetY=atkY-rgap*1.8-eS;
   return{
-    left: {x:mg,           y:H-mg-mS, s:mS},
-    right:{x:mg+mS+gap,    y:H-mg-mS, s:mS},
-    jump: {x:jmpX,         y:jmpY,    s:jS},
-    atk:  {x:atkX,         y:atkY,    s:aS},
-    jet:  {x:jetCX-eS/2,   y:jetY,    s:eS},
+    left: {x:lgap,           y:H-mg-mS, s:mS},
+    right:{x:lgap+mS+lgap,   y:H-mg-mS, s:mS},
+    jump: {x:jmpX,           y:jmpY,    s:jS},
+    atk:  {x:atkX,           y:atkY,    s:aS},
+    jet:  {x:jetX,           y:jetY,    s:eS},
   };
 }
 function inC(tx,ty,bx,by,s){return Math.hypot(tx-bx-s/2,ty-by-s/2)<=s/2;}
@@ -848,7 +847,13 @@ canvas.addEventListener('touchstart',e=>{
     return; // 他タップは無視
   }
   if(state==='charselect'){handleCSTap(e);return;}
-  if(state==='gameover'){state='charselect';bgmPlay('title');return;}
+  if(state==='gameover'){
+    const lp0c=toLogical(e.changedTouches[0].clientX,e.changedTouches[0].clientY);
+    const gb=getGameOverBtns();
+    if(inBtn(lp0c,gb.retry)){retryStage();return;}
+    if(inBtn(lp0c,gb.charsel)){state='charselect';bgmPlay('title');return;}
+    return;
+  }
   if(state==='stageclear'){
     if(currentStage<TOTAL_STAGES){
       const nxt=currentStage+1;
@@ -860,8 +865,8 @@ canvas.addEventListener('touchstart',e=>{
     const lp0c=toLogical(e.changedTouches[0].clientX,e.changedTouches[0].clientY);
     const pm=getPauseMenuBtns();
     if(inBtn(lp0c,pm.resume)){paused=false;bgmPlay(bossTriggered&&boss&&boss.hp>0?'boss':'play');return;}
-    if(inBtn(lp0c,pm.charsel)){paused=false;bgmPlay('title');state='charselect';return;}
     if(inBtn(lp0c,pm.savequit)){doSave();paused=false;bgmStop();state='title';return;}
+    if(inBtn(lp0c,pm.title)){paused=false;bgmStop();state='title';return;}
     return;
   }
   if(state==='play'&&!paused){
@@ -896,7 +901,8 @@ document.addEventListener('keydown',e=>{
     if(e.key==='ArrowRight')selChar=(selChar+1)%CHARS.length;
     if(e.key==='Enter')startGame(true);return;
   }
-  if(state==='gameover'&&e.key==='Enter'){state='charselect';bgmPlay('title');return;}
+  if(state==='gameover'&&(e.key==='Enter'||e.key===' ')){retryStage();return;}
+  if(state==='gameover'&&e.key==='Escape'){state='charselect';bgmPlay('title');return;}
   if(state==='stageclear'&&(e.key==='Enter'||e.key===' ')){
     if(currentStage<TOTAL_STAGES){currentStage++;startGame();}
     else{currentStage=1;state='charselect';bgmPlay('title');}return;
@@ -908,6 +914,11 @@ document.addEventListener('keydown',e=>{
   }
 });
 document.addEventListener('keyup',e=>{keys[e.key]=false;});
+// アプリ一時停止時自動セーブ
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden&&state==='play'&&player){doSave();bgmStop();paused=true;}
+  else if(!document.hidden&&state==='play'&&paused){bgmPlay(bossTriggered&&boss&&boss.hp>0?'boss':'play');}
+});
 
 // ================================================================
 //  ゲーム初期化
@@ -1128,14 +1139,24 @@ function setSave(d){localStorage.setItem('mbs_save',JSON.stringify(d));}
 function clearSave(){localStorage.removeItem('mbs_save');}
 function doSave(){
   if(!player)return;
-  setSave({stage:currentStage,score,orbsCollected:[...orbsCollected],
-    weaponLv:player.weaponLv,weaponArmor:player.weaponArmor||3,weaponGauge:player.weaponGauge,char:player.ci});
+  setSave({
+    stage:currentStage,score,orbsCollected:[...orbsCollected],
+    weaponLv:player.weaponLv,weaponArmor:player.weaponArmor||3,weaponGauge:player.weaponGauge,
+    char:player.ci,
+    px:Math.floor(player.x),py:Math.floor(player.y),
+    hp:player.hp,oxygen:Math.floor(player.oxygen),
+    camx:Math.floor(cam.x)
+  });
 }
 function loadGame(){
   const d=getSave();if(!d)return;
   selChar=d.char||0;currentStage=d.stage||1;
   buildStageData();
-  player=mkPlayer(selChar);cam.x=0;score=d.score||0;
+  player=mkPlayer(selChar);
+  cam.x=d.camx||0;score=d.score||0;
+  if(d.px!=null){player.x=d.px;player.y=d.py!=null?d.py:280;}
+  if(d.hp!=null)player.hp=Math.max(1,d.hp);
+  if(d.oxygen!=null)player.oxygen=Math.max(10,d.oxygen);
   orbsCollected=d.orbsCollected||[];
   player.weaponLv=d.weaponLv||0;player.weaponArmor=d.weaponArmor||3;player.weaponGauge=d.weaponGauge||0;
   spawnEnemies();projectiles=[];eProjectiles=[];effects=[];particles=[];
@@ -1146,14 +1167,32 @@ function loadGame(){
   bgmPlay('play');state='play';
 }
 function getPauseMenuBtns(){
-  const bw=210,bh=40,bx=(W-bw)/2;
-  return{resume:{x:bx,y:H*.40,w:bw,h:bh},charsel:{x:bx,y:H*.40+56,w:bw,h:bh},savequit:{x:bx,y:H*.40+112,w:bw,h:bh}};
+  const bw=224,bh=50,bx=(W-bw)/2;
+  return{
+    resume:  {x:bx,y:H*.34,  w:bw,h:bh},
+    savequit:{x:bx,y:H*.34+70,w:bw,h:bh},
+    title:   {x:bx,y:H*.34+140,w:bw,h:bh},
+  };
+}
+function getGameOverBtns(){
+  const bw=210,bh=48,bx=(W-bw)/2;
+  return{retry:{x:bx,y:H*.64,w:bw,h:bh},charsel:{x:bx,y:H*.64+66,w:bw,h:bh}};
 }
 function getTitleSaveBtns(){
   const bw=210,bh=46,bx=(W-bw)/2;
   return{cont:{x:bx,y:H*.62,w:bw,h:bh},newg:{x:bx,y:H*.62+62,w:bw,h:bh}};
 }
 function inBtn(lp,b){return lp.x>=b.x&&lp.x<=b.x+b.w&&lp.y>=b.y&&lp.y<=b.y+b.h;}
+function retryStage(){
+  buildStageData();
+  player=mkPlayer(selChar);cam.x=0;
+  spawnEnemies();projectiles=[];eProjectiles=[];effects=[];particles=[];
+  stageItems=ITEM_SPAWNS.map(d=>({x:d.x,y:d.y,type:d.type,collected:false,anim:Math.random()*Math.PI*2}));
+  damageNums=[];comboTexts=[];shakeAmt=0;hitStop=0;
+  bossDefeated=false;boss=null;bossTriggered=false;bossOrb=null;
+  gameTimer=0;paused=false;
+  bgmPlay('play');state='play';
+}
 function spawnBoss(){
   const cfg=STAGE_CFG[currentStage-1];
   boss={
@@ -2949,40 +2988,39 @@ function drawEffect(ef){
 // ================================================================
 function drawHUD(){
   // 上バー背景
-  dr(0,0,W,28,'#000014');dr(0,28,W,1,'#223');
+  dr(0,0,W,30,'#000014');dr(0,30,W,1,'#223');
 
-  // ステージ番号 (中央上)
+  // ステージ番号 (ポーズボタン右側)
   const scfg=STAGE_CFG[currentStage-1];
-  ctx.fillStyle='#445566';ctx.font='bold 9px monospace';ctx.textAlign='center';
-  ctx.fillText(`ST.${currentStage}/${TOTAL_STAGES} ${scfg.name}`,W/2,19);
+  const sb=getSysBtns();
+  ctx.fillStyle='#334455';ctx.font='bold 8px monospace';ctx.textAlign='left';
+  ctx.fillText(`ST.${currentStage}/${TOTAL_STAGES} ${scfg.name}`,sb.pause.x+sb.pause.w+6,21);
 
-  // ポーズ・ミュートボタン (右上角)
-  {const sb=getSysBtns();
-    // ミュートボタン
-    dr(sb.mute.x,sb.mute.y,sb.mute.w,sb.mute.h,muted?'#440000':'#001122');
-    dr(sb.mute.x,sb.mute.y,sb.mute.w,1,muted?'#ff4444':'#334466');
-    dr(sb.mute.x,sb.mute.y,1,sb.mute.h,muted?'#ff4444':'#334466');
-    ctx.fillStyle=muted?'#ff4444':'#88aacc';ctx.font='bold 10px monospace';ctx.textAlign='center';
-    ctx.fillText(muted?'🔇':'♪',sb.mute.x+sb.mute.w/2,sb.mute.y+16);
-    // ポーズボタン
-    dr(sb.pause.x,sb.pause.y,sb.pause.w,sb.pause.h,paused?'#330033':'#001122');
-    dr(sb.pause.x,sb.pause.y,sb.pause.w,1,paused?'#cc44ff':'#334466');
-    dr(sb.pause.x,sb.pause.y,1,sb.pause.h,paused?'#cc44ff':'#334466');
-    ctx.fillStyle=paused?'#cc44ff':'#88aacc';ctx.font='bold 10px monospace';ctx.textAlign='center';
-    ctx.fillText(paused?'▶':'⏸',sb.pause.x+sb.pause.w/2,sb.pause.y+16);
+  // ポーズ・ミュートボタン
+  {
+    // ミュートボタン (右)
+    ctx.globalAlpha=0.82;dr(sb.mute.x,sb.mute.y,sb.mute.w,sb.mute.h,muted?'#440000':'#000e1a');ctx.globalAlpha=1;
+    dr(sb.mute.x,sb.mute.y,sb.mute.w,2,muted?'#ff4444':'#334466');
+    ctx.fillStyle=muted?'#ff4444':'#88aacc';ctx.font='bold 11px monospace';ctx.textAlign='center';
+    ctx.fillText(muted?'🔇':'♪',sb.mute.x+sb.mute.w/2,sb.mute.y+21);
+    // ポーズボタン (中央)
+    ctx.globalAlpha=0.88;dr(sb.pause.x,sb.pause.y,sb.pause.w,sb.pause.h,paused?'#1a0033':'#000e1a');ctx.globalAlpha=1;
+    dr(sb.pause.x,sb.pause.y,sb.pause.w,2,paused?'#cc44ff':'#4455aa');
+    ctx.fillStyle=paused?'#dd88ff':'#aabbee';ctx.font='bold 12px monospace';ctx.textAlign='center';
+    ctx.fillText(paused?'▶':'⏸',sb.pause.x+sb.pause.w/2,sb.pause.y+22);
   }
 
-  // スコア (右上) — ポーズボタン分左にずらす
-  ctx.fillStyle='#ffdd00';ctx.font='bold 12px monospace';ctx.textAlign='right';
-  ctx.fillText('SCORE '+String(score).padStart(6,'0'),W-76,19);
+  // スコア (左寄り中央)
+  ctx.fillStyle='#ffdd00';ctx.font='bold 11px monospace';ctx.textAlign='right';
+  ctx.fillText('SCORE '+String(score).padStart(6,'0'),sb.pause.x-6,21);
 
   // キャラ名・ニックネーム (左上)
   const c=CHARS[player.ci];
   ctx.textAlign='left';
-  ctx.fillStyle='#ffffff';ctx.font='bold 13px monospace';
-  ctx.fillText(c.nick,10,19);
-  ctx.fillStyle='#5566aa';ctx.font='9px monospace';
-  ctx.fillText(c.name,10,29);
+  ctx.fillStyle='#ffffff';ctx.font='bold 12px monospace';
+  ctx.fillText(c.nick,8,19);
+  ctx.fillStyle='#5566aa';ctx.font='8px monospace';
+  ctx.fillText(c.name,8,29);
 
   // HPバー
   const hbx=10,hby=33,hbw=100;
@@ -3082,16 +3120,20 @@ function drawHUD(){
 //  ボタン描画
 // ================================================================
 function drawCircleBtn(b,held,bg,hbg,br,hbr,tc,lb){
-  const cx=b.x+b.s/2, cy=b.y+b.s/2, r=b.s/2;
+  const cx=b.x+b.s/2, cy=b.y+b.s/2;
+  const r=(b.s/2)*(held?0.88:1); // 押下時に少し縮む
   ctx.save();
   // 外側グロー (押下時)
   if(held){
-    ctx.globalAlpha=0.3;
-    ctx.beginPath();ctx.arc(cx,cy,r+4,0,Math.PI*2);
+    ctx.globalAlpha=0.4;
+    ctx.beginPath();ctx.arc(cx,cy,r+7,0,Math.PI*2);
+    ctx.fillStyle=hbr;ctx.fill();
+    ctx.globalAlpha=0.18;
+    ctx.beginPath();ctx.arc(cx,cy,r+14,0,Math.PI*2);
     ctx.fillStyle=hbr;ctx.fill();
   }
   // 本体
-  ctx.globalAlpha=held?0.92:0.36;
+  ctx.globalAlpha=held?0.96:0.40;
   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
   ctx.fillStyle=held?hbg:bg;ctx.fill();
   // 上半分ハイライト (立体感)
@@ -3671,28 +3713,30 @@ function drawPlay(){
   drawHUD();
   // ポーズオーバーレイ
   if(paused){
-    ctx.fillStyle='rgba(0,0,20,0.78)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(0,0,24,0.84)';ctx.fillRect(0,0,W,H);
+    // タイトル
     ctx.textAlign='center';
-    ctx.fillStyle='#cc44ff';ctx.font=`bold ${Math.min(W*.065,40)}px monospace`;
-    ctx.fillText('PAUSE',W/2,H*.28);
+    const pt=Date.now();
+    ctx.globalAlpha=0.7+Math.sin(pt/400)*.15;
+    ctx.fillStyle='#cc44ff';ctx.font=`bold ${Math.min(W*.07,44)}px monospace`;
+    ctx.fillText('PAUSE',W/2,H*.24);
+    ctx.globalAlpha=1;
+    // 区切り線
+    ctx.globalAlpha=0.4;dr(W*.12,H*.28,W*.76,1,'#8844cc');ctx.globalAlpha=1;
     const pm=getPauseMenuBtns();
-    // つづける
-    dr(pm.resume.x,pm.resume.y,pm.resume.w,pm.resume.h,'#141830');
-    dr(pm.resume.x,pm.resume.y,pm.resume.w,3,'#cc44ff');
-    ctx.fillStyle='#dd88ff';ctx.font=`bold ${Math.min(W*.038,22)}px monospace`;
-    ctx.fillText('▶ つづける',W/2,pm.resume.y+pm.resume.h*.68);
-    // キャラ選択
-    dr(pm.charsel.x,pm.charsel.y,pm.charsel.w,pm.charsel.h,'#0a0a18');
-    dr(pm.charsel.x,pm.charsel.y,pm.charsel.w,2,'#335577');
-    ctx.fillStyle='#5588aa';ctx.font=`bold ${Math.min(W*.034,20)}px monospace`;
-    ctx.fillText('キャラ選択にもどる',W/2,pm.charsel.y+pm.charsel.h*.68);
-    // セーブして終了
-    dr(pm.savequit.x,pm.savequit.y,pm.savequit.w,pm.savequit.h,'#0a0a18');
-    dr(pm.savequit.x,pm.savequit.y,pm.savequit.w,2,'#664422');
-    ctx.fillStyle='#cc8844';ctx.font=`bold ${Math.min(W*.034,20)}px monospace`;
-    ctx.fillText('セーブして終了',W/2,pm.savequit.y+pm.savequit.h*.68);
+    const drawPBtn=(b,top,tc,label,sub)=>{
+      ctx.globalAlpha=0.88;dr(b.x,b.y,b.w,b.h,'#0c0e1e');ctx.globalAlpha=1;
+      dr(b.x,b.y,b.w,3,top);
+      ctx.strokeStyle=top;ctx.lineWidth=1;ctx.globalAlpha=0.5;ctx.strokeRect(b.x,b.y,b.w,b.h);ctx.globalAlpha=1;
+      ctx.fillStyle=tc;ctx.font=`bold ${Math.min(W*.042,22)}px monospace`;ctx.textAlign='center';
+      ctx.fillText(label,W/2,b.y+b.h*.58);
+      if(sub){ctx.fillStyle='#445566';ctx.font=`${Math.min(W*.02,11)}px monospace`;ctx.fillText(sub,W/2,b.y+b.h*.88);}
+    };
+    drawPBtn(pm.resume,  '#5566ff','#aabbff','▶  ゲーム再開',null);
+    drawPBtn(pm.savequit,'#cc8844','#ddaa66','💾  セーブして終了','現在地・HPを保存');
+    drawPBtn(pm.title,   '#446688','#7799aa','⏎  タイトルへ戻る','セーブせずに戻る');
     ctx.fillStyle='#334455';ctx.font=`${Math.min(W*.018,11)}px monospace`;
-    ctx.fillText('P / ESC でつづける',W/2,H*.9);
+    ctx.fillText('P / ESC でつづける',W/2,H*.92);
   }
   scanlines();
 }
@@ -3705,21 +3749,34 @@ function drawGameOver(){
   STARS.forEach(s=>dr((s.x%W+W)%W,s.y,s.s,s.s,'#fff'));
   dr(0,0,W,H,'rgba(40,0,0,.75)');
   ctx.textAlign='center';
-  ctx.fillStyle='#220000';ctx.font=`bold ${Math.min(W*.06,44)}px monospace`;ctx.fillText('MISSION FAILED',W/2+2,H*.35+2);
-  ctx.fillStyle='#ff3333';ctx.fillText('MISSION FAILED',W/2,H*.35);
-  ctx.fillStyle='#ffdd44';ctx.font=`bold ${Math.min(W*.03,24)}px monospace`;
-  ctx.fillText('SCORE '+String(score).padStart(6,'0'),W/2,H*.5);
+  ctx.fillStyle='#330000';ctx.font=`bold ${Math.min(W*.06,44)}px monospace`;ctx.fillText('MISSION FAILED',W/2+2,H*.3+2);
+  ctx.fillStyle='#ff3333';ctx.fillText('MISSION FAILED',W/2,H*.3);
+  ctx.fillStyle='#ffdd44';ctx.font=`bold ${Math.min(W*.03,22)}px monospace`;
+  ctx.fillText('SCORE '+String(score).padStart(6,'0'),W/2,H*.44);
   const scores=getScores();
   if(scores.length){
-    ctx.fillStyle='#334455';ctx.font=`bold ${Math.min(W*.015,10)}px monospace`;ctx.textAlign='center';
-    ctx.fillText('── BEST SCORES ──',W/2,H*.65);
-    scores.forEach((s,i)=>{
+    ctx.fillStyle='#334455';ctx.font=`bold ${Math.min(W*.015,10)}px monospace`;
+    ctx.fillText('── BEST SCORES ──',W/2,H*.54);
+    scores.slice(0,3).forEach((s,i)=>{
       ctx.fillStyle=i===0?'#ffcc00':'#7788aa';
-      ctx.font=`${Math.min(W*.014,10)}px monospace`;ctx.textAlign='center';
-      ctx.fillText(`${i+1}. ${s.char}  ${String(s.score).padStart(7,'0')}  ${s.date}`,W/2,H*.70+i*16);
+      ctx.font=`${Math.min(W*.014,10)}px monospace`;
+      ctx.fillText(`${i+1}. ${s.char}  ${String(s.score).padStart(7,'0')}`,W/2,H*.59+i*14);
     });
   }
-  if(Math.floor(Date.now()/500)%2){ctx.fillStyle='#aaaaff';ctx.font=`bold ${Math.min(W*.022,16)}px monospace`;ctx.fillText('PRESS START TO RETRY',W/2,H*.9);}
+  // ボタン
+  const gb=getGameOverBtns();
+  ctx.globalAlpha=0.9;dr(gb.retry.x,gb.retry.y,gb.retry.w,gb.retry.h,'#0d1a3a');ctx.globalAlpha=1;
+  dr(gb.retry.x,gb.retry.y,gb.retry.w,3,'#4466ff');
+  ctx.fillStyle='#88aaff';ctx.font=`bold ${Math.min(W*.042,22)}px monospace`;
+  ctx.fillText('▶  リトライ',W/2,gb.retry.y+gb.retry.h*.65);
+  ctx.fillStyle='#334466';ctx.font=`${Math.min(W*.02,11)}px monospace`;
+  ctx.fillText(`ST.${currentStage}から再開`,W/2,gb.retry.y+gb.retry.h*.92);
+  ctx.globalAlpha=0.9;dr(gb.charsel.x,gb.charsel.y,gb.charsel.w,gb.charsel.h,'#0a0a14');ctx.globalAlpha=1;
+  dr(gb.charsel.x,gb.charsel.y,gb.charsel.w,2,'#445566');
+  ctx.fillStyle='#667788';ctx.font=`bold ${Math.min(W*.038,20)}px monospace`;
+  ctx.fillText('キャラ選択へ',W/2,gb.charsel.y+gb.charsel.h*.68);
+  ctx.fillStyle='#334455';ctx.font=`${Math.min(W*.018,11)}px monospace`;
+  ctx.fillText('ENTER:リトライ  ESC:キャラ選択',W/2,H*.94);
   scanlines();
 }
 
