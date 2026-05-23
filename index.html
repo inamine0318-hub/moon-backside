@@ -593,7 +593,7 @@ const CHARS=[
   {name:'タカ型',   nick:'BRUCE',   dna:'鷹DNA',  col:'#c07828',w:30,h:42,spd:5.2,jmp:-8.8,maxHp:5,atkCd:18,atkLabel:'急降下斬',  glide:true, djump:true, wallSlide:false,ability:'滑空＋二段ジャンプ'},
   {name:'クマ型',   nick:'LARC',    dna:'熊DNA',  col:'#7a4a22',w:34,h:46,spd:3.2,jmp:-8.5,maxHp:5,atkCd:30,atkLabel:'熊パンチ',  glide:false,djump:true, wallSlide:false,ability:'高HP×2・攻撃力2倍・二段J'},
   {name:'オオカミ型',nick:'MIGUEL', dna:'狼DNA',  col:'#3a4aaa',w:30,h:48,spd:5.5,jmp:-9.0,maxHp:5,atkCd:16,atkLabel:'剣閃撃',    glide:false,djump:true, wallSlide:true, ability:'二段ジャンプ・壁張付き【主人公】'},
-  {name:'サル型',   nick:'KIBA',    dna:'猿DNA',  col:'#aa7722',w:28,h:44,spd:6.8,jmp:-10.0,maxHp:5,atkCd:14,atkLabel:'電磁ムチ',  glide:false,djump:true, wallSlide:true, ability:'最速・電磁ムチ引寄せ・壁張付き・二段J'},
+  {name:'サル型',   nick:'KIBA',    dna:'猿DNA',  col:'#aa7722',w:28,h:44,spd:6.8,jmp:-10.0,maxHp:5,atkCd:14,atkLabel:'電磁ムチ',  glide:false,djump:true, wallSlide:true, ability:'最速・電磁ムチ引寄せ・壁張付き・二段J・踏みつけトランポリン'},
   {name:'サイ型',   nick:'REX',     dna:'犀DNA',  col:'#556677',w:36,h:46,spd:5.5,jmp:-9.0, maxHp:7, atkCd:20,atkLabel:'猛突進',    glide:false,djump:true, wallSlide:false,ability:'HP最大・攻撃1.5倍・ボス被ダメ軽減・突進無敵'},
 ];
 
@@ -1771,6 +1771,15 @@ function update(){
     // 毒ダメージ (80フレーム毎・最大3回)
     if(e.poisoned>0){e.poisonTimer++;if(e.poisonTimer>=80){e.poisonTimer=0;e.poisoned--;if(e.hp>0)hitE(i,1);}}
     if(e.hp<=0)continue;
+    // KIBA ストンプ: 落下中に敵頭上へ着地→ダメージ1＋トランポリン跳ね
+    if(player.ci===3&&player.vy>2&&ov(e,player)&&player.y+player.h<=e.y+e.h*.52){
+      hitE(i,1);
+      player.vy=-8.5;player.onGround=false;
+      player.invincible=Math.max(player.invincible,14);
+      e.dmgCd=30;
+      burst(player.x+player.w/2,player.y+player.h,'#ffcc00',10);addShake(3);sfx('jump');
+      continue;
+    }
     if(e.dmgCd>0){e.dmgCd--;continue;}
     if(player.invincible===0&&ov(e,player)){
       player.hp--;player.invincible=75;player.vy=-6;player.vx=(player.x>e.x?1:-1)*4;
@@ -2062,6 +2071,13 @@ function updateBoss(){
   if(boss.x<BOSS_ARENA_LEFT+50)boss.x=BOSS_ARENA_LEFT+50;if(boss.x+boss.w>BOSS_ARENA_RIGHT-50)boss.x=BOSS_ARENA_RIGHT-50-boss.w;
   if(boss.dmgCd>0)boss.dmgCd--;
   if(boss.flashTimer>0)boss.flashTimer--;
+  // KIBA ボスストンプ
+  if(player.ci===3&&player.vy>2&&ov(boss,player)&&player.y+player.h<=boss.y+boss.h*.4){
+    hitBoss(1);
+    player.vy=-8.5;player.onGround=false;
+    player.invincible=Math.max(player.invincible,14);
+    burst(player.x+player.w/2,player.y+player.h,'#ffcc00',12);addShake(4);sfx('jump');
+  }
   if(player.invincible===0&&ov(boss,player)){
     const bDmg=player.ci===4?0:1; // REXはボス接触ダメージ軽減
     player.hp=Math.max(0,player.hp-bDmg);player.invincible=80;player.vy=-7;
