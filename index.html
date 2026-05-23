@@ -177,7 +177,8 @@ function toLogical(cx,cy){
   return{x:cx/s, y:cy/s};
 }
 
-const GRAVITY = 0.32, WORLD_W = 7000, P = 3;
+const GRAVITY = 0.32, WORLD_W = 9000, P = 3;
+const BOSS_ARENA_LEFT = 7100, BOSS_ARENA_RIGHT = 8650;
 
 // ================================================================
 //  敵スプライト (月面生命体)
@@ -509,24 +510,29 @@ let ENEMY_SPAWNS=[];
 //  ステージ別地形・敵生成
 // ================================================================
 function buildStageData(){
-  TERRAIN.length=0;ENEMY_SPAWNS.length=0;HEART_SPAWNS.length=0;
+  TERRAIN.length=0;ENEMY_SPAWNS.length=0;ITEM_SPAWNS.length=0;
+  HAZARD_LASERS.length=0;HAZARD_SPIKES.length=0;
   const G=(x,y,w)=>TERRAIN.push({x,y,w,h:30,type:'ruin'});
   const P=(x,y,w)=>TERRAIN.push({x,y,w,h:16,type:'slab'});
+  const T=(x,y,w)=>TERRAIN.push({x,y,w,h:16,type:'trap',trapTimer:0,trapState:'stable'});
+  const C=(x,y,w)=>TERRAIN.push({x,y,w,h:30,type:'ceil'});
   const E=(x,y,t)=>ENEMY_SPAWNS.push({x,y,type:t});
-  const HT=(x,y)=>HEART_SPAWNS.push({x,y});
+  const IT=(x,y,tp)=>ITEM_SPAWNS.push({x,y,type:tp});
+  const L=(x,cy,period,offset)=>HAZARD_LASERS.push({x,ceilY:cy,period,offset,warn:false,active:false});
+  const SP=(x,y,period,offset)=>HAZARD_SPIKES.push({x,y,period,offset,ext:0,active:false});
   // ボスアリーナ (共通)
-  G(5560,435,1700);
+  G(7200,435,2100);
   switch(currentStage){
     case 1: // 月面遺跡: 標準的な遺跡
       G(0,460,700);G(780,440,280);G(1120,420,400);G(1600,445,350);
       G(2020,430,420);G(2520,410,350);G(2950,435,500);G(3540,415,400);
       G(4020,440,350);G(4450,420,600);G(5130,445,430);
-      P(180,370,130);P(420,330,110);P(830,345,140);P(1030,295,100);
-      P(1300,355,120);P(1470,305,100);P(1750,340,130);P(1950,285,110);
-      P(2150,320,140);P(2380,355,120);P(2680,310,130);P(2820,360,100);
-      P(3100,340,140);P(3280,295,110);P(3650,325,130);P(3850,375,120);
-      P(4120,350,110);P(4280,300,130);P(4580,335,140);P(4780,285,120);
-      P(5000,355,100);P(5200,315,130);P(5380,370,110);P(5500,330,100);
+      P(180,370,130);T(420,330,110);T(1030,295,100);
+      P(1300,355,120);P(1750,340,130);T(1950,285,110);
+      P(2380,355,120);T(2680,310,130);
+      P(3100,340,140);T(3280,295,110);T(3850,375,120);
+      P(4120,350,110);T(4580,335,140);P(4780,285,120);
+      T(5200,315,130);P(5380,370,110);
       E(420,428,'patrol');E(610,428,'jumper');E(900,408,'turret');
       E(1160,388,'patrol');E(1380,413,'charger');E(1500,355,'sniper');
       E(1750,408,'turret');E(1950,253,'flyer');E(2100,398,'charger');
@@ -534,7 +540,15 @@ function buildStageData(){
       E(3100,308,'flyer');E(3280,263,'sniper');E(3650,293,'turret');
       E(3850,343,'patrol');E(4280,268,'flyer');E(4580,303,'sniper');
       E(4780,253,'flyer');E(5000,323,'jumper');E(5200,283,'turret');
-      HT(480,308);HT(1360,323);HT(2440,293);HT(3715,293);HT(5050,323);
+      IT(480,308,'hp');IT(1360,323,'hp');IT(2440,293,'hp');IT(3715,293,'hp');IT(5050,323,'hp');
+      IT(150,435,'o2');IT(880,415,'o2');IT(1650,395,'o2');IT(2960,410,'o2');IT(3580,390,'o2');IT(5180,420,'o2');
+      IT(230,348,'chip');IT(860,323,'chip');IT(1320,333,'chip');IT(1790,318,'chip');
+      IT(2190,298,'chip');IT(3110,318,'chip');IT(3680,303,'chip');IT(4160,328,'chip');
+      // 上昇セクション (ascending climbing section)
+      G(5580,440,200);G(5900,415,160);G(6200,385,160);G(6500,355,160);G(6790,320,180);G(6990,380,190);
+      P(5750,365,120);P(6050,325,120);P(6350,285,120);P(6640,245,120);P(6930,305,120);
+      E(5630,408,'patrol');E(5810,333,'flyer');E(6010,393,'charger');E(6120,293,'sniper');E(6330,353,'patrol');E(6440,253,'flyer');E(6590,323,'charger');E(6720,213,'flyer');E(6810,288,'turret');E(6970,273,'patrol');E(7050,348,'jumper');
+      IT(5800,340,'chip');IT(6090,300,'chip');IT(6390,260,'chip');IT(6700,220,'hp');IT(5870,415,'o2');IT(6260,360,'o2');IT(6880,355,'hp');IT(6560,300,'chip');
       break;
     case 2: // 雷峰: 山岳・大きな高低差
       G(0,460,350);G(440,430,180);G(710,400,180);G(990,365,160);
@@ -542,31 +556,39 @@ function buildStageData(){
       G(2540,375,160);G(2830,340,160);G(3110,375,180);G(3420,415,200);
       G(3750,455,220);G(4110,425,170);G(4430,390,160);G(4730,355,170);
       G(5050,395,170);G(5360,435,200);
-      P(160,395,75);P(280,370,65);P(420,345,75);P(570,320,65);
-      P(720,295,75);P(880,272,65);P(1060,248,75);P(1200,265,65);
-      P(1420,360,75);P(1640,385,65);P(1870,355,75);P(2050,325,65);
-      P(2250,295,75);P(2480,262,65);P(2700,240,75);P(2920,255,65);
-      P(3150,308,75);P(3360,342,65);P(3640,388,75);P(3900,360,65);
-      P(4200,328,75);P(4500,295,65);P(4790,262,75);P(5020,302,65);
-      P(5220,368,75);P(5430,408,65);
+      P(160,395,75);P(420,345,75);P(720,295,75);P(1060,248,75);
+      P(1420,360,75);P(1870,355,75);P(2250,295,75);P(2700,240,75);
+      P(3150,308,75);P(3640,388,75);P(4200,328,75);P(4790,262,75);
+      P(5220,368,75);
       E(200,428,'patrol');E(460,398,'sniper');E(730,368,'charger');
       E(1010,333,'flyer');E(1300,363,'sniper');E(1610,398,'charger');
       E(1940,428,'patrol');E(2290,383,'flyer');E(2590,343,'sniper');
       E(2870,308,'charger');E(3150,343,'turret');E(3460,383,'flyer');
       E(3800,423,'sniper');E(4160,393,'charger');E(4480,358,'flyer');
       E(4780,323,'sniper');E(5090,363,'turret');E(5400,403,'charger');
-      HT(300,340);HT(900,240);HT(1650,350);HT(2700,208);HT(4500,262);
+      IT(300,340,'hp');IT(900,240,'hp');IT(1650,350,'hp');IT(2700,208,'hp');IT(4500,262,'hp');
+      IT(100,435,'o2');IT(510,405,'o2');IT(760,375,'o2');IT(1900,435,'o2');IT(3800,430,'o2');IT(5200,410,'o2');
+      IT(200,370,'chip');IT(580,320,'chip');IT(1100,248,'chip');IT(1490,335,'chip');
+      IT(2100,300,'chip');IT(2550,237,'chip');IT(3200,318,'chip');IT(4200,335,'chip');
+      G(5560,418,280);G(5890,395,260);G(6200,418,300);G(6560,438,280);G(6890,420,280);
+      P(5630,348,75);P(5990,295,75);P(6380,295,75);P(6820,350,75);
+      E(5670,386,'sniper');E(5870,290,'flyer');E(6060,238,'sniper');E(6270,263,'charger');E(6490,386,'patrol');E(6700,290,'flyer');E(6930,388,'charger');E(6650,263,'brute');
+      IT(5670,323,'chip');IT(5990,270,'chip');IT(6270,243,'chip');IT(6620,297,'chip');IT(5870,260,'hp');IT(6570,297,'hp');IT(5620,393,'o2');IT(6300,393,'o2');
+      // 天井 (ceiling)
+      C(0,95,820);C(860,95,820);C(1730,95,820);C(2600,95,820);C(3470,95,820);C(4340,95,820);C(5210,95,330);C(5590,95,420);C(6060,95,420);C(6530,95,420);C(7000,95,180);
+      // 天井レーザー
+      L(420,125,380,0);L(1150,125,380,126);L(1960,125,380,252);L(2750,125,380,63);L(3580,125,380,189);L(4370,125,380,315);L(5100,125,380,32);L(6080,125,380,158);L(6800,125,380,284);
       break;
     case 3: // 炎窟: 溶岩の谷・渡り足場
       G(0,455,480);G(660,450,260);G(1120,460,200);G(1520,450,300);
       G(2040,460,250);G(2510,455,250);G(3000,460,280);G(3500,450,250);
       G(3980,460,300);G(4520,455,260);G(5040,460,280);G(5460,450,120);
-      P(520,378,90);P(650,358,80);P(790,338,90);P(940,318,80);P(1080,338,90);
-      P(1380,370,90);P(1520,350,80);P(1680,330,90);P(1840,350,80);P(1990,368,90);
-      P(2340,368,90);P(2490,350,80);P(2680,330,90);P(2840,350,80);
-      P(3060,368,90);P(3240,348,80);P(3420,330,90);P(3640,348,80);P(3820,368,90);
-      P(4140,368,90);P(4300,348,80);P(4480,328,90);P(4670,348,80);P(4870,368,90);
-      P(5090,368,90);P(5240,348,80);P(5380,330,90);P(5490,370,80);
+      P(520,378,90);P(790,338,90);P(1080,338,90);
+      P(1380,370,90);P(1680,330,90);P(1990,368,90);
+      P(2340,368,90);P(2680,330,90);
+      P(3060,368,90);P(3420,330,90);P(3820,368,90);
+      P(4140,368,90);P(4480,328,90);P(4870,368,90);
+      P(5090,368,90);P(5380,330,90);
       E(250,423,'charger');E(700,418,'bomber');E(860,310,'turret');
       E(1160,428,'charger');E(1380,342,'flyer');E(1680,302,'bomber');
       E(2080,428,'charger');E(2340,340,'flyer');E(2560,423,'bomber');
@@ -575,22 +597,30 @@ function buildStageData(){
       E(4560,423,'charger');E(4860,340,'bomber');E(5080,428,'turret');
       E(5290,320,'charger');
       E(920,428,'brute');E(2200,428,'brute');E(3800,428,'brute');
-      HT(650,326);HT(1500,318);HT(2500,318);HT(3600,318);HT(4800,336);
+      IT(650,326,'hp');IT(1500,318,'hp');IT(2500,318,'hp');IT(3600,318,'hp');IT(4800,336,'hp');
+      IT(200,430,'o2');IT(750,425,'o2');IT(1200,435,'o2');IT(2100,435,'o2');IT(3060,435,'o2');IT(4560,430,'o2');
+      IT(570,338,'chip');IT(820,313,'chip');IT(1420,325,'chip');IT(1720,305,'chip');
+      IT(2400,343,'chip');IT(2730,305,'chip');IT(3280,323,'chip');IT(4520,308,'chip');
+      G(5610,453,300);G(5970,450,300);G(6330,453,320);G(6710,450,300);G(7060,453,200);
+      P(5700,368,90);P(6050,328,90);P(6440,368,90);P(6850,328,90);
+      E(5710,421,'charger');E(5900,320,'flyer');E(6100,300,'bomber');E(6320,421,'charger');E(6560,320,'flyer');E(6760,300,'bomber');
+      E(6960,421,'brute');E(6200,421,'brute');
+      IT(5740,343,'chip');IT(6090,303,'chip');IT(6470,343,'chip');IT(5900,316,'hp');IT(6680,316,'hp');IT(5660,428,'o2');IT(6380,428,'o2');
+      // 天井 (ceiling) - 炎窟は低い天井で圧迫感
+      C(0,82,700);C(750,82,660);C(1460,82,680);C(2180,82,680);C(2910,82,690);C(3650,82,680);C(4380,82,680);C(5100,82,360);C(5510,82,440);C(6000,82,440);C(6490,82,440);C(6980,82,150);
+      // 天井レーザー
+      L(380,112,320,0);L(1000,112,320,106);L(1700,112,320,213);L(2480,112,320,53);L(3200,112,320,159);L(4020,112,320,265);L(4800,112,320,26);L(5700,112,320,132);L(6400,112,320,239);
+      // 床スパイク (溶岩地帯)
+      SP(350,453,260,0);SP(900,450,260,86);SP(1600,452,260,173);SP(2350,455,260,43);SP(3100,460,260,129);SP(3900,453,260,216);SP(4700,455,260,64);SP(5800,453,260,151);SP(6500,450,260,238);
       break;
     case 4: // 深海神殿: 多層構造・広い床
       G(0,458,750);G(840,458,600);G(1540,452,650);G(2290,458,600);
       G(2990,455,650);G(3750,458,600);G(4460,452,700);G(5300,455,260);
-      P(100,392,150);P(300,382,140);P(510,372,150);P(730,362,140);
-      P(930,378,150);P(1150,368,140);P(1380,358,150);P(1600,372,140);
-      P(1850,388,150);P(2080,378,140);P(2320,362,150);P(2560,352,140);
-      P(2780,368,150);P(3020,378,140);P(3300,388,150);P(3560,372,140);
-      P(3820,358,150);P(4080,372,140);P(4330,388,150);P(4620,372,140);
-      P(4900,358,150);P(5150,372,140);P(5370,390,120);
-      P(240,312,100);P(480,302,90);P(700,292,100);P(960,302,90);
-      P(1200,292,100);P(1480,302,90);P(1760,312,100);P(2060,302,90);
-      P(2380,292,100);P(2660,282,90);P(2960,292,100);P(3280,302,90);
-      P(3600,292,100);P(3900,302,90);P(4200,312,100);P(4500,302,90);
-      P(4820,292,100);P(5100,302,90);P(5350,312,90);
+      P(100,392,150);P(510,372,150);P(930,378,150);P(1380,358,150);
+      P(1850,388,150);P(2320,362,150);P(2780,368,150);P(3300,388,150);
+      P(3820,358,150);P(4330,388,150);P(4900,358,150);P(5370,390,120);
+      P(240,312,100);P(700,292,100);P(1200,292,100);P(1760,312,100);
+      P(2380,292,100);P(2960,292,100);P(3600,292,100);P(4200,312,100);P(4820,292,100);
       E(200,426,'patrol');E(450,426,'flyer');E(700,426,'patrol');
       E(940,360,'flyer');E(1200,282,'turret');E(1480,426,'patrol');
       E(1800,360,'flyer');E(2100,282,'sniper');E(2380,426,'charger');
@@ -598,7 +628,20 @@ function buildStageData(){
       E(3620,282,'flyer');E(3920,426,'charger');E(4220,360,'sniper');
       E(4530,282,'flyer');E(4840,426,'patrol');E(5130,360,'turret');
       E(600,426,'brute');E(2100,426,'brute');E(4200,426,'brute');
-      HT(500,350);HT(1400,340);HT(2500,330);HT(3700,350);HT(5000,423);
+      IT(500,350,'hp');IT(1400,340,'hp');IT(2500,330,'hp');IT(3700,350,'hp');IT(5000,423,'hp');
+      IT(200,433,'o2');IT(800,433,'o2');IT(1600,427,'o2');IT(2400,433,'o2');IT(3100,430,'o2');IT(4600,427,'o2');
+      IT(350,357,'chip');IT(640,277,'chip');IT(1000,277,'chip');IT(1550,277,'chip');
+      IT(2150,357,'chip');IT(2700,267,'chip');IT(3350,287,'chip');IT(4250,297,'chip');
+      G(5600,458,340);G(6000,452,340);G(6400,458,360);G(6820,452,340);G(7200,458,200);
+      P(5720,388,150);P(6170,356,150);P(6640,388,150);
+      P(5790,308,100);P(6310,278,100);P(6890,308,100);
+      E(5730,426,'patrol');E(5960,360,'flyer');E(6200,282,'turret');E(6430,426,'charger');E(6680,360,'flyer');E(6910,282,'sniper');
+      E(5820,426,'brute');E(6520,426,'brute');
+      IT(5750,363,'chip');IT(6050,267,'chip');IT(6390,357,'chip');IT(6630,267,'chip');IT(5980,277,'hp');IT(6620,263,'hp');IT(5660,433,'o2');IT(6450,433,'o2');
+      // 天井 (ceiling) - 深海神殿
+      C(0,88,800);C(850,88,790);C(1690,88,790);C(2530,88,790);C(3370,88,790);C(4210,88,790);C(5050,88,340);C(5440,88,460);C(5950,88,470);C(6470,88,480);C(7000,88,180);
+      // 天井レーザー (水中式: ゆっくり)
+      L(450,118,440,0);L(1250,118,440,146);L(2100,118,440,293);L(2950,118,440,73);L(3800,118,440,220);L(4650,118,440,366);L(5500,118,440,110);L(6300,118,440,256);L(7000,118,440,36);
       break;
     case 5: // 月宮殿: 階段状宮殿・上昇→下降
       G(0,462,280);G(360,442,180);G(620,422,180);G(880,402,180);
@@ -607,13 +650,10 @@ function buildStageData(){
       G(2920,372,200);G(3210,392,200);G(3490,412,200);
       G(3790,432,240);G(4140,452,280);G(4530,442,280);
       G(4920,432,200);G(5210,436,200);
-      P(150,392,85);P(295,372,85);P(445,352,85);P(595,332,85);
-      P(745,312,85);P(895,292,85);P(1045,272,85);P(1195,252,85);
-      P(1345,260,85);P(1510,268,85);P(1700,255,85);P(1890,240,85);
-      P(2070,258,85);P(2280,278,85);P(2500,298,85);P(2730,318,85);
-      P(2960,338,85);P(3220,318,85);P(3450,298,85);P(3680,318,85);
-      P(3950,358,85);P(4210,398,85);P(4510,378,85);P(4760,358,85);
-      P(4990,378,85);P(5180,410,85);P(5360,425,85);
+      P(150,392,85);P(445,352,85);P(745,312,85);P(1045,272,85);
+      P(1345,260,85);P(1700,255,85);P(2070,258,85);P(2500,298,85);
+      P(2960,338,85);P(3450,298,85);P(3950,358,85);P(4510,378,85);
+      P(4990,378,85);P(5360,425,85);
       E(180,430,'jumper');E(400,410,'sniper');E(660,390,'jumper');
       E(920,370,'sniper');E(1180,350,'patrol');E(1440,330,'sniper');
       E(1700,308,'jumper');E(1920,260,'turret');E(2200,280,'sniper');
@@ -621,7 +661,15 @@ function buildStageData(){
       E(3390,360,'patrol');E(3680,380,'jumper');E(4010,400,'sniper');
       E(4330,420,'patrol');E(4700,410,'jumper');E(5050,400,'sniper');
       E(700,426,'brute');E(2200,426,'brute');E(4000,426,'brute');E(5200,426,'brute');
-      HT(400,280);HT(1200,340);HT(2800,300);HT(3900,330);HT(5000,310);
+      IT(400,280,'hp');IT(1200,340,'hp');IT(2800,300,'hp');IT(3900,330,'hp');IT(5000,310,'hp');
+      IT(80,437,'o2');IT(450,417,'o2');IT(980,377,'o2');IT(1720,315,'o2');IT(2450,307,'o2');IT(4700,427,'o2');
+      IT(250,367,'chip');IT(600,307,'chip');IT(950,267,'chip');IT(1250,237,'chip');
+      IT(1740,230,'chip');IT(2130,253,'chip');IT(2540,273,'chip');IT(3700,293,'chip');
+      G(5460,444,280);G(5800,452,280);G(6140,448,280);G(6480,452,280);G(6820,448,300);G(7160,452,200);
+      P(5530,398,85);P(5870,422,85);P(6240,390,85);P(6450,372,85);P(6900,405,85);
+      E(5560,412,'jumper');E(5750,420,'sniper');E(5940,428,'patrol');E(6130,408,'jumper');E(6330,358,'sniper');E(6530,420,'patrol');E(6750,356,'sniper');
+      E(6680,426,'brute');E(7100,426,'brute');
+      IT(5580,373,'chip');IT(5880,397,'chip');IT(6270,363,'chip');IT(6690,360,'chip');IT(5790,387,'hp');IT(6510,347,'hp');IT(5510,419,'o2');IT(6180,423,'o2');
       break;
     case 6: // 大地の果て: 極端な高低差・荒野
       G(0,462,240);G(340,432,140);G(590,400,180);G(890,362,150);
@@ -629,13 +677,10 @@ function buildStageData(){
       G(2460,362,160);G(2760,318,150);G(3040,362,170);G(3340,408,190);
       G(3680,450,210);G(4050,430,165);G(4380,398,160);G(4700,362,165);
       G(5030,400,170);G(5360,440,200);
-      P(90,402,58);P(195,382,52);P(305,360,58);P(430,332,52);
-      P(545,302,62);P(665,272,58);P(800,278,52);P(940,296,62);
-      P(1070,328,58);P(1205,362,52);P(1390,392,58);P(1560,358,52);
-      P(1760,328,62);P(1980,288,58);P(2180,256,52);P(2360,242,62);
-      P(2600,262,58);P(2830,238,52);P(3070,258,62);P(3310,282,58);
-      P(3620,280,52);P(3900,252,62);P(4180,278,58);P(4480,252,52);
-      P(4770,238,62);P(5040,262,58);P(5280,360,52);P(5440,408,58);
+      P(90,402,58);P(305,360,58);P(545,302,62);P(800,278,52);
+      P(1070,328,58);P(1390,392,58);P(1760,328,62);P(2180,256,52);
+      P(2600,262,58);P(3070,258,62);P(3620,280,52);P(4180,278,58);
+      P(4770,238,62);P(5280,360,52);
       E(140,430,'charger');E(380,400,'jumper');E(640,368,'charger');
       E(940,330,'bomber');E(1200,366,'charger');E(1510,403,'jumper');
       E(1840,430,'bomber');E(2220,376,'charger');E(2520,330,'jumper');
@@ -643,7 +688,15 @@ function buildStageData(){
       E(3730,418,'jumper');E(4100,398,'bomber');E(4440,366,'charger');
       E(4740,330,'jumper');E(5070,368,'sniper');E(5400,408,'bomber');
       E(800,426,'brute');E(2500,426,'brute');E(3800,426,'brute');E(5000,426,'brute');
-      HT(500,290);HT(1400,340);HT(2500,310);HT(3500,280);HT(5000,330);
+      IT(500,290,'hp');IT(1400,340,'hp');IT(2500,310,'hp');IT(3500,280,'hp');IT(5000,330,'hp');
+      IT(80,437,'o2');IT(430,407,'o2');IT(940,337,'o2');IT(1500,410,'o2');IT(2830,293,'o2');IT(4480,337,'o2');
+      IT(150,377,'chip');IT(340,307,'chip');IT(590,277,'chip');IT(840,253,'chip');
+      IT(2400,217,'chip');IT(2900,213,'chip');IT(3960,227,'chip');IT(4840,213,'chip');
+      G(5600,432,160);G(5890,398,160);G(6200,362,165);G(6500,330,160);G(6780,362,165);G(7060,402,210);
+      P(5680,392,58);P(5970,330,62);P(6320,268,52);P(6710,268,58);P(6910,300,52);
+      E(5650,400,'charger');E(5860,368,'jumper');E(6060,330,'bomber');E(6270,298,'sniper');E(6510,298,'charger');E(6720,236,'sniper');E(6940,330,'bomber');
+      E(5750,426,'brute');E(6380,426,'brute');
+      IT(5730,367,'chip');IT(6000,305,'chip');IT(6350,243,'chip');IT(6750,243,'chip');IT(5860,337,'hp');IT(6550,223,'hp');IT(5650,407,'o2');IT(6250,337,'o2');
       break;
     case 7: // 虚無: 孤立した足場・無の空間
       G(0,462,200);G(380,442,110);G(600,422,100);G(830,442,110);
@@ -651,12 +704,9 @@ function buildStageData(){
       G(2080,382,100);G(2340,400,110);G(2640,422,130);G(2960,442,100);
       G(3220,420,110);G(3510,400,100);G(3800,382,110);G(4100,362,100);
       G(4400,382,110);G(4720,402,130);G(5060,422,100);G(5320,440,200);
-      P(100,402,65);P(255,382,58);P(415,358,65);P(570,335,58);
-      P(705,312,65);P(890,290,58);P(1070,268,65);P(1250,248,58);
-      P(1440,268,65);P(1640,248,58);P(1870,228,65);P(2080,210,58);
-      P(2240,228,65);P(2460,248,58);P(2720,268,65);P(2990,250,58);
-      P(3240,230,65);P(3500,248,58);P(3800,268,65);P(4130,248,58);
-      P(4470,268,65);P(4790,248,58);P(5110,268,65);P(5350,298,58);
+      P(100,402,65);P(415,358,65);P(705,312,65);P(1070,268,65);
+      P(1440,268,65);P(1870,228,65);P(2240,228,65);P(2720,268,65);
+      P(3240,230,65);P(3800,268,65);P(4470,268,65);P(5110,268,65);
       E(100,430,'flyer');E(440,410,'sniper');E(650,390,'charger');
       E(880,410,'bomber');E(1120,430,'flyer');E(1380,410,'sniper');
       E(1620,390,'charger');E(1880,368,'flyer');E(2140,350,'sniper');
@@ -665,7 +715,15 @@ function buildStageData(){
       E(4180,330,'flyer');E(4480,350,'sniper');E(4800,370,'charger');
       E(5130,390,'bomber');E(5380,410,'flyer');
       E(700,426,'brute');E(1800,426,'brute');E(3200,426,'brute');E(4400,426,'brute');E(5200,426,'brute');
-      HT(500,300);HT(1400,270);HT(2600,290);HT(3800,260);HT(5100,300);
+      IT(500,300,'hp');IT(1400,270,'hp');IT(2600,290,'hp');IT(3800,260,'hp');IT(5100,300,'hp');
+      IT(80,437,'o2');IT(450,417,'o2');IT(700,397,'o2');IT(1150,437,'o2');IT(2700,243,'o2');IT(4100,337,'o2');
+      IT(180,377,'chip');IT(450,333,'chip');IT(720,287,'chip');IT(960,243,'chip');
+      IT(1700,203,'chip');IT(2320,203,'chip');IT(4200,223,'chip');IT(4850,223,'chip');
+      G(5570,420,130);G(5840,402,120);G(6090,382,120);G(6350,400,130);G(6640,420,140);G(6940,440,220);
+      P(5610,378,65);P(6010,338,65);P(6440,298,65);P(6900,258,65);P(7100,278,58);
+      E(5660,388,'flyer');E(5880,370,'bomber');E(6110,350,'sniper');E(6370,368,'charger');E(6680,388,'bomber');E(6920,408,'flyer');E(7130,246,'sniper');
+      E(5760,426,'brute');E(6310,426,'brute');E(6830,426,'brute');
+      IT(5660,353,'chip');IT(5990,313,'chip');IT(6310,273,'chip');IT(6710,253,'chip');IT(5830,333,'hp');IT(6480,263,'hp');IT(5630,395,'o2');IT(6190,357,'o2');
       break;
   }
 }
@@ -682,17 +740,19 @@ const STARS=Array.from({length:200},()=>({
 let state='title', selChar=2, player=null, cam={x:0}, score=0;
 let storyStartTime=0, storyHeld=false, storyDone=false;
 let enemies=[], projectiles=[], eProjectiles=[], effects=[], particles=[];
-let o2tanks=[];
-let hearts=[], HEART_SPAWNS=[];
+let stageItems=[], ITEM_SPAWNS=[];
 let _eid=0;
 let damageNums=[];
-let drops=[];
 let comboTexts=[];
 let shakeAmt=0,shakeDx=0,shakeDy=0;
 let gameTimer=0;
 let bossDefeated=false;
-const GOAL_X=6800;
+const GOAL_X=8700;
+const ORB_COLORS=['#cc88ff','#4499ff','#ff5522','#22ffcc','#ddaaff','#ffaa22','#ffffff'];
 let boss=null,bossTriggered=false;
+let bossOrb=null;
+let orbsCollected=[];
+let HAZARD_LASERS=[],HAZARD_SPIKES=[];
 let hitStop=0;
 let currentStage=1;
 const STAGE_CFG=[
@@ -768,7 +828,17 @@ canvas.addEventListener('touchstart',e=>{
       if(state==='play'){paused=!paused;if(paused)bgmStop();else bgmPlay(bossTriggered&&boss&&boss.hp>0?'boss':'play');}return;
     }
   }
-  if(state==='title'){tryFullscreen();bgmPlay('title');state='story';storyStartTime=Date.now();storyHeld=false;storyDone=false;return;}
+  if(state==='title'){
+    const sv=getSave();
+    if(sv){
+      const lp0c=toLogical(e.changedTouches[0].clientX,e.changedTouches[0].clientY);
+      const tb=getTitleSaveBtns();
+      if(inBtn(lp0c,tb.cont)){tryFullscreen();loadGame();return;}
+      if(inBtn(lp0c,tb.newg)){clearSave();tryFullscreen();bgmPlay('title');state='story';storyStartTime=Date.now();storyHeld=false;storyDone=false;return;}
+      return;
+    }
+    tryFullscreen();bgmPlay('title');state='story';storyStartTime=Date.now();storyHeld=false;storyDone=false;return;
+  }
   if(state==='story'){
     const t0=e.changedTouches[0];const lp0=toLogical(t0.clientX,t0.clientY);
     if(storyDone){state='charselect';return;}
@@ -780,8 +850,19 @@ canvas.addEventListener('touchstart',e=>{
   if(state==='charselect'){handleCSTap(e);return;}
   if(state==='gameover'){state='charselect';bgmPlay('title');return;}
   if(state==='stageclear'){
-    if(currentStage<TOTAL_STAGES){currentStage++;startGame();}
-    else{currentStage=1;state='charselect';bgmPlay('title');}return;
+    if(currentStage<TOTAL_STAGES){
+      const nxt=currentStage+1;
+      setSave({stage:nxt,score,orbsCollected:[...orbsCollected],weaponLv:player?player.weaponLv:0,weaponArmor:player?(player.weaponArmor||3):3,weaponGauge:player?player.weaponGauge:0,char:selChar});
+      currentStage=nxt;startGame();
+    }else{clearSave();currentStage=1;state='charselect';bgmPlay('title');}return;
+  }
+  if(state==='play'&&paused){
+    const lp0c=toLogical(e.changedTouches[0].clientX,e.changedTouches[0].clientY);
+    const pm=getPauseMenuBtns();
+    if(inBtn(lp0c,pm.resume)){paused=false;bgmPlay(bossTriggered&&boss&&boss.hp>0?'boss':'play');return;}
+    if(inBtn(lp0c,pm.charsel)){paused=false;bgmPlay('title');state='charselect';return;}
+    if(inBtn(lp0c,pm.savequit)){doSave();paused=false;bgmStop();state='title';return;}
+    return;
   }
   if(state==='play'&&!paused){
     const z=getBtns();
@@ -840,7 +921,7 @@ function mkPlayer(ci){
     spd:c.spd,jmp:c.jmp,djump:c.djump,canDjump:false,
     glide:c.glide,wallSlide:c.wallSlide,
     atkCd:0,jetCd:0,jetActive:false,jetTimer:0,comboStep:0,comboTimer:0,invincible:0,col:c.col,name:c.name,dna:c.dna,ci,frame:0,moving:false,
-    weaponLv:0,weaponGauge:0};
+    weaponLv:0,weaponGauge:0,weaponArmor:3};
 }
 function spawnEnemies(){
   _eid=0;
@@ -861,15 +942,10 @@ function startGame(resetStage){
   buildStageData();
   player=mkPlayer(selChar);cam.x=0;score=0;
   spawnEnemies();projectiles=[];eProjectiles=[];effects=[];particles=[];
-  // O2タンク: 10個を均等に配置
-  o2tanks=Array.from({length:10},(_,i)=>{
-    const x=400+Math.floor(i*(5000/9))+Math.random()*60-30;
-    const y=230+Math.random()*150;
-    return{x,y,collected:false};
-  });
-  hearts=HEART_SPAWNS.map(d=>({x:d.x,y:d.y,collected:false,anim:Math.random()*Math.PI*2}));
-  damageNums=[];drops=[];comboTexts=[];shakeAmt=0;hitStop=0;
-  bossDefeated=false;boss=null;bossTriggered=false;
+  stageItems=ITEM_SPAWNS.map(d=>({x:d.x,y:d.y,type:d.type,collected:false,anim:Math.random()*Math.PI*2}));
+  damageNums=[];comboTexts=[];shakeAmt=0;hitStop=0;
+  bossDefeated=false;boss=null;bossTriggered=false;bossOrb=null;
+  if(resetStage)orbsCollected=[];
   gameTimer=0;paused=false;
   bgmPlay('play');
   state='play';
@@ -908,6 +984,7 @@ function doAttack(){
   const mx=f>0?px+pw+2:px-2, my=py+ph*.5;
   if(step===2){comboTexts.push({x:px+pw*.5,y:py-18,life:45,vy:-0.85});addShake(4);}
   const lv=player.weaponLv,ci=player.ci;
+  const _pl=projectiles.length;
 
   switch(ci){
     case 0:{ // BRUCE 鷹 - 弓矢
@@ -998,6 +1075,7 @@ function doAttack(){
       break;
     }
   }
+  for(let pi=_pl;pi<projectiles.length;pi++)projectiles[pi].wlv=lv;
 }
 function doJet(){
   if(!player||player.jetCd>0||player.jetActive)return;
@@ -1045,10 +1123,41 @@ function saveScore(s,ch){
   sc.sort((a,b)=>b.score-a.score);sc=sc.slice(0,5);
   localStorage.setItem('mbs',JSON.stringify(sc));
 }
+function getSave(){try{return JSON.parse(localStorage.getItem('mbs_save')||'null');}catch{return null;}}
+function setSave(d){localStorage.setItem('mbs_save',JSON.stringify(d));}
+function clearSave(){localStorage.removeItem('mbs_save');}
+function doSave(){
+  if(!player)return;
+  setSave({stage:currentStage,score,orbsCollected:[...orbsCollected],
+    weaponLv:player.weaponLv,weaponArmor:player.weaponArmor||3,weaponGauge:player.weaponGauge,char:player.ci});
+}
+function loadGame(){
+  const d=getSave();if(!d)return;
+  selChar=d.char||0;currentStage=d.stage||1;
+  buildStageData();
+  player=mkPlayer(selChar);cam.x=0;score=d.score||0;
+  orbsCollected=d.orbsCollected||[];
+  player.weaponLv=d.weaponLv||0;player.weaponArmor=d.weaponArmor||3;player.weaponGauge=d.weaponGauge||0;
+  spawnEnemies();projectiles=[];eProjectiles=[];effects=[];particles=[];
+  stageItems=ITEM_SPAWNS.map(sp=>({x:sp.x,y:sp.y,type:sp.type,collected:false,anim:Math.random()*Math.PI*2}));
+  damageNums=[];comboTexts=[];shakeAmt=0;hitStop=0;
+  bossDefeated=false;boss=null;bossTriggered=false;bossOrb=null;
+  gameTimer=0;paused=false;
+  bgmPlay('play');state='play';
+}
+function getPauseMenuBtns(){
+  const bw=210,bh=40,bx=(W-bw)/2;
+  return{resume:{x:bx,y:H*.40,w:bw,h:bh},charsel:{x:bx,y:H*.40+56,w:bw,h:bh},savequit:{x:bx,y:H*.40+112,w:bw,h:bh}};
+}
+function getTitleSaveBtns(){
+  const bw=210,bh=46,bx=(W-bw)/2;
+  return{cont:{x:bx,y:H*.62,w:bw,h:bh},newg:{x:bx,y:H*.62+62,w:bw,h:bh}};
+}
+function inBtn(lp,b){return lp.x>=b.x&&lp.x<=b.x+b.w&&lp.y>=b.y&&lp.y<=b.y+b.h;}
 function spawnBoss(){
   const cfg=STAGE_CFG[currentStage-1];
   boss={
-    type:cfg.bossType,x:5700,y:280,w:cfg.bossW,h:cfg.bossH,
+    type:cfg.bossType,x:7400,y:280,w:cfg.bossW,h:cfg.bossH,
     hp:cfg.bossHp,maxHp:cfg.bossHp,vx:0,vy:0,
     phase:1,state:'walk',stateTimer:0,
     atkTimer:[150,130,120,110,100,90][currentStage-1],
@@ -1089,14 +1198,14 @@ function update(){
   if(player.vy>22)player.vy=22;
   player.x+=player.vx;player.y+=player.vy;
   if(player.x<0){player.x=0;player.vx=0;}
+  if(bossTriggered&&!bossDefeated){
+    if(player.x<BOSS_ARENA_LEFT){player.x=BOSS_ARENA_LEFT;player.vx=0;}
+    if(player.x+player.w>BOSS_ARENA_RIGHT){player.x=BOSS_ARENA_RIGHT-player.w;player.vx=0;}
+  }
   if(player.atkCd>0)player.atkCd--;
   if(player.jetCd>0)player.jetCd--;
   if(player.comboTimer>0)player.comboTimer--;else player.comboStep=0;
   if(player.invincible>0)player.invincible--;
-  // 武器ゲージ自動減衰
-  if(player.weaponLv===2)player.weaponGauge=Math.max(0,player.weaponGauge-0.15);
-  else if(player.weaponLv===1)player.weaponGauge=Math.max(0,player.weaponGauge-0.05);
-  if(player.weaponLv>0&&player.weaponGauge<=0){player.weaponLv--;player.weaponGauge=player.weaponLv>0?55:0;}
   // ステージギミック
   const gimmick=STAGE_CFG[currentStage-1].gimmick;
   if(gimmick==='thunder'&&gameTimer%280===0&&Math.random()<0.55){
@@ -1129,8 +1238,44 @@ function update(){
     }
   }
 
+  // 天井レーザー更新
+  for(let li=0;li<HAZARD_LASERS.length;li++){
+    const l=HAZARD_LASERS[li];
+    const phase=(gameTimer+l.offset)%l.period;
+    l.warn=phase<65;l.active=phase>=65&&phase<95;
+    if(l.active&&player.invincible===0){
+      if(player.x<l.x+10&&player.x+player.w>l.x){
+        player.hp--;player.invincible=65;addShake(6);
+        burst(player.x+player.w/2,player.y,'#ff4400',10);sfx('phit');
+        if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);bgmStop();state='gameover';return;}
+      }
+    }
+  }
+  // 床スパイク更新
+  for(let si=0;si<HAZARD_SPIKES.length;si++){
+    const sp=HAZARD_SPIKES[si];
+    const phase=(gameTimer+sp.offset)%sp.period;
+    if(phase<45){sp.ext=Math.floor(28*phase/45);sp.active=false;}
+    else if(phase<80){sp.ext=28;sp.active=true;}
+    else if(phase<110){sp.ext=Math.max(0,28-Math.floor(28*(phase-80)/30));sp.active=false;}
+    else{sp.ext=0;sp.active=false;}
+    if(sp.active&&player.invincible===0){
+      if(player.x<sp.x+16&&player.x+player.w>sp.x-8&&player.y+player.h>=sp.y-sp.ext&&player.y+player.h<=sp.y+4){
+        player.hp--;player.invincible=65;addShake(6);
+        burst(player.x+player.w/2,player.y+player.h,'#ff5500',10);sfx('phit');
+        if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);bgmStop();state='gameover';return;}
+      }
+    }
+  }
+
   player.onGround=false;player.onWall=false;player.wallDir=0;
   for(const t of TERRAIN){
+    if(t.type==='trap'&&t.trapState==='gone')continue;
+    if(t.type==='ceil'){
+      const ox=player.x+player.w>t.x&&player.x<t.x+t.w;
+      if(ox&&player.vy<0&&player.y<=t.y+t.h&&player.y>=t.y-6){player.y=t.y+t.h;player.vy=0;}
+      continue;
+    }
     const ox=player.x+player.w>t.x&&player.x<t.x+t.w;
     if(ox){
       if(player.vy>=0&&player.y+player.h>=t.y&&player.y+player.h<=t.y+t.h+18){
@@ -1138,9 +1283,9 @@ function update(){
         player.y=t.y-player.h;player.vy=0;player.onGround=true;
         if(lvy>5){landDust(player.x+player.w/2,player.y+player.h);if(lvy>10)addShake(Math.floor(lvy*.45));}
       }
-      if(player.vy<0&&player.y<=t.y+t.h&&player.y>=t.y-5){player.y=t.y+t.h;player.vy=0;}
+      if(t.type==='ruin'&&player.vy<0&&player.y<=t.y+t.h&&player.y>=t.y-5){player.y=t.y+t.h;player.vy=0;}
     }
-    if(player.y+player.h>t.y+4&&player.y<t.y+t.h-4){
+    if(t.type==='ruin'&&player.y+player.h>t.y+4&&player.y<t.y+t.h-4){
       if(player.vx>0&&player.x+player.w>=t.x&&player.x+player.w<=t.x+22){player.x=t.x-player.w;player.vx=0;if(!player.onGround){player.onWall=true;player.wallDir=1;}}
       if(player.vx<0&&player.x<=t.x+t.w&&player.x>=t.x+t.w-22){player.x=t.x+t.w;player.vx=0;if(!player.onGround){player.onWall=true;player.wallDir=-1;}}
     }
@@ -1156,6 +1301,23 @@ function update(){
     player.vy=-10;
   }
 
+  // --- トラップ足場更新 ---
+  if(currentStage===1){
+    TERRAIN.forEach(t=>{
+      if(t.type!=='trap')return;
+      const onTop=player.onGround&&player.x+player.w>t.x&&player.x<t.x+t.w&&Math.abs((player.y+player.h)-t.y)<4;
+      if(t.trapState==='stable'){
+        if(onTop){t.trapState='shaking';t.trapTimer=48;}
+      } else if(t.trapState==='shaking'){
+        t.trapTimer--;
+        if(t.trapTimer<=0){t.trapState='gone';t.trapTimer=260;burst((t.x+t.w/2)-cam.x,t.y,'#8a7040',8);}
+      } else if(t.trapState==='gone'){
+        t.trapTimer--;
+        if(t.trapTimer<=0)t.trapState='stable';
+      }
+    });
+  }
+
   // --- 酸素 ---
   player.oxygen-=0.018;
   if(player.oxygen<0)player.oxygen=0;
@@ -1164,29 +1326,36 @@ function update(){
     if(player.o2dmgTimer>=120){player.o2dmgTimer=0;player.hp--;burst(player.x+player.w/2,player.y,'#4488ff',6);addShake(3);if(player.hp<=0){saveScore(score,CHARS[player.ci].nick);bgmStop();state='gameover';return;}}
   } else player.o2dmgTimer=0;
 
-  // --- O2タンク収集 ---
-  o2tanks.forEach(t=>{
-    if(t.collected)return;
-    if(ov({x:t.x,y:t.y,w:18,h:22},player)){
-      t.collected=true;player.oxygen=Math.min(player.oxygen+60,player.maxOxygen);
-      burst(t.x+9,t.y+11,'#44aaff',10);
-    }
-  });
-
-  // --- ハート収集 ---
-  hearts.forEach(h=>{
-    if(h.collected)return;
-    h.anim+=.06;
-    if(ov({x:h.x-5,y:h.y-10,w:12,h:12},player)){
-      h.collected=true;
+  // --- アイテム収集 ---
+  stageItems.forEach(it=>{
+    if(it.collected)return;
+    it.anim+=0.05;
+    if(!ov({x:it.x-10,y:it.y-18,w:24,h:24},player))return;
+    it.collected=true;
+    if(it.type==='hp'){
       if(player.hp<player.maxHp){player.hp++;burst(player.x+player.w/2,player.y,'#ff4488',10);}
       else{score+=200;burst(player.x+player.w/2,player.y,'#ffdd00',8);}
+    }else if(it.type==='o2'){
+      player.oxygen=Math.min(player.oxygen+60,player.maxOxygen);burst(it.x-cam.x,it.y,'#44aaff',10);
+    }else if(it.type==='chip'){
+      player.weaponGauge=Math.min(player.weaponGauge+34,100);
+      if(player.weaponGauge>=100){player.weaponGauge=0;player.weaponLv=Math.min(player.weaponLv+1,2);player.weaponArmor=3;sfx('lvup');}
+      burst(it.x-cam.x,it.y,'#ffcc00',10);
     }
   });
+  // ボス戦: 5秒ごとにアイテム出現
+  if(bossTriggered&&boss&&boss.hp>0&&gameTimer%300===0){
+    const r=Math.random();const tp=r<0.4?'o2':r<0.7?'hp':'chip';
+    stageItems.push({x:7750+(Math.random()-0.5)*700,y:385+Math.random()*25,type:tp,collected:false,anim:Math.random()*Math.PI*2});
+  }
 
   // カメラ
   const tx=player.x-W*.35;cam.x+=(tx-cam.x)*.12;
   if(cam.x<0)cam.x=0;if(cam.x>WORLD_W-W)cam.x=WORLD_W-W;
+  if(bossTriggered&&!bossDefeated){
+    if(cam.x<BOSS_ARENA_LEFT)cam.x=BOSS_ARENA_LEFT;
+    if(cam.x>BOSS_ARENA_RIGHT-W)cam.x=BOSS_ARENA_RIGHT-W;
+  }
 
   // 弾
   for(let i=projectiles.length-1;i>=0;i--){
@@ -1406,23 +1575,6 @@ function update(){
     const d=damageNums[i];d.y+=d.vy;d.vy*=0.92;d.life--;
     if(d.life<=0)damageNums.splice(i,1);
   }
-  // drops UPDATE
-  for(let i=drops.length-1;i>=0;i--){
-    const d=drops[i];if(d.collected){drops.splice(i,1);continue;}
-    d.vy+=0.25;d.y+=d.vy;d.life--;
-    for(const t of TERRAIN){if(d.x>t.x&&d.x<t.x+t.w&&d.vy>0&&d.y+10>=t.y&&d.y<t.y+t.h){d.y=t.y-10;d.vy=0;}}
-    if(d.life<=0||d.y>H+80){drops.splice(i,1);continue;}
-    if(ov({x:d.x,y:d.y,w:12,h:12},player)){
-      d.collected=true;
-      if(d.tp==='o2')player.oxygen=Math.min(player.oxygen+22,player.maxOxygen);
-      else if(d.tp==='hp'&&player.hp<player.maxHp)player.hp++;
-      else if(d.tp==='chip'){
-        player.weaponGauge=Math.min(player.weaponGauge+35,100);
-        if(player.weaponGauge>=100){player.weaponGauge=0;player.weaponLv=Math.min(player.weaponLv+1,2);sfx('lvup');}
-      }
-      burst(d.x+6,d.y+6,d.tp==='o2'?'#44aaff':d.tp==='chip'?'#ffcc00':'#ff4466',8);
-    }
-  }
   // comboTexts UPDATE
   for(let i=comboTexts.length-1;i>=0;i--){
     const c=comboTexts[i];c.y+=c.vy;c.life--;if(c.life<=0)comboTexts.splice(i,1);
@@ -1434,10 +1586,26 @@ function update(){
     shakeAmt*=0.82;if(shakeAmt<0.4)shakeAmt=0;
   }else{shakeDx=0;shakeDy=0;}
   // ボストリガー
-  if(!bossTriggered&&player&&player.x>5200){bossTriggered=true;spawnBoss();bgmPlay('boss');addShake(5);}
+  if(!bossTriggered&&player&&player.x>7000){bossTriggered=true;spawnBoss();bgmPlay('boss');addShake(5);}
   // ボス更新
   if(boss&&boss.hp>0)updateBoss();
-  else if(boss&&boss.hp<=0&&!bossDefeated){bossDefeated=true;score+=1000;addShake(10);}
+  else if(boss&&boss.hp<=0&&!bossDefeated){
+    bossDefeated=true;score+=1000;addShake(10);
+    bossOrb={x:boss.x+boss.w/2,baseY:boss.y-20,anim:0,collected:false,stage:currentStage};
+  }
+  // オーブ更新
+  if(bossOrb&&!bossOrb.collected){
+    bossOrb.anim+=0.045;
+    bossOrb.y=bossOrb.baseY+Math.sin(bossOrb.anim)*9;
+    if(Math.random()<0.06)particles.push({x:bossOrb.x+(Math.random()-.5)*18,y:bossOrb.y+(Math.random()-.5)*18,vx:(Math.random()-.5)*1.5,vy:-Math.random()*2-0.5,col:ORB_COLORS[bossOrb.stage-1],life:28});
+    if(player&&ov({x:bossOrb.x-16,y:bossOrb.y-16,w:32,h:32},player)){
+      bossOrb.collected=true;
+      if(!orbsCollected.includes(bossOrb.stage))orbsCollected.push(bossOrb.stage);
+      score+=500;
+      for(let k=0;k<24;k++){const a=Math.random()*Math.PI*2,s=Math.random()*5+2;particles.push({x:bossOrb.x,y:bossOrb.y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-2,col:ORB_COLORS[bossOrb.stage-1],life:36});}
+      sfx('lvup');
+    }
+  }
   // ゴール判定
   if(bossDefeated&&player&&player.x>=GOAL_X){
     saveScore(score,CHARS[player.ci].nick);bgmStop();state='stageclear';sfx('clear');
@@ -1456,10 +1624,6 @@ function hitE(j,dmg){
   damageNums.push({x:e.x+e.w/2,y:e.y-4,val:dmg,life:44,vy:-1.8});
   if(e.hp<=0){
     deathBurst(e.x,e.y);score+=100;
-    if(Math.random()<0.28){
-      const r=Math.random();const tp=r<0.45?'o2':r<0.72?'hp':'chip';
-      drops.push({x:e.x+e.w/2-5,y:e.y,vy:-2.8,tp,collected:false,life:480});
-    }
   }
 }
 function ov(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
@@ -1604,7 +1768,7 @@ function updateBoss(){
     boss.vx*=0.5;
     if(boss.stateTimer===25){
       // 瞬間移動
-      const tx=Math.max(200,Math.min(WORLD_W-300,player.x+(boss.dir>0?200:-200)));
+      const tx=Math.max(BOSS_ARENA_LEFT+100,Math.min(BOSS_ARENA_RIGHT-200,player.x+(boss.dir>0?200:-200)));
       burst(boss.x+boss.w/2,boss.y+boss.h/2,'#eeeeff',18);
       boss.x=tx;
       burst(boss.x+boss.w/2,boss.y+boss.h/2,'#eeeeff',18);
@@ -1668,7 +1832,7 @@ function updateBoss(){
       boss.y=t.y-boss.h;boss.vy=0;boss.onGround=true;
     }
   }
-  if(boss.x<100)boss.x=100;if(boss.x+boss.w>WORLD_W-100)boss.x=WORLD_W-100-boss.w;
+  if(boss.x<BOSS_ARENA_LEFT+50)boss.x=BOSS_ARENA_LEFT+50;if(boss.x+boss.w>BOSS_ARENA_RIGHT-50)boss.x=BOSS_ARENA_RIGHT-50-boss.w;
   if(boss.dmgCd>0)boss.dmgCd--;
   if(boss.flashTimer>0)boss.flashTimer--;
   if(player.invincible===0&&ov(boss,player)){
@@ -1692,7 +1856,7 @@ function hitBoss(dmg){
   if(boss.dropCounter>=threshold){
     boss.dropCounter=0;
     const btr=Math.random(),btp=btr<0.38?'hp':btr<0.72?'o2':'chip';
-    drops.push({x:boss.x+boss.w/2-6,y:boss.y,vy:-3.5,tp:btp,collected:false,life:600});
+    stageItems.push({x:boss.x+boss.w/2,y:boss.y+boss.h/2,type:btp,collected:false,anim:0});
   }
   if(boss.hp<=0){
     deathBurst(boss.x+boss.w/2,boss.y+boss.h/2);
@@ -1702,11 +1866,12 @@ function hitBoss(dmg){
 }
 
 function damageWeapon(){
-  if(!player)return;
-  player.weaponGauge-=42;
-  if(player.weaponGauge<0){
+  if(!player||player.weaponLv===0)return;
+  player.weaponArmor=(player.weaponArmor||3)-1;
+  if(player.weaponArmor<=0){
     player.weaponLv=Math.max(0,player.weaponLv-1);
-    player.weaponGauge=player.weaponLv>0?55:0;
+    player.weaponArmor=3;
+    burst(player.x+player.w/2,player.y-8,'#ffaa00',12);sfx('hit');
   }
 }
 
@@ -1947,6 +2112,7 @@ function drawEnemies(){
 //  ゴール石碑描画
 // ================================================================
 function drawGoal(){
+  if(bossTriggered&&!bossDefeated)return;
   const gx=Math.floor(GOAL_X-cam.x);
   if(gx>W+60||gx+20<-60)return;
   const t=Date.now();
@@ -2560,6 +2726,47 @@ function drawTerrain(){
   const t=Date.now();
   TERRAIN.forEach(ter=>{
     const tx=ter.x-cam.x;if(tx>W+60||tx+ter.w<-60)return;
+    // 天井 (ceil)
+    if(ter.type==='ceil'){
+      dr(tx,ter.y,ter.w,ter.h,tM);
+      for(let bx=tx;bx<tx+ter.w;bx+=32)dr(bx,ter.y,1,ter.h,'#0a0a12');
+      dr(tx,ter.y+ter.h-3,ter.w,3,tH);dr(tx,ter.y+ter.h-1,ter.w,1,tH2);
+      dr(tx,ter.y,2,ter.h,tS);dr(tx+ter.w-2,ter.y,2,ter.h,'#0a0a12');
+      // 機械遺跡装飾: ステージ別
+      if(currentStage===2){ // 雷峰: 稲妻装飾
+        for(let gx=tx+20;gx<tx+ter.w-20;gx+=60){
+          dr(gx,ter.y+ter.h-8,2,5,'#2a3860');dr(gx+3,ter.y+ter.h-10,2,5,'#2a3860');}
+      }
+      if(currentStage===3){ // 炎窟: 溶岩滴り装飾
+        for(let gx=tx+16;gx<tx+ter.w-16;gx+=48){
+          dr(gx,ter.y+ter.h-1,3,4,'#882200');dr(gx+1,ter.y+ter.h+2,1,3,'#ff4400');}
+      }
+      if(currentStage===4){ // 深海神殿: 珊瑚装飾
+        for(let gx=tx+12;gx<tx+ter.w-12;gx+=44){
+          dr(gx,ter.y+ter.h-1,2,5,'#0a3a20');dr(gx+1,ter.y+ter.h,1,4,'#1a6a30');}
+      }
+      return;
+    }
+    // 崩れ足場 (trap)
+    if(ter.type==='trap'){
+      if(ter.trapState==='gone')return;
+      const shk=ter.trapState==='shaking'?(Math.random()*4-2|0):0;
+      const ty=ter.y+shk;
+      dr(tx,ty,ter.w,ter.h,'#241808');
+      for(let bx=tx;bx<tx+ter.w;bx+=24)dr(bx,ty,1,ter.h,'#0a0500');
+      dr(tx,ty,ter.w,2,ter.trapState==='shaking'?'#cc4400':'#7a6030');
+      dr(tx,ty,ter.w,1,ter.trapState==='shaking'?'#ff6622':'#aa8840');
+      // ひび割れ
+      const c1=tx+ter.w*.28|0,c2=tx+ter.w*.62|0;
+      dr(c1,ty+1,1,9,'#110800');dr(c1+3,ty+4,1,5,'#110800');
+      dr(c2,ty+2,1,8,'#110800');dr(c2-2,ty,1,6,'#110800');
+      if(ter.trapState==='shaking'){
+        ctx.globalAlpha=0.12+Math.sin(t/60)*.08;
+        dr(tx,ty,ter.w,ter.h,'#ff3300');
+        ctx.globalAlpha=1;
+      }
+      return;
+    }
     const isG=ter.h>20;
     dr(tx,ter.y,ter.w,ter.h,isG?tM:'#12121e');
     // タイル割り石目
@@ -2609,45 +2816,75 @@ function drawTerrain(){
 // ================================================================
 //  アイテム描画
 // ================================================================
-function drawHearts(){
-  const t=Date.now()/400;
-  hearts.forEach(h=>{
-    if(h.collected)return;
-    const hx=Math.floor(h.x-cam.x);
-    const bob=Math.sin(h.anim+t)*3;
-    const hy=Math.floor(h.y+bob);
-    // ハート形ピクセルアート
-    dr(hx+1,hy-9,2,2,'#ff3366');dr(hx+5,hy-9,2,2,'#ff3366');
-    dr(hx,hy-7,8,2,'#ff3366');
-    dr(hx,hy-5,8,2,'#ff3366');
-    dr(hx+1,hy-3,6,2,'#ff3366');
-    dr(hx+2,hy-1,4,1,'#ff3366');
-    dr(hx+3,hy,2,1,'#ff3366');
-    // ハイライト
-    dr(hx+1,hy-9,1,1,'#ff88aa');dr(hx+5,hy-9,1,1,'#ff88aa');
-    dr(hx,hy-7,3,1,'#ff88aa');
-    // グロー
-    ctx.globalAlpha=0.18+Math.sin(h.anim+t*1.4)*.08;
-    dr(hx-2,hy-11,12,12,'#ff4488');
+function drawBossOrb(){
+  if(!bossOrb||bossOrb.collected)return;
+  const ox=Math.floor(bossOrb.x-cam.x);
+  const oy=Math.floor(bossOrb.y);
+  if(ox<-50||ox>W+50)return;
+  const col=ORB_COLORS[bossOrb.stage-1];
+  const t=Date.now();
+  const gl=Math.sin(t/280)*.5+.5;
+  // 外グロウ
+  ctx.globalAlpha=0.18+gl*.16;
+  ctx.fillStyle=col;
+  ctx.beginPath();ctx.arc(ox,oy,28,0,Math.PI*2);ctx.fill();
+  // 中グロウ
+  ctx.globalAlpha=0.45+gl*.2;
+  ctx.beginPath();ctx.arc(ox,oy,17,0,Math.PI*2);ctx.fill();
+  // コア
+  ctx.globalAlpha=1;
+  ctx.fillStyle=col;
+  ctx.beginPath();ctx.arc(ox,oy,11,0,Math.PI*2);ctx.fill();
+  // ハイライト
+  ctx.globalAlpha=0.75;
+  ctx.fillStyle='#ffffff';
+  ctx.beginPath();ctx.arc(ox-3.5,oy-3.5,4.5,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=1;
+  // うさ耳 (ピクセル風)
+  dr(ox-8,oy-26,5,14,col);
+  dr(ox+3,oy-26,5,14,col);
+  dr(ox-7,oy-25,2,11,'#ffffff55');
+  dr(ox+4,oy-25,2,11,'#ffffff55');
+  // PICK UP!点滅
+  if(Math.floor(t/400)%2){
+    ctx.fillStyle='#ffffff';ctx.globalAlpha=0.9;
+    ctx.font='bold 8px monospace';ctx.textAlign='center';
+    ctx.fillText('PICK UP!',ox,oy+26);
     ctx.globalAlpha=1;
-  });
+  }
 }
-
-function drawO2Tanks(){
-  o2tanks.forEach(t=>{
-    if(t.collected)return;
-    const tx=Math.floor(t.x-cam.x);
-    // 燃料タンク本体 (オレンジ系)
-    dr(tx,   t.y,   18,22,'#442200');
-    dr(tx,   t.y,   18,2, '#cc6600');  // ハイライト
-    dr(tx,   t.y,   2, 22,'#883300');
-    dr(tx+14,t.y,   4, 22,'#221100');
-    // バルブ
-    dr(tx+6, t.y-4, 6, 4,'#aa5500');
-    dr(tx+8, t.y-6, 2, 2,'#ffaa44');
-    // FUELテキスト
-    ctx.fillStyle='#ffaa44';ctx.font='bold 6px monospace';ctx.textAlign='center';
-    ctx.fillText('FUEL',tx+9,t.y+13);
+function drawStageItems(){
+  const t=Date.now()/400;
+  stageItems.forEach(it=>{
+    if(it.collected)return;
+    const ix=Math.floor(it.x-cam.x);
+    if(ix<-30||ix>W+30)return;
+    const bob=Math.sin(it.anim+t)*3;
+    const iy=Math.floor(it.y+bob);
+    if(it.type==='hp'){
+      // Heart - ~20x20px
+      dr(ix+2,iy-17,6,6,'#ff3366');dr(ix+12,iy-17,6,6,'#ff3366');
+      dr(ix,iy-12,20,4,'#ff3366');dr(ix,iy-8,20,4,'#ff3366');
+      dr(ix+2,iy-4,16,4,'#ff3366');dr(ix+4,iy,12,3,'#ff3366');
+      dr(ix+6,iy+3,8,3,'#ff3366');dr(ix+8,iy+6,4,2,'#ff3366');
+      dr(ix+2,iy-17,3,3,'#ff88aa');dr(ix+12,iy-17,3,3,'#ff88aa');dr(ix,iy-12,8,2,'#ff88aa');
+      ctx.globalAlpha=0.18+Math.sin(it.anim+t*1.4)*.08;dr(ix-3,iy-20,26,28,'#ff4488');ctx.globalAlpha=1;
+    }else if(it.type==='o2'){
+      // O2 tank - ~24x30px
+      dr(ix,iy,24,30,'#442200');dr(ix,iy,24,3,'#cc6600');
+      dr(ix,iy,3,30,'#883300');dr(ix+19,iy,5,30,'#221100');
+      dr(ix+8,iy-6,8,6,'#aa5500');dr(ix+10,iy-9,4,4,'#ffaa44');
+      ctx.fillStyle='#ffaa44';ctx.font='bold 8px monospace';ctx.textAlign='center';
+      ctx.fillText('O2',ix+12,iy+18);
+      ctx.globalAlpha=0.14+Math.sin(it.anim+t)*.06;dr(ix-2,iy-2,28,34,'#ff8800');ctx.globalAlpha=1;
+    }else{
+      // Chip crystal - ~20x22px
+      const g=Math.floor(Date.now()/200)%2;
+      dr(ix,iy+6,20,12,'#443300');dr(ix+2,iy+8,16,8,g?'#ffcc00':'#aa8800');
+      dr(ix+6,iy,8,22,'#443300');dr(ix+8,iy+1,4,20,g?'#ffee44':'#ccaa00');
+      dr(ix+7,iy+8,6,6,'#ffffff');
+      ctx.globalAlpha=0.14+Math.sin(it.anim+t*2)*.08;dr(ix-1,iy-2,22,26,'#ffcc00');ctx.globalAlpha=1;
+    }
   });
 }
 
@@ -2779,7 +3016,41 @@ function drawHUD(){
   dr(wgx,wgy,wgw,1,'#666655');
   ctx.fillStyle=wgcol;ctx.font='bold 8px monospace';ctx.textAlign='left';
   ctx.fillText('WPN Lv.'+(wlv+1),wgx,wgy-1);
+  // 武器アーマー (耐久3回)
+  const arm=player.weaponLv>0?(player.weaponArmor||3):0;
+  for(let i=0;i<3;i++){
+    const shx=wgx+i*14,shy=wgy+9;
+    dr(shx+1,shy,10,2,'#1a0800');dr(shx,shy+2,12,6,'#1a0800');dr(shx+2,shy+8,8,2,'#1a0800');
+    if(i<arm){
+      const sc=wlv===2?'#ff8800':wlv===1?'#ffcc00':'#55aa44';
+      dr(shx+1,shy,10,2,sc);dr(shx,shy+2,12,5,sc);dr(shx+2,shy+7,8,2,sc);
+      dr(shx+2,shy+1,3,3,'#ffffff44');
+    }
+  }
 
+  // オーブコレクション表示
+  {const orbY=85,orbLabelX=10;
+    ctx.fillStyle='#556677';ctx.font='bold 7px monospace';ctx.textAlign='left';
+    ctx.fillText('ORB',orbLabelX,orbY);
+    for(let i=0;i<TOTAL_STAGES;i++){
+      const cx=32+i*14,cy=orbY-5;
+      const collected=orbsCollected.includes(i+1);
+      ctx.globalAlpha=collected?1:0.18;
+      ctx.fillStyle=collected?ORB_COLORS[i]:'#334455';
+      ctx.beginPath();ctx.arc(cx,cy,5,0,Math.PI*2);ctx.fill();
+      if(collected){
+        ctx.globalAlpha=0.55;ctx.fillStyle='#ffffff';
+        ctx.beginPath();ctx.arc(cx-1.5,cy-1.5,2,0,Math.PI*2);ctx.fill();
+      }
+      ctx.globalAlpha=1;
+    }
+    // 現在のステージのオーブがまだなら点滅
+    if(bossOrb&&!bossOrb.collected&&Math.floor(Date.now()/350)%2){
+      const cx=32+(currentStage-1)*14,cy=orbY-5;
+      ctx.globalAlpha=0.6;ctx.fillStyle=ORB_COLORS[currentStage-1];
+      ctx.beginPath();ctx.arc(cx,cy,5,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+    }
+  }
   // 進行バー(下)
   const pgx=0,pgy=H-4,pgw=Math.floor(W*(player.x/WORLD_W));
   dr(pgx,pgy,W,4,'#111');dr(pgx,pgy,pgw,4,'#334466');
@@ -3045,7 +3316,24 @@ function drawTitle(){
   ctx.fillStyle='#c8d8ff';ctx.fillText('月の裏側',W/2,H*.3);
   ctx.fillStyle='#222244';ctx.font=`bold ${Math.min(W*.028,22)}px monospace`;ctx.fillText('- THE RABBIT ORBS -',W/2+1,H*.3+44);
   ctx.fillStyle='#6677bb';ctx.fillText('- THE RABBIT ORBS -',W/2,H*.3+42);
-  if(Math.floor(Date.now()/500)%2){ctx.fillStyle='#ffee44';ctx.font=`bold ${Math.min(W*.025,18)}px monospace`;ctx.fillText('>> PRESS START <<',W/2,H*.8);}
+  const sv=getSave();
+  if(sv){
+    const tb=getTitleSaveBtns();
+    dr(tb.cont.x,tb.cont.y,tb.cont.w,tb.cont.h,'#111830');
+    dr(tb.cont.x,tb.cont.y,tb.cont.w,3,'#4488ff');
+    ctx.fillStyle='#88ccff';ctx.font=`bold ${Math.min(W*.038,22)}px monospace`;ctx.textAlign='center';
+    ctx.fillText('つづきから',W/2,tb.cont.y+28);
+    ctx.fillStyle='#445566';ctx.font=`${Math.min(W*.022,13)}px monospace`;
+    ctx.fillText(`ST.${sv.stage}  SCORE: ${sv.score}`,W/2,tb.cont.y+42);
+    dr(tb.newg.x,tb.newg.y,tb.newg.w,tb.newg.h,'#0a0a16');
+    dr(tb.newg.x,tb.newg.y,tb.newg.w,2,'#333');
+    ctx.fillStyle='#556677';ctx.font=`bold ${Math.min(W*.033,18)}px monospace`;ctx.textAlign='center';
+    ctx.fillText('はじめから',W/2,tb.newg.y+28);
+    ctx.fillStyle='#334';ctx.font=`${Math.min(W*.018,10)}px monospace`;
+    ctx.fillText('(セーブデータが消えます)',W/2,tb.newg.y+42);
+  }else{
+    if(Math.floor(Date.now()/500)%2){ctx.fillStyle='#ffee44';ctx.font=`bold ${Math.min(W*.025,18)}px monospace`;ctx.fillText('>> PRESS START <<',W/2,H*.8);}
+  }
   scanlines();
 }
 
@@ -3095,6 +3383,76 @@ function drawCharSelect(){
   scanlines();
 }
 
+function drawArenaWalls(){
+  if(!bossTriggered||bossDefeated)return;
+  const t=Date.now();
+  const gl=Math.sin(t/220)*.5+.5;
+  const drawWall=(wx)=>{
+    const sx=Math.floor(wx-cam.x);
+    if(sx>W+30||sx+22<-30)return;
+    // 石積み
+    dr(sx,0,22,H,'#180d22');
+    for(let wy=0;wy<H;wy+=36){
+      dr(sx+1,wy+1,20,33,'#221035');
+      dr(sx+1,wy+1,20,2,'#301848');
+      dr(sx+2,wy+28,18,2,'#110820');
+    }
+    // エネルギーライン (右端 or 左端)
+    ctx.globalAlpha=0.45+gl*.25;
+    dr(sx+18,0,4,H,'#cc44ff');
+    ctx.globalAlpha=0.18+gl*.12;
+    dr(sx+14,0,8,H,'#ff88ff');
+    ctx.globalAlpha=1;
+    // ルーン文字
+    const rc=`rgba(180,80,255,${0.5+gl*.3})`;
+    ctx.fillStyle=rc;ctx.font='bold 9px monospace';ctx.textAlign='center';
+    for(let ry=40;ry<H-40;ry+=80){
+      ctx.fillText(['⚡','☽','✦','⚔'][Math.floor(ry/80)%4],sx+11,ry);
+    }
+  };
+  drawWall(BOSS_ARENA_LEFT-22);
+  drawWall(BOSS_ARENA_RIGHT);
+}
+
+function drawHazards(){
+  const now=Date.now();
+  // 天井レーザー
+  HAZARD_LASERS.forEach(l=>{
+    const sx=Math.floor(l.x-cam.x);
+    if(sx<-30||sx>W+30)return;
+    const cy=l.ceilY;
+    if(l.warn){
+      const pulse=Math.sin(now/80)*.4+.6;
+      ctx.globalAlpha=pulse*.35;ctx.fillStyle='#ffdd44';ctx.fillRect(sx,cy,10,H-cy);
+      ctx.globalAlpha=pulse*.15;ctx.fillStyle='#ffee88';ctx.fillRect(sx-5,cy,20,H-cy);
+      ctx.globalAlpha=1;
+      // エミッター (天井接合部)
+      ctx.globalAlpha=pulse*.8;dr(sx-4,cy-6,18,8,'#cc8800');dr(sx-1,cy-2,12,4,'#ffdd44');
+      ctx.globalAlpha=1;
+    }else if(l.active){
+      ctx.globalAlpha=0.92;ctx.fillStyle='#ff2200';ctx.fillRect(sx,cy,10,H-cy);
+      ctx.globalAlpha=0.3;ctx.fillStyle='#ffaa00';ctx.fillRect(sx-6,cy,22,H-cy);
+      ctx.globalAlpha=0.8;ctx.fillStyle='#ffffff';ctx.fillRect(sx+3,cy,4,H-cy);
+      ctx.globalAlpha=1;
+      dr(sx-4,cy-6,18,8,'#ff4400');
+    }
+  });
+  // 床スパイク
+  HAZARD_SPIKES.forEach(sp=>{
+    if(sp.ext<=0)return;
+    const sx=Math.floor(sp.x-cam.x);
+    if(sx<-40||sx>W+40)return;
+    const sy=Math.floor(sp.y);
+    for(let i=-1;i<=1;i++){
+      const bx=sx+i*10;
+      dr(bx,sy-sp.ext,4,sp.ext,'#882200');
+      dr(bx+1,sy-sp.ext,2,2,'#ff6644');
+      if(sp.ext>10)dr(bx+1,sy-sp.ext+2,1,sp.ext*.4|0,'#cc4400');
+    }
+    if(sp.active){ctx.globalAlpha=0.22;dr(sx-9,sy-sp.ext-2,26,sp.ext+4,'#ff4400');ctx.globalAlpha=1;}
+  });
+}
+
 function drawPitSpikes(){
   const py=H-1;
   for(let sx=-(Math.floor(cam.x)%14);sx<W+14;sx+=14){
@@ -3121,35 +3479,39 @@ function drawPitSpikes(){
 function drawPlay(){
   drawBg();
   drawTerrain();
+  drawHazards();
   drawGoal();
+  drawArenaWalls();
   drawPitSpikes();
-  drawHearts();
+  drawStageItems();
+  drawBossOrb();
   // 壁スライドスパーク
   if(player&&player.onWall&&player.wallSlide&&!player.onGround&&Math.random()<.4)
     burst(player.x-cam.x+(player.wallDir>0?player.w:0),player.y+player.h*.6,'#aabbff',1);
-  drawO2Tanks();
-  // drops 描画
-  drops.forEach(d=>{
-    if(d.collected)return;
-    const dx=Math.floor(d.x-cam.x);
-    if(d.tp==='o2'){
-      dr(dx,d.y,12,14,'#1a3355');dr(dx,d.y,12,2,'#4488aa');
-      ctx.fillStyle='#66ccff';ctx.font='bold 6px monospace';ctx.textAlign='center';
-      ctx.fillText('O2',dx+6,d.y+10);
-    }else if(d.tp==='chip'){
-      const g=Math.floor(Date.now()/200)%2;
-      dr(dx+1,d.y+3,10,8,'#443300');dr(dx+2,d.y+4,8,6,g?'#ffcc00':'#aa8800');
-      dr(dx+4,d.y,4,14,'#443300');dr(dx+5,d.y+1,2,12,g?'#ffee44':'#ccaa00');
-      dr(dx+4,d.y+5,4,4,'#ffffff');
-    }else{
-      dr(dx+2,d.y,8,6,'#662222');dr(dx,d.y+4,12,6,'#882233');
-      dr(dx+3,d.y+2,6,8,'#aa2244');dr(dx+4,d.y,4,12,'#cc3355');
-      if(Math.floor(Date.now()/300)%2)dr(dx+4,d.y+2,4,6,'#ff6688');
-    }
-  });
+  // Lv2 オーラ
+  if(player&&player.weaponLv===2){
+    const ax=Math.floor(player.x-cam.x+player.w/2),ay=Math.floor(player.y+player.h/2),tt=Date.now();
+    ctx.globalAlpha=0.14+Math.sin(tt/130)*.07;ctx.fillStyle='#ff8800';
+    ctx.beginPath();ctx.arc(ax,ay,28,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=0.1+Math.sin(tt/90)*.06;ctx.fillStyle='#ffdd44';
+    ctx.beginPath();ctx.arc(ax,ay,18,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=1;
+  }
   effects.forEach(drawEffect);
   projectiles.forEach(p=>{
     const bx=Math.floor(p.x-cam.x),by=Math.floor(p.y);
+    if(p.wlv>=1){
+      const now=Date.now(),cr=Math.max(p.w,p.h)/2;
+      ctx.globalAlpha=0.16+Math.sin(now/90)*.06;
+      ctx.fillStyle=p.wlv===2?'#ff8800':'#ffdd44';
+      ctx.beginPath();ctx.arc(bx+p.w/2,by+p.h/2,cr+8,0,Math.PI*2);ctx.fill();
+      if(p.wlv===2){
+        ctx.globalAlpha=0.22+Math.sin(now/130)*.08;
+        ctx.fillStyle='#ff5500';
+        ctx.beginPath();ctx.arc(bx+p.w/2,by+p.h/2,cr+16,0,Math.PI*2);ctx.fill();
+      }
+      ctx.globalAlpha=1;
+    }
     if(p.claw){
       // 狼: 3本の爪傷が飛ぶ
       const dir=p.vx>=0?1:-1;
@@ -3309,14 +3671,28 @@ function drawPlay(){
   drawHUD();
   // ポーズオーバーレイ
   if(paused){
-    ctx.fillStyle='rgba(0,0,20,0.72)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(0,0,20,0.78)';ctx.fillRect(0,0,W,H);
     ctx.textAlign='center';
-    ctx.fillStyle='#cc44ff';ctx.font=`bold ${Math.min(W*.07,44)}px monospace`;
-    ctx.fillText('PAUSE',W/2,H*.42);
-    ctx.fillStyle='#6677aa';ctx.font=`${Math.min(W*.025,16)}px monospace`;
-    ctx.fillText('▶ or P to resume',W/2,H*.55);
-    ctx.fillStyle='#445566';ctx.font=`${Math.min(W*.018,12)}px monospace`;
-    ctx.fillText('M = mute / ESC = pause',W/2,H*.63);
+    ctx.fillStyle='#cc44ff';ctx.font=`bold ${Math.min(W*.065,40)}px monospace`;
+    ctx.fillText('PAUSE',W/2,H*.28);
+    const pm=getPauseMenuBtns();
+    // つづける
+    dr(pm.resume.x,pm.resume.y,pm.resume.w,pm.resume.h,'#141830');
+    dr(pm.resume.x,pm.resume.y,pm.resume.w,3,'#cc44ff');
+    ctx.fillStyle='#dd88ff';ctx.font=`bold ${Math.min(W*.038,22)}px monospace`;
+    ctx.fillText('▶ つづける',W/2,pm.resume.y+pm.resume.h*.68);
+    // キャラ選択
+    dr(pm.charsel.x,pm.charsel.y,pm.charsel.w,pm.charsel.h,'#0a0a18');
+    dr(pm.charsel.x,pm.charsel.y,pm.charsel.w,2,'#335577');
+    ctx.fillStyle='#5588aa';ctx.font=`bold ${Math.min(W*.034,20)}px monospace`;
+    ctx.fillText('キャラ選択にもどる',W/2,pm.charsel.y+pm.charsel.h*.68);
+    // セーブして終了
+    dr(pm.savequit.x,pm.savequit.y,pm.savequit.w,pm.savequit.h,'#0a0a18');
+    dr(pm.savequit.x,pm.savequit.y,pm.savequit.w,2,'#664422');
+    ctx.fillStyle='#cc8844';ctx.font=`bold ${Math.min(W*.034,20)}px monospace`;
+    ctx.fillText('セーブして終了',W/2,pm.savequit.y+pm.savequit.h*.68);
+    ctx.fillStyle='#334455';ctx.font=`${Math.min(W*.018,11)}px monospace`;
+    ctx.fillText('P / ESC でつづける',W/2,H*.9);
   }
   scanlines();
 }
