@@ -1056,7 +1056,7 @@ function mkPlayer(ci){
     spd:c.spd,jmp:c.jmp,djump:c.djump,canDjump:false,
     glide:c.glide,wallSlide:c.wallSlide,
     atkCd:0,jetCd:0,jetActive:false,jetTimer:0,comboStep:0,comboTimer:0,invincible:0,col:c.col,name:c.name,dna:c.dna,ci,frame:0,moving:false,
-    charging:false,chargeTimer:0,chargeDir:1,chargeSpd:14,chargeAir:false,
+    charging:false,chargeTimer:0,chargeDir:1,chargeSpd:14,chargeAir:false,airTackleCount:0,
     weaponLv:0,weaponGauge:0,weaponArmor:3};
 }
 function spawnEnemies(){
@@ -1192,8 +1192,10 @@ function doAttack(){
       break;
     }
     case 4:{ // REX サイ - 強パンチ＋空中タックル
-      if(!player.onGround){ // 空中: 水平タックル
+      if(!player.onGround){ // 空中: 水平タックル (2回まで)
         if(!player.charging){
+          if(player.airTackleCount>=2){ break; } // 3回目以降は不可→落下
+          player.airTackleCount++;
           player.charging=true;player.chargeTimer=20;player.chargeDir=f;
           player.chargeSpd=17;player.chargeAir=true;
           player.invincible=Math.max(player.invincible,22);
@@ -1494,7 +1496,7 @@ function update(){
     if(ox){
       if(player.vy>=0&&player.y+player.h>=t.y&&player.y+player.h<=t.y+t.h+18){
         const lvy=player.vy;
-        player.y=t.y-player.h;player.vy=0;player.onGround=true;
+        player.y=t.y-player.h;player.vy=0;player.onGround=true;player.airTackleCount=0;
         if(lvy>5){landDust(player.x+player.w/2,player.y+player.h);if(lvy>10)addShake(Math.floor(lvy*.45));}
       }
       if(t.type==='ruin'&&player.vy<0&&player.y<=t.y+t.h&&player.y>=t.y-5){player.y=t.y+t.h;player.vy=0;}
@@ -1506,7 +1508,7 @@ function update(){
   }
   const PIT_FLOOR=H+12;
   if(player.y+player.h>=PIT_FLOOR){
-    player.y=PIT_FLOOR-player.h;
+    player.y=PIT_FLOOR-player.h;player.airTackleCount=0;
     if(player.invincible===0){
       player.hp=Math.max(0,player.hp-1);player.invincible=80;
       burst(player.x+player.w/2,player.y+player.h,'#ff3344',12);addShake(8);
