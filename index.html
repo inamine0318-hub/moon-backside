@@ -221,8 +221,8 @@ function drawSprite(ox,oy,flip){
 // ================================================================
 //  キャラクター描画 (二足歩行宇宙服 手続き型 fillRect)
 // ================================================================
-const SC_SUIT  =['#c07828','#7a4a22','#3a4aaa','#aa7722','#556677','#c8ccd8'];
-const SC_ACCNT =['#ff8800','#cc3300','#5566ee','#ffcc00','#99bbcc','#2288ff'];
+const SC_SUIT  =['#c07828','#7a4a22','#3a4aaa','#aa7722','#556677','#c8ccd8','#d0e8ff'];
+const SC_ACCNT =['#ff8800','#cc3300','#5566ee','#ffcc00','#99bbcc','#2288ff','#88ccff'];
 
 function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirborne){
   ctx.save();
@@ -362,8 +362,42 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirb
         _r(AC,57,11, 4, 2); _r(HL,60,10, 3, 2);
       }
     }
-  } else { // ===== 鷹/熊/狼/竜 =====
-    if(ci===5){ // ===== BUSTER 装甲ロボット - キャノンアーム =====
+  } else { // ===== 鷹/熊/狼/竜/ツクヨミ =====
+    if(ci===6){ // ===== TSUKUYOMI 月兎型 - 閃光月刀 =====
+      const BL='#c0ddff', BL2='#88ccff', BLG='#e8f4ff';
+      if(atk===0){
+        const sw=moving?(wf===0?1:-1):0;
+        // 後腕 (軽く添え)
+        _r(OL, 1,22, 4,12); _r(BL, 2,23, 2,10); _r(BL2, 2,23, 2, 3);
+        _r(OL, 4,18, 8, 5); _r(BL, 5,19, 6, 3); _r(BL2, 5,19, 6, 2);
+        // 前腕 (収刀ポーズ)
+        _r(OL,20+sw,17, 7,11); _r(BL,21+sw,18, 5, 9); _r(BL2,21+sw,18, 5, 3);
+        _r(OL,26+sw,14, 5, 5); _r(BL,27+sw,15, 3, 3);
+        // 刀身 (細い光の刃・収刀)
+        _r(OL,30+sw,10, 3,18); _r(BL2,31+sw,11, 1,16);
+        ctx.globalAlpha=0.45; _r(BLG,30+sw, 9, 4,19); ctx.globalAlpha=1;
+      } else {
+        // 斬撃: 腕を繰り出す
+        _r(OL,-bkPull,21, 4,13); _r(BL,1-bkPull,22, 2,11); _r(BL2,1-bkPull,22, 2, 3);
+        _r(OL,-1-bkPull,31, 6, 4); _r(BL,-bkPull,32, 4, 3);
+        const eA=Math.floor(ext*.22),eB=Math.floor(ext*.38);
+        _r(OL,22,19, 7+eA, 5); _r(BL,23,20, 5+eA, 3); _r(BL2,23,20, 5+eA, 2);
+        _r(OL,27+eB,14, 6+eA, 7); _r(BL,28+eB,15, 4+eA, 5); _r(BL2,28+eB,15, 4+eA, 2);
+        // 閃光刀身
+        const tsx=33+ext;
+        _r(OL,tsx, 5, 3,30); _r(BL2,tsx+1, 6, 1,28);
+        ctx.globalAlpha=0.55+atk*.1; _r(BLG,tsx-1, 4, 5,32); ctx.globalAlpha=1;
+        if(atk>=3){
+          // フィニッシャー: 三日月エネルギー
+          ctx.save();
+          ctx.globalAlpha=0.78;ctx.fillStyle=BL2;
+          ctx.beginPath();ctx.arc(tsx+1,7,17,-Math.PI*.72,Math.PI*.72);ctx.arc(tsx-5,7,12,Math.PI*.72,-Math.PI*.72,true);ctx.closePath();ctx.fill();
+          ctx.globalAlpha=0.3;ctx.fillStyle=BLG;
+          ctx.beginPath();ctx.arc(tsx+1,7,24,-Math.PI*.7,Math.PI*.7);ctx.arc(tsx-5,7,17,Math.PI*.7,-Math.PI*.7,true);ctx.closePath();ctx.fill();
+          ctx.globalAlpha=1;ctx.restore();
+        }
+      }
+    } else if(ci===5){ // ===== BUSTER 装甲ロボット - キャノンアーム =====
       if(atk===0){
         const sw=moving?(wf===0?1:-1):0;
         // 後腕: 機械式上腕 (関節リング付き)
@@ -539,6 +573,30 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirb
     _r(OL,-5,15, 6,18);_r('#445566',-4,16, 5,16);_r('#99bbcc',-4,16, 5, 2);
     _r(OL,28,15, 8,18);_r('#445566',29,16, 6,16);_r('#99bbcc',29,16, 6, 2);
     if(atk>=3){_r('#aabbcc',37,15, 4,14);_r('#bbccdd',40,13, 3,16);_r('#ccddee',43,11, 2,18);}
+  } else if(ci===6){ // 月兎型 TSUKUYOMI - 月光マント＋ウサギ尻尾
+    const t2t=frameTime;
+    const flow=Math.sin(t2t/200)*2|0;
+    // 丸いウサギ尻尾
+    ctx.globalAlpha=0.92;
+    _r('#ffffff',-4,35, 8, 7); _r('#e8f4ff',-3,36, 6, 5); _r('#c0ddff',-2,37, 4, 4);
+    ctx.globalAlpha=1;
+    // 月光マント (揺れる・半透明)
+    const scf=moving?flow:0;
+    ctx.globalAlpha=0.5;
+    _r('#88ccff',-4,21+scf, 5,13); _r('#c0ddff',-6,23+scf, 4,11);
+    _r('#88ccff',-7,26+scf, 3, 8);
+    ctx.globalAlpha=0.22;
+    _r('#e8f4ff',-9,24+scf, 4,16);
+    ctx.globalAlpha=1;
+    // 攻撃時: 光の軌跡ライン
+    if(atk>0){
+      const als=Math.min(atk*.16+.1,.6);
+      ctx.globalAlpha=als;
+      _r('#c0ddff', 8,15, atk*5+6,20);
+      ctx.globalAlpha=als*.5;
+      _r('#e8f4ff', 6,12, atk*6+4,26);
+      ctx.globalAlpha=1;
+    }
   } else if(ci===5){ // 装甲ロボット BUSTER - 多層肩装甲＋デュアルスラスター＋アークリアクター
     const t2b=frameTime;
     const pulse=Math.sin(t2b/350);
@@ -792,6 +850,39 @@ function drawAnimalHead(ci,_r,AC,atk){
     _r(OL, 2,22,28, 2); _r(MG3, 3,22,26, 2); _r(MHL, 3,22,10, 1);
     break;
   }
+  case 6: { // ===== 月兎型 TSUKUYOMI (青白・長耳・三日月紋) =====
+    const MN='#c0ddff', MN2='#e8f4ff', MN3='#a0c8f0', EYE='#88ccff', EYE2='#ddeeff';
+    // 長耳 左 (垂直に高く)
+    _r(OL, 5,-22, 7,24); _r(MN, 6,-21, 5,22); _r(MN2, 7,-21, 3,10);
+    _r('#ffb0c8', 7,-19, 3,14); // 内耳ピンク
+    // 長耳 右 (わずか傾く)
+    _r(OL,19,-20, 7,22); _r(MN,20,-19, 5,20); _r(MN2,21,-19, 3, 9);
+    _r('#ffb0c8',21,-17, 3,12);
+    // 頭本体 (スリム楕円)
+    ctx.fillStyle=OL;ctx.beginPath();ctx.ellipse(15,10,13,12,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=MN;ctx.beginPath();ctx.ellipse(15,10,12,11,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=MN2;ctx.beginPath();ctx.ellipse(15,6,11,6,0,0,Math.PI*2);ctx.fill();
+    // 額の三日月紋 (脈動)
+    const mc6=Math.sin(frameTime/160)*.28+.72;
+    ctx.globalAlpha=mc6;
+    _r('#88ccff',11,-1, 4, 5); _r('#88ccff',17,-1, 4, 5);
+    _r('#c0eeff',12,-3, 7, 3);
+    ctx.globalAlpha=1;
+    // 目 (大きく青白い発光)
+    _r(OL, 6, 5, 9, 8); _r(EYE, 7, 6, 7, 6); _r(EYE2, 7, 6, 7, 2);
+    _r('#4488cc', 9, 7, 4, 5); _r(OL,11, 8, 1, 3); _r(EYE2, 7, 6, 3, 2);
+    _r(OL,17, 5, 9, 8); _r(EYE,18, 6, 7, 6); _r(EYE2,18, 6, 7, 2);
+    _r('#4488cc',19, 7, 4, 5); _r(OL,21, 8, 1, 3); _r(EYE2,18, 6, 3, 2);
+    // 攻撃時: 目の発光
+    if(atk>0){ctx.globalAlpha=0.18+atk*.07;_r(EYE, 5, 4,22,12);ctx.globalAlpha=1;}
+    // 鼻 (小さい)
+    _r('#ffaacc',13,13, 5, 3); _r('#ffccdd',14,13, 3, 1);
+    // 口
+    _r(OL,13,15, 6, 1); _r(OL,12,13, 1, 3); _r(OL,18,13, 1, 3);
+    // 首プレート
+    _r(OL, 3,22,25, 2); _r(MN3, 4,22,23, 2); _r(MN2, 4,22, 8, 1);
+    break;
+  }
   }
 }
 
@@ -805,6 +896,7 @@ const CHARS=[
   {name:'サル型',   nick:'KIBA',    dna:'猿DNA',  col:'#aa7722',w:28,h:44,spd:6.8,jmp:-10.0,maxHp:5,atkCd:14,atkLabel:'電磁ムチ',  glide:false,djump:true, wallSlide:true, ability:'最速・電磁ムチ引寄せ・壁張付き・二段J・踏みつけトランポリン'},
   {name:'サイ型',   nick:'REX',     dna:'犀DNA',  col:'#556677',w:36,h:46,spd:5.5,jmp:-9.0, maxHp:7, atkCd:20,atkLabel:'猛突進',    glide:false,djump:true, wallSlide:false,ability:'HP最大・攻撃1.5倍・ボス被ダメ軽減・突進無敵'},
   {name:'ロボ型',   nick:'BUSTER',  dna:'メカコア',col:'#1e2c3a',w:36,h:48,spd:4.8,jmp:-9.2, maxHp:10,atkCd:22,atkLabel:'レーザー砲', glide:true, djump:true, wallSlide:false,ability:'レーザー砲・アーマー(2回に1回無効化)・ホーミングミサイル・空中突進無制限'},
+  {name:'月兎型',  nick:'TSUKUYOMI',dna:'月霊DNA', col:'#c0ddff',w:30,h:44,spd:6.4,jmp:-9.6, maxHp:4, atkCd:14,atkLabel:'瞬身斬',   glide:false,djump:true, wallSlide:true, ability:'瞬身斬（ワープ斬）・幻影分身3体・常時半透明・残像移動'},
 ];
 
 // ================================================================
@@ -1298,6 +1390,7 @@ function spawnEnemies(){
 }
 function startGame(resetStage){
   if(resetStage)currentStage=1;
+  if(selChar===6)setTsukuyomiUnlocked(false); // 選んだ瞬間消費
   buildStageData();
   player=mkPlayer(selChar);cam.x=0;score=0;
   if(!resetStage){const sv=getSave();if(sv){player.weaponLv=sv.weaponLv||0;player.weaponArmor=sv.weaponArmor||3;player.weaponGauge=sv.weaponGauge||0;}}
@@ -1323,7 +1416,12 @@ function handleCSTap(e){
     }
     // ?ボタン
     if(tx>=W*.86&&tx<=W*.98&&ty>=H*.03&&ty<=H*.11){showHelp=true;return;}
-    CHARS.forEach((_,i)=>{const b=z.chars[i];if(tx>=b.x&&tx<=b.x+b.w&&ty>=b.y&&ty<=b.y+b.h)selChar=i;});
+    CHARS.slice(0,6).forEach((_,i)=>{const b=z.chars[i];if(tx>=b.x&&tx<=b.x+b.w&&ty>=b.y&&ty<=b.y+b.h)selChar=i;});
+    const sc2=z.secret;
+    if(tx>=sc2.x&&tx<=sc2.x+sc2.w&&ty>=sc2.y&&ty<=sc2.y+sc2.h){
+      if(getTsukuyomiUnlocked())selChar=6;
+      else{/* 未解放: 何もしない */}
+    }
     const s=z.start;if(tx>=s.x&&tx<=s.x+s.w&&ty>=s.y&&ty<=s.y+s.h){tryFullscreen();startGame(true);}
   }
 }
@@ -1513,6 +1611,48 @@ function doAttack(){
       }
       break;
     }
+    case 6:{ // TSUKUYOMI 月兎型 - 瞬身斬（ワープ斬）+ 幻影分身
+      if(!player.ghostTrail)player.ghostTrail=[];
+      const blinkAmt=step<2?(f>0?60:-60):(f>0?80:-80);
+      const nxBoss=bossTriggered&&!bossDefeated;
+      const nx=nxBoss
+        ?Math.max(BOSS_ARENA_LEFT,Math.min(BOSS_ARENA_RIGHT-player.w,player.x+blinkAmt))
+        :Math.max(0,Math.min(WORLD_W-player.w,player.x+blinkAmt));
+      // 残像記録
+      player.ghostTrail.push({x:player.x,y:player.y,facing:player.facing,life:14});
+      if(step<2){
+        // 瞬身斬: ワープ経路スラッシュ
+        const slashW=step===0?50:64, slashDmg=step===0?2:3;
+        const sx2=f>0?player.x+player.w:nx-slashW+player.w;
+        projectiles.push({x:sx2,y:player.y+2,vx:f*1,vy:0,w:slashW,h:player.h-8,col:'#88ccff',dmg:slashDmg,life:6,hit:[],pierce:true,homing:false,slash_tsuku:true});
+        burst(player.x+player.w*.5+(f>0?slashW*.5:-slashW*.5),player.y+player.h*.5,'#c0ddff',step===0?6:9);
+        player.x=nx;sfx('slash');addShake(step===0?2:3);
+      }else if(lv<2){
+        // フィニッシャーlv0/1: 大斬り + 月光弾
+        const bigW=lv>=1?72:58,bigDmg=lv>=1?4:3;
+        projectiles.push({x:f>0?player.x+player.w:player.x-bigW,y:player.y+2,vx:f*2,vy:0,w:bigW,h:player.h-6,col:'#c0ddff',dmg:bigDmg,life:7,hit:[],pierce:true,homing:false,slash_tsuku:true});
+        player.x=nx;
+        for(let k=0;k<2;k++){
+          setTimeout(()=>{if(player){const f2=player.facing;
+            projectiles.push({x:player.x+player.w*.5,y:player.y+player.h*.3,vx:f2*(13+k*3),vy:(k===0?-2.5:2.5),w:22,h:10,col:'#88ccff',dmg:2,life:16,hit:[],pierce:true,homing:false,slash_tsuku:true});
+            sfx('slash');
+          }},k*85);
+        }
+        burst(player.x+player.w*.5,player.y+player.h*.5,'#e8f4ff',12);addShake(4);sfx('slash');
+      }else{
+        // フィニッシャーlv2: 幻影分身 (3体・90フレーム)
+        if(!player.phantoms)player.phantoms=[];
+        player.phantoms=[];
+        for(let k=0;k<3;k++){
+          const offX=f*(38+k*32), offY=(k-1)*20;
+          player.phantoms.push({x:player.x+offX,y:player.y+offY,facing:player.facing,life:90,atkCd:6+k*4});
+        }
+        player.x=nx;
+        burst(player.x+player.w*.5,player.y+player.h*.5,'#c0ddff',20);addShake(5);sfx('slash');
+      }
+      player.invincible=Math.max(player.invincible,14);
+      break;
+    }
   }
   for(let pi=_pl;pi<projectiles.length;pi++)projectiles[pi].wlv=lv;
 }
@@ -1554,6 +1694,8 @@ function saveScore(s,ch){
 function getSave(){try{return JSON.parse(localStorage.getItem('mbs_save')||'null');}catch{return null;}}
 function setSave(d){localStorage.setItem('mbs_save',JSON.stringify(d));}
 function clearSave(){localStorage.removeItem('mbs_save');}
+function getTsukuyomiUnlocked(){try{return localStorage.getItem('mbs_tsuku')==='1';}catch{return false;}}
+function setTsukuyomiUnlocked(v){try{if(v)localStorage.setItem('mbs_tsuku','1');else localStorage.removeItem('mbs_tsuku');}catch{}}
 function doSave(){
   if(!player)return;
   setSave({
@@ -1681,6 +1823,30 @@ function update(){
   if(player.rageTimer>0){player.rageTimer--;if(player.rageTimer%6===0)particles.push({x:player.x+player.w*.5+(Math.random()-.5)*player.w,y:player.y+player.h*.3+Math.random()*player.h*.4,vx:(Math.random()-.5)*1.5,vy:-1.2-Math.random()*2,col:Math.random()<.6?'#ff6600':'#ffcc00',life:22});}
   // BUSTER アーマーカウンター: 偶数ヒット前オーラ
   if(player.ci===5&&(player.armorCounter||0)%2===1&&player.frame%8===0){particles.push({x:player.x+player.w*.5+(Math.random()-.5)*player.w,y:player.y+player.h*.5+Math.random()*player.h*.3,vx:(Math.random()-.5)*1.0,vy:-0.8-Math.random()*1.5,col:Math.random()<.6?'#ff6600':'#ffaa00',life:18});}
+  // TSUKUYOMI 残像トレイル + 幻影分身
+  if(player.ci===6){
+    if(!player.ghostTrail)player.ghostTrail=[];
+    if(player.moving&&gameTimer%4===0)player.ghostTrail.push({x:player.x,y:player.y,facing:player.facing,life:9});
+    for(let k=player.ghostTrail.length-1;k>=0;k--){player.ghostTrail[k].life--;if(player.ghostTrail[k].life<=0)player.ghostTrail.splice(k,1);}
+    if(!player.phantoms)player.phantoms=[];
+    for(let k=player.phantoms.length-1;k>=0;k--){
+      const ph=player.phantoms[k];
+      ph.life--;if(ph.life<=0){player.phantoms.splice(k,1);continue;}
+      if(ph.atkCd>0){ph.atkCd--;continue;}
+      // 最近の敵/ボスを探して自動攻撃
+      let tgt=null,md=200;
+      for(const e of enemies){if(e.hp<=0)continue;const d=Math.hypot(e.x+e.w/2-ph.x,e.y+e.h/2-ph.y);if(d<md){md=d;tgt=e;}}
+      if(boss&&boss.hp>0){const d=Math.hypot(boss.x+boss.w/2-ph.x,boss.y+boss.h/2-ph.y);if(d<md){md=d;tgt=boss;}}
+      if(tgt){
+        ph.atkCd=20;
+        const dir=tgt.x+tgt.w/2>ph.x?1:-1;ph.facing=dir;
+        const hx=dir>0?ph.x+28:ph.x-52;
+        projectiles.push({x:hx,y:ph.y+4,vx:dir*2,vy:0,w:52,h:player.h-10,col:'#88ccff',dmg:1,life:5,hit:[],pierce:true,homing:false,slash_tsuku:true,wlv:player.weaponLv});
+        ph.x=Math.max(0,Math.min(WORLD_W-30,ph.x+dir*32));
+        burst(ph.x+16,ph.y+player.h*.5,'#c0ddff',3);
+      }
+    }
+  }
   // BRUCE 急降下ダイブ
   if(player.ci===0&&player.diving){
     if(player.onGround){
@@ -4154,7 +4320,7 @@ function drawEnding(){
   const speed=20;
   const elapsed=(Date.now()-endingStartTime)/1000;
   const scrollY=elapsed*speed;
-  if(scrollY>totalH+H*.05&&!endingDone)endingDone=true;
+  if(scrollY>totalH+H*.05&&!endingDone){endingDone=true;setTsukuyomiUnlocked(true);}
   ctx.save();
   ctx.beginPath();ctx.rect(W*.06,H*.04,W*.88,H*.90);ctx.clip();
   ctx.globalAlpha=0.45;dr(W*.06,H*.04,W*.88,H*.90,'#000020');ctx.globalAlpha=1;
@@ -4335,8 +4501,13 @@ function drawTitle(){
 // ================================================================
 function csLayout(){
   const bw=62,bh=114,gap=4;
-  const total=CHARS.length*(bw+gap)-gap,sx=(W-total)/2,by=H*.35;
-  return{chars:CHARS.map((_,i)=>({x:sx+i*(bw+gap),y:by,w:bw,h:bh})),start:{x:W/2-78,y:H*.78,w:156,h:42}};
+  const mainCount=6;
+  const total=mainCount*(bw+gap)-gap,sx=(W-total)/2,by=H*.35;
+  return{
+    chars:CHARS.slice(0,mainCount).map((_,i)=>({x:sx+i*(bw+gap),y:by,w:bw,h:bh})),
+    start:{x:W/2-78,y:H*.78,w:156,h:42},
+    secret:{x:W/2-52,y:H*.905,w:104,h:32}
+  };
 }
 function drawCharSelect(){
   const t=frameTime;
@@ -4443,6 +4614,29 @@ function drawCharSelect(){
   ctx.fillText('▶  START MISSION',W/2,s.y+s.h*.65);
   ctx.globalAlpha=1;
 
+  // ── 秘密キャラスロット ──
+  { const sc2=z.secret, unlocked=getTsukuyomiUnlocked(), sel=(selChar===6);
+    const pulse=Math.sin(t/220)*.3+.7;
+    if(unlocked){
+      // 解放済み: 月光グロー枠
+      ctx.globalAlpha=pulse*.7;dr(sc2.x-2,sc2.y-2,sc2.w+4,sc2.h+4,'#88ccff');ctx.globalAlpha=1;
+      dr(sc2.x,sc2.y,sc2.w,sc2.h,sel?'#0a1a2e':'#050e1c');
+      dr(sc2.x,sc2.y,sc2.w,2,'#88ccff');
+      // 三日月アイコン
+      ctx.fillStyle='#aaddff';ctx.font=`${Math.min(W*.04,14)}px monospace`;ctx.textAlign='center';
+      ctx.fillText('☽  TSUKUYOMI  ☽',sc2.x+sc2.w/2,sc2.y+sc2.h*.68);
+      ctx.fillStyle='#5588aa';ctx.font=`${Math.min(W*.02,9)}px monospace`;
+      ctx.fillText('SECRET CHARACTER',sc2.x+sc2.w/2,sc2.y+sc2.h*.88+6);
+      if(sel){ctx.globalAlpha=pulse;ctx.fillStyle='#88ccff';ctx.fillText('▲ SELECTED',sc2.x+sc2.w/2,sc2.y-6);ctx.globalAlpha=1;}
+    } else {
+      // 未解放: 薄い三日月のみ
+      ctx.globalAlpha=0.18+Math.sin(t/800)*.06;
+      dr(sc2.x,sc2.y,sc2.w,sc2.h,'#0a1020');
+      ctx.fillStyle='#334466';ctx.font=`${Math.min(W*.04,14)}px monospace`;ctx.textAlign='center';
+      ctx.fillText('☽  ？？？  ☽',sc2.x+sc2.w/2,sc2.y+sc2.h*.68);
+      ctx.globalAlpha=1;
+    }
+  }
   // ── 「?」ヘルプボタン ──
   const hbx=W*.86,hby=H*.03,hbs=W*.12;
   dr(hbx,hby,hbs,hbs,'#0d1428');
@@ -4761,6 +4955,22 @@ function drawPlay(){
       ctx.globalAlpha=0.18;ctx.fillStyle='#ffee88';
       ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
       ctx.globalAlpha=1;ctx.restore();
+    }else if(p.slash_tsuku){
+      // 月兎ツクヨミ: 三日月閃光スラッシュ
+      const dir=p.vx>=0?1:-1;
+      const la=(p.life/7)*0.88;
+      ctx.save();
+      ctx.globalAlpha=la*0.28;ctx.fillStyle='#c0ddff';
+      ctx.fillRect(bx-3,by-4,p.w+6,p.h+8);
+      ctx.globalAlpha=la*0.7;ctx.fillStyle='#88ccff';
+      ctx.fillRect(bx,by,p.w,p.h);
+      ctx.globalAlpha=la*0.9;ctx.fillStyle='#e8f4ff';
+      ctx.fillRect(bx+2,by+Math.floor(p.h*.3),p.w-4,Math.ceil(p.h*.4));
+      // 三日月エッジ光
+      ctx.globalAlpha=la*0.85;ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx+p.w,by+p.h);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(bx,by+p.h);ctx.lineTo(bx+p.w,by);ctx.stroke();
+      ctx.globalAlpha=1;ctx.restore();
     }else if(p.punch){
       // 拳衝撃フラッシュ
       const alpha=(p.life/8)*0.75;
@@ -4837,9 +5047,32 @@ function drawPlay(){
       dr(Math.floor(player.x-cam.x)-4,Math.floor(player.y)-4,player.w+8,player.h+8,'#00ff88');
       ctx.globalAlpha=1;
     }
+    // TSUKUYOMI 残像 + 幻影分身 描画
+    if(player.ci===6){
+      if(player.ghostTrail){
+        player.ghostTrail.forEach(g=>{
+          ctx.globalAlpha=g.life/18*0.32;
+          drawCharacter(Math.floor(g.x-cam.x),Math.floor(g.y),6,g.facing,0,false,0,false,false);
+          ctx.globalAlpha=1;
+        });
+      }
+      if(player.phantoms){
+        player.phantoms.forEach(ph=>{
+          const fa=Math.min(ph.life/90*0.42,0.38);
+          ctx.globalAlpha=fa*0.5;
+          ctx.fillStyle='#88ccff';
+          ctx.beginPath();ctx.arc(Math.floor(ph.x-cam.x+15),Math.floor(ph.y+22),20,0,Math.PI*2);ctx.fill();
+          ctx.globalAlpha=fa;
+          drawCharacter(Math.floor(ph.x-cam.x),Math.floor(ph.y),6,ph.facing,0,false,0,false,false);
+          ctx.globalAlpha=1;
+        });
+      }
+    }
     if(!(player.invincible>0&&!player.jetActive&&Math.floor(player.invincible/4)%2===0)){
       const atkAnim=player.atkCd>0?player.comboStep+1:0;
+      if(player.ci===6)ctx.globalAlpha=0.82;
       drawCharacter(Math.floor(player.x-cam.x),Math.floor(player.y),player.ci,player.facing,player.frame,player.moving,atkAnim,player.jetActive,!player.onGround);
+      ctx.globalAlpha=1;
     }
   }
   // damageNums 描画
