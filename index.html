@@ -573,22 +573,28 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirb
     _r(OL,-5,15, 6,18);_r('#445566',-4,16, 5,16);_r('#99bbcc',-4,16, 5, 2);
     _r(OL,28,15, 8,18);_r('#445566',29,16, 6,16);_r('#99bbcc',29,16, 6, 2);
     if(atk>=3){_r('#aabbcc',37,15, 4,14);_r('#bbccdd',40,13, 3,16);_r('#ccddee',43,11, 2,18);}
-  } else if(ci===6){ // 月兎型 TSUKUYOMI - 月光マント＋ウサギ尻尾
+  } else if(ci===6){ // 月神型 TSUKUYOMI - 月輪光輪＋霊気
     const t2t=frameTime;
-    const flow=Math.sin(t2t/200)*2|0;
-    // 丸いウサギ尻尾
-    ctx.globalAlpha=0.92;
-    _r('#ffffff',-4,35, 8, 7); _r('#e8f4ff',-3,36, 6, 5); _r('#c0ddff',-2,37, 4, 4);
+    const rot=t2t/320;
+    const fl=Math.sin(t2t/190)*.5+.5;
+    // 月輪 (体の周りを回る光の輪)
+    ctx.save();
+    ctx.translate(15,22);ctx.rotate(rot);
+    ctx.globalAlpha=0.3;ctx.strokeStyle='#88ccff';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(0,0,21,0,Math.PI*2);ctx.stroke();
+    ctx.globalAlpha=0.65;ctx.fillStyle='#c0ddff';
+    ctx.beginPath();ctx.arc(21,0,3,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=0.4;ctx.fillStyle='#e8f4ff';
+    ctx.beginPath();ctx.arc(-21,0,2,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+    // 霊気 (背後から漂うエネルギー)
+    const fy=Math.floor(fl*3);
+    ctx.globalAlpha=0.38;
+    _r('#c0ddff',-5,20+fy, 3,11); _r('#88ccff',-8,26+fy, 2, 8);
+    ctx.globalAlpha=0.18;
+    _r('#e8f4ff',-7,16+fy, 4,17);
     ctx.globalAlpha=1;
-    // 月光マント (揺れる・半透明)
-    const scf=moving?flow:0;
-    ctx.globalAlpha=0.5;
-    _r('#88ccff',-4,21+scf, 5,13); _r('#c0ddff',-6,23+scf, 4,11);
-    _r('#88ccff',-7,26+scf, 3, 8);
-    ctx.globalAlpha=0.22;
-    _r('#e8f4ff',-9,24+scf, 4,16);
-    ctx.globalAlpha=1;
-    // 攻撃時: 光の軌跡ライン
+    // 攻撃時: 光の放射
     if(atk>0){
       const als=Math.min(atk*.16+.1,.6);
       ctx.globalAlpha=als;
@@ -850,37 +856,42 @@ function drawAnimalHead(ci,_r,AC,atk){
     _r(OL, 2,22,28, 2); _r(MG3, 3,22,26, 2); _r(MHL, 3,22,10, 1);
     break;
   }
-  case 6: { // ===== 月兎型 TSUKUYOMI (青白・長耳・三日月紋) =====
-    const MN='#c0ddff', MN2='#e8f4ff', MN3='#a0c8f0', EYE='#88ccff', EYE2='#ddeeff';
-    // 長耳 左 (垂直に高く)
-    _r(OL, 5,-22, 7,24); _r(MN, 6,-21, 5,22); _r(MN2, 7,-21, 3,10);
-    _r('#ffb0c8', 7,-19, 3,14); // 内耳ピンク
-    // 長耳 右 (わずか傾く)
-    _r(OL,19,-20, 7,22); _r(MN,20,-19, 5,20); _r(MN2,21,-19, 3, 9);
-    _r('#ffb0c8',21,-17, 3,12);
-    // 頭本体 (スリム楕円)
-    ctx.fillStyle=OL;ctx.beginPath();ctx.ellipse(15,10,13,12,0,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle=MN;ctx.beginPath();ctx.ellipse(15,10,12,11,0,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle=MN2;ctx.beginPath();ctx.ellipse(15,6,11,6,0,0,Math.PI*2);ctx.fill();
-    // 額の三日月紋 (脈動)
-    const mc6=Math.sin(frameTime/160)*.28+.72;
-    ctx.globalAlpha=mc6;
-    _r('#88ccff',11,-1, 4, 5); _r('#88ccff',17,-1, 4, 5);
-    _r('#c0eeff',12,-3, 7, 3);
+  case 6: { // ===== 月神型 TSUKUYOMI (神格・ウサギ耳) =====
+    const MDK='#071228', MDK2='#0e1e3a', MDK3='#142244', EYE='#88ccff', EYE2='#e8f4ff';
+    const gl=Math.sin(frameTime/150)*.18+.82;
+    // 長耳 左 (光の結晶耳・内部が発光)
+    _r(MDK2, 5,-22, 7,24); _r(MDK3, 6,-21, 5,22);
+    ctx.globalAlpha=gl*.7;_r(EYE, 7,-20, 3,18);ctx.globalAlpha=1;
+    ctx.globalAlpha=gl*.3;_r(EYE2, 7,-20, 2, 8);ctx.globalAlpha=1;
+    // 長耳 右
+    _r(MDK2,19,-20, 7,22); _r(MDK3,20,-19, 5,20);
+    ctx.globalAlpha=gl*.7;_r(EYE,21,-18, 3,16);ctx.globalAlpha=1;
+    ctx.globalAlpha=gl*.3;_r(EYE2,21,-18, 2, 7);ctx.globalAlpha=1;
+    // 月冠 (耳の間に浮かぶ光点)
+    ctx.globalAlpha=gl*.65;ctx.fillStyle=EYE;
+    ctx.beginPath();ctx.arc(15,-6,3.5,0,Math.PI*2);ctx.fill();
     ctx.globalAlpha=1;
-    // 目 (大きく青白い発光)
-    _r(OL, 6, 5, 9, 8); _r(EYE, 7, 6, 7, 6); _r(EYE2, 7, 6, 7, 2);
-    _r('#4488cc', 9, 7, 4, 5); _r(OL,11, 8, 1, 3); _r(EYE2, 7, 6, 3, 2);
-    _r(OL,17, 5, 9, 8); _r(EYE,18, 6, 7, 6); _r(EYE2,18, 6, 7, 2);
-    _r('#4488cc',19, 7, 4, 5); _r(OL,21, 8, 1, 3); _r(EYE2,18, 6, 3, 2);
-    // 攻撃時: 目の発光
-    if(atk>0){ctx.globalAlpha=0.18+atk*.07;_r(EYE, 5, 4,22,12);ctx.globalAlpha=1;}
-    // 鼻 (小さい)
-    _r('#ffaacc',13,13, 5, 3); _r('#ffccdd',14,13, 3, 1);
-    // 口
-    _r(OL,13,15, 6, 1); _r(OL,12,13, 1, 3); _r(OL,18,13, 1, 3);
-    // 首プレート
-    _r(OL, 3,22,25, 2); _r(MN3, 4,22,23, 2); _r(MN2, 4,22, 8, 1);
+    // 頭本体 (球形・深い藍)
+    ctx.fillStyle=MDK; ctx.beginPath();ctx.ellipse(15,10,14,13,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=MDK2;ctx.beginPath();ctx.ellipse(15,10,13,12,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=MDK3;ctx.beginPath();ctx.ellipse(15, 7,13, 7,0,0,Math.PI*2);ctx.fill();
+    // 三日月形の目 (神秘的に発光)
+    ctx.globalAlpha=gl;
+    ctx.fillStyle=EYE;
+    ctx.beginPath();ctx.arc( 9,9,5,-Math.PI*.65,Math.PI*.65);ctx.arc( 6,9,3.5,Math.PI*.65,-Math.PI*.65,true);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.arc(21,9,5,-Math.PI*.65,Math.PI*.65);ctx.arc(18,9,3.5,Math.PI*.65,-Math.PI*.65,true);ctx.closePath();ctx.fill();
+    ctx.globalAlpha=gl*.75;ctx.fillStyle=EYE2;
+    ctx.beginPath();ctx.arc( 9,9,3.2,-Math.PI*.5,Math.PI*.5);ctx.arc( 7,9,2,  Math.PI*.5,-Math.PI*.5,true);ctx.closePath();ctx.fill();
+    ctx.beginPath();ctx.arc(21,9,3.2,-Math.PI*.5,Math.PI*.5);ctx.arc(19,9,2,  Math.PI*.5,-Math.PI*.5,true);ctx.closePath();ctx.fill();
+    ctx.globalAlpha=1;
+    // 顔中央の三日月紋
+    ctx.globalAlpha=gl*.45;
+    _r(EYE,11,17, 4, 3); _r(EYE,17,17, 4, 3); _r(EYE2,12,15, 7, 2);
+    ctx.globalAlpha=1;
+    // 攻撃グロー
+    if(atk>0){ctx.globalAlpha=0.18+atk*.08;ctx.fillStyle=EYE;ctx.beginPath();ctx.ellipse(15,10,19,17,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}
+    // 首
+    _r(MDK2, 3,22,25, 2); _r(EYE2, 4,22, 6, 1);
     break;
   }
   }
@@ -896,7 +907,7 @@ const CHARS=[
   {name:'サル型',   nick:'KIBA',    dna:'猿DNA',  col:'#aa7722',w:28,h:44,spd:6.8,jmp:-10.0,maxHp:5,atkCd:14,atkLabel:'電磁ムチ',  glide:false,djump:true, wallSlide:true, ability:'最速・電磁ムチ引寄せ・壁張付き・二段J・踏みつけトランポリン'},
   {name:'サイ型',   nick:'REX',     dna:'犀DNA',  col:'#556677',w:36,h:46,spd:5.5,jmp:-9.0, maxHp:7, atkCd:20,atkLabel:'猛突進',    glide:false,djump:true, wallSlide:false,ability:'HP最大・攻撃1.5倍・ボス被ダメ軽減・突進無敵'},
   {name:'ロボ型',   nick:'BUSTER',  dna:'メカコア',col:'#1e2c3a',w:36,h:48,spd:4.8,jmp:-9.2, maxHp:10,atkCd:22,atkLabel:'レーザー砲', glide:true, djump:true, wallSlide:false,ability:'レーザー砲・アーマー(2回に1回無効化)・ホーミングミサイル・空中突進無制限'},
-  {name:'月兎型',  nick:'TSUKUYOMI',dna:'月霊DNA', col:'#c0ddff',w:30,h:44,spd:6.4,jmp:-9.6, maxHp:4, atkCd:14,atkLabel:'瞬身斬',   glide:false,djump:true, wallSlide:true, ability:'瞬身斬（ワープ斬）・幻影分身3体・常時半透明・残像移動'},
+  {name:'月神型',  nick:'TSUKUYOMI',dna:'月霊DNA', col:'#c0ddff',w:30,h:44,spd:6.4,jmp:-9.6, maxHp:4, atkCd:14,atkLabel:'瞬身斬',   glide:false,djump:true, wallSlide:true, ability:'瞬身斬（ワープ斬）・幻影分身3体・常時半透明・残像移動'},
 ];
 
 // ================================================================
