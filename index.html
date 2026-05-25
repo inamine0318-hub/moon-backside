@@ -910,9 +910,9 @@ function getSysBtns(){
   };
 }
 function getBtns(){
-  const mg=8, lgap=10, rgap=14;
+  const mg=8, lgap=10, rgap=26;
   const jS=106;  // JUMP
-  const aS=92;   // ATK
+  const aS=106;  // ATK (JUMPと同サイズ)
   const eS=78;   // JET
   const mS=92;   // 移動
   const jmpX=W-mg-jS, jmpY=H-mg-jS;
@@ -3669,9 +3669,9 @@ function drawTitle(){
 //  キャラ選択
 // ================================================================
 function csLayout(){
-  const bw=Math.min(W*.17,118),bh=82,gap=10;
-  const total=CHARS.length*(bw+gap)-gap,sx=(W-total)/2,by=H*.38;
-  return{chars:CHARS.map((_,i)=>({x:sx+i*(bw+gap),y:by,w:bw,h:bh})),start:{x:W/2-78,y:H*.76,w:156,h:42}};
+  const bw=72,bh=114,gap=5;
+  const total=CHARS.length*(bw+gap)-gap,sx=(W-total)/2,by=H*.35;
+  return{chars:CHARS.map((_,i)=>({x:sx+i*(bw+gap),y:by,w:bw,h:bh})),start:{x:W/2-78,y:H*.78,w:156,h:42}};
 }
 function drawCharSelect(){
   dr(0,0,W,H,'#02020e');
@@ -3685,17 +3685,17 @@ function drawCharSelect(){
     dr(b.x,b.y,b.w,2,sel?c.col:'#333');dr(b.x,b.y,2,b.h,sel?c.col:'#333');
     dr(b.x+b.w-2,b.y,2,b.h,sel?'#111':'#111');dr(b.x,b.y+b.h-2,b.w,2,'#111');
     // キャラプレビュー
-    ctx.save();ctx.translate(b.x+4,b.y+6);ctx.scale(.60,.60);
+    ctx.save();ctx.translate(b.x+4,b.y+10);ctx.scale(.82,.82);
     drawCharacter(0,0,i,1,0,false,0);ctx.restore();
     // ニックネーム (大)
-    ctx.fillStyle=sel?'#ffffff':'#888';ctx.font=`bold ${Math.min(b.w*.13,13)}px monospace`;ctx.textAlign='center';
-    ctx.fillText(c.nick,b.x+b.w/2,b.y+b.h-28);
+    ctx.fillStyle=sel?'#ffffff':'#888';ctx.font=`bold ${Math.min(b.w*.16,13)}px monospace`;ctx.textAlign='center';
+    ctx.fillText(c.nick,b.x+b.w/2,b.y+b.h-30);
     // キャラ種別
-    ctx.fillStyle=sel?c.col:'#555';ctx.font=`${Math.min(b.w*.085,9)}px monospace`;
-    ctx.fillText(c.name,b.x+b.w/2,b.y+b.h-16);
+    ctx.fillStyle=sel?c.col:'#555';ctx.font=`${Math.min(b.w*.10,9)}px monospace`;
+    ctx.fillText(c.name,b.x+b.w/2,b.y+b.h-18);
     // 攻撃名
-    ctx.fillStyle=sel?'#aabbff':'#444';ctx.font=`${Math.min(b.w*.08,8)}px monospace`;
-    ctx.fillText(c.atkLabel,b.x+b.w/2,b.y+b.h-4);
+    ctx.fillStyle=sel?'#aabbff':'#444';ctx.font=`${Math.min(b.w*.10,8)}px monospace`;
+    ctx.fillText(c.atkLabel,b.x+b.w/2,b.y+b.h-6);
     if(i===2){ctx.fillStyle='#ffff44';ctx.font=`${Math.min(b.w*.08,8)}px monospace`;ctx.fillText('★MAIN',b.x+b.w/2,b.y+b.h+12);}
     if(sel){ctx.fillStyle='#88aaff';ctx.fillText('▼ SELECT',b.x+b.w/2,b.y+b.h+(i===2?22:12));}
   });
