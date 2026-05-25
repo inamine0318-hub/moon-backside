@@ -3355,6 +3355,69 @@ function drawStageClear(){
 }
 
 // ================================================================
+//  ステージ別背景フレア (drawBg冒頭から呼ぶ・既存コード不変)
+// ================================================================
+function drawStageBgFlair(st,t){
+  // 空グラデーション
+  const tops=['#080e2a','#080c1c','#1e0500','#001820','#0e0228','#130c04','#021220'];
+  const top=tops[(st-1)%7];
+  const grd=ctx.createLinearGradient(0,0,0,H*.7);
+  grd.addColorStop(0,top);grd.addColorStop(1,top+'00');
+  ctx.fillStyle=grd;ctx.fillRect(0,0,W,H*.7);
+
+  if(st===2){ // 雷峰: 嵐雲シルエット
+    ctx.globalAlpha=0.32;
+    for(let k=0;k<6;k++){
+      const cx=((k*183+cam.x*.04)%(W+160)+W+160)%(W+160)-80;
+      dr(cx,k%2?2:0,Math.floor(160+k*20),Math.floor(36+k*7),'#06070f');
+      dr(cx+10,k%2?6:4,Math.floor(90+k*14),Math.floor(20+k*4),'#09091c');
+    }
+    ctx.globalAlpha=1;
+  }
+  if(st===3){ // 炎窟: 赤い地底グロー
+    const fl=Math.sin(t/280)*.25+.75;
+    ctx.globalAlpha=fl*.28;dr(0,H*.52,W,H*.48,'#bb1a00');
+    ctx.globalAlpha=fl*.18;dr(0,H*.68,W,H*.32,'#ff5500');
+    ctx.globalAlpha=1;
+  }
+  if(st===4){ // 深海神殿: 深海グロー + 発光粒子
+    ctx.globalAlpha=0.22;dr(0,0,W,H,'#001a18');ctx.globalAlpha=1;
+    for(let k=0;k<14;k++){
+      const bx=((k*131+t*.007)%W);
+      const by=H*.08+(k*41+t*.004)%(H*.8);
+      ctx.globalAlpha=Math.sin(t/500+k)*.5+.5;
+      ctx.globalAlpha*=0.14;dr(bx,by,3,3,'#00ffcc');ctx.globalAlpha=1;
+    }
+  }
+  if(st===5){ // 月宮殿: 大きな満月
+    const mx=W*.75,my=H*.17,mr=46;
+    ctx.globalAlpha=0.18;ctx.fillStyle='#8898cc';
+    ctx.beginPath();ctx.arc(mx,my,mr+24,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=0.35;ctx.fillStyle='#c8d8ff';
+    ctx.beginPath();ctx.arc(mx,my,mr,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=0.6;ctx.fillStyle='#e8eeff';
+    ctx.beginPath();ctx.arc(mx,my,mr*.78,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=0.14;ctx.fillStyle='#aab0cc';
+    ctx.beginPath();ctx.arc(mx+15,my+10,10,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(mx-18,my-10,7,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=1;
+  }
+  if(st===6){ // 崩落回廊: 天井の暗帯 + 廊下の奥行き
+    ctx.globalAlpha=0.32;dr(0,0,W,H*.22,'#08060200');
+    ctx.globalAlpha=0.32;dr(0,0,W,H*.22,'#080602');ctx.globalAlpha=1;
+    ctx.globalAlpha=0.18;dr(0,H*.22,W,3,'#665544');ctx.globalAlpha=1;
+  }
+  if(st===7){ // 機械神殿: グリッド + 赤脈動
+    const gl=Math.sin(t/500)*.35+.65;
+    for(let k=0;k<8;k++){dr(0,Math.floor(H*k/8),W,1,'rgba(0,80,100,0.06)');}
+    for(let k=0;k<12;k++){dr(Math.floor(W*k/12),0,1,H,'rgba(0,80,100,0.06)');}
+    ctx.globalAlpha=gl*.16;dr(0,0,W,H*.3,'#001e2e');ctx.globalAlpha=1;
+    // 赤いコアパルス
+    ctx.globalAlpha=gl*.1;dr(Math.floor(W*.2),Math.floor(H*.3),Math.floor(W*.6),Math.floor(H*.4),'#440000');ctx.globalAlpha=1;
+  }
+}
+
+// ================================================================
 //  月面古代遺跡 背景
 // ================================================================
 function drawBg(){
@@ -3363,6 +3426,7 @@ function drawBg(){
 
   const t=frameTime;
   const st=currentStage;
+  drawStageBgFlair(st,t);
 
   if(st<=5){
   // 星雲ヒント (ステージ別カラー)
