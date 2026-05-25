@@ -203,8 +203,8 @@ function drawSprite(ox,oy,flip){
 // ================================================================
 //  キャラクター描画 (二足歩行宇宙服 手続き型 fillRect)
 // ================================================================
-const SC_SUIT  =['#c07828','#7a4a22','#3a4aaa','#aa7722','#556677','#1a1030'];
-const SC_ACCNT =['#ff8800','#cc3300','#5566ee','#ffcc00','#99bbcc','#ff3300'];
+const SC_SUIT  =['#c07828','#7a4a22','#3a4aaa','#aa7722','#556677','#1e2c3a'];
+const SC_ACCNT =['#ff8800','#cc3300','#5566ee','#ffcc00','#99bbcc','#ffaa00'];
 
 function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirborne){
   ctx.save();
@@ -345,28 +345,33 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirb
       }
     }
   } else { // ===== 鷹/熊/狼/竜 =====
-    if(ci===5){ // ===== BUSTER メカ竜 - ドラゴンクロー =====
+    if(ci===5){ // ===== BUSTER 装甲ロボット - キャノンアーム =====
       if(atk===0){
         const sw=moving?(wf===0?1:-1):0;
-        // 後腕: ぶら下げ
-        _r(OL, 0,23, 5,14); _r(SC, 1,24, 3,12); _r(AC, 1,24, 3, 3);
-        _r(OL,-2,35, 9, 5); _r('#1a2a3a',-1,36, 7, 4);
-        _r('#334455', 0,37, 2, 4); _r('#334455', 3,37, 2, 3); _r('#334455', 6,37, 2, 2);
-        // 前腕: 前方へ
-        _r(OL,18+sw,19, 7,13); _r(SC,19+sw,20, 5,11); _r(AC,19+sw,20, 5, 3);
-        _r(OL,24+sw,15, 8, 8); _r(SC,25+sw,16, 6, 6); _r(AC,25+sw,16, 6, 2);
-        _r(OL,31+sw,13,11, 8); _r('#1a2a3a',32+sw,14, 9, 6);
-        _r('#445566',33+sw,14, 2, 6); _r('#334455',36+sw,14, 2, 5); _r('#223344',39+sw,14, 2, 4);
+        // 後腕: 機械式上腕
+        _r(OL, 0,22, 5,14); _r(SC, 1,23, 3,12); _r(AC, 1,23, 3, 3);
+        _r(OL,-2,34, 9, 6); _r('#1a2a3a',-1,35, 7, 5);
+        _r('#2a3a4a', 0,36, 2, 4); _r('#2a3a4a', 3,36, 2, 4); _r('#2a3a4a', 6,36, 2, 3);
+        // 前腕: キャノン砲身(待機)
+        _r(OL,18+sw,18, 7,12); _r(SC,19+sw,19, 5,10); _r(AC,19+sw,19, 5, 3);
+        _r(OL,24+sw,14,12, 9); _r('#1a2a3a',25+sw,15,10, 7); _r('#2a3a4a',25+sw,15,10, 2);
+        _r(OL,35+sw,13,10, 8); _r('#0e1824',36+sw,14, 8, 6); // キャノン本体
+        _r('#334455',36+sw,14, 3, 6); _r('#223344',40+sw,14, 3, 5); // 冷却フィン
+        _r('#0a1018',44+sw,14, 2, 6); // 砲口
       } else {
-        // ブレス体勢: 両腕を広げ爪を前へ
+        // 発射体勢: キャノン前方へ
         _r(OL,-bkPull,20, 5,15); _r(SC,1-bkPull,21, 3,13); _r(AC,1-bkPull,21, 3, 3);
         _r(OL,-bkPull-3,33, 9, 5); _r('#1a2a3a',-bkPull-2,34, 7, 4);
         const eA=Math.floor(ext*.22),eB=Math.floor(ext*.38);
-        _r(OL,22,20,10+eA, 5); _r(SC,23,21, 8+eA, 3); _r(AC,23,21, 8+eA, 2);
-        _r(OL,29+eB,15,10+eA, 8); _r(SC,30+eB,16, 8+eA, 6); _r(AC,30+eB,16, 8+eA, 2);
-        _r(OL,37+ext,12,10, 9); _r('#1a2a3a',38+ext,13, 8, 7);
-        _r('#445566',39+ext,13, 2, 7); _r('#334455',42+ext,13, 2, 6); _r('#223344',45+ext,13, 2, 5);
-        if(atk>=3){ _r('#ff6600',49,11, 3, 5); _r('#ff8800',52,10, 2, 7); _r('#ffcc00',54, 9, 2, 9); }
+        _r(OL,22,19,10+eA, 6); _r(SC,23,20, 8+eA, 4); _r(AC,23,20, 8+eA, 2);
+        _r(OL,29+eB,14,12+eA, 9); _r('#1a2a3a',30+eB,15,10+eA, 7); _r('#2a3a4a',30+eB,15,10+eA, 2);
+        _r(OL,40+ext,13,12, 8); _r('#0e1824',41+ext,14,10, 6);
+        _r('#334455',41+ext,14, 3, 6); _r('#223344',45+ext,14, 3, 5);
+        _r('#0a1018',50+ext,13, 2, 8); // 砲口
+        if(atk>=3){
+          _r('#ffaa00',52+ext,11, 6,11); _r('#ffcc44',54+ext, 9, 3,14);
+          ctx.globalAlpha=0.45;_r('#ffee99',51+ext,10, 8,13);ctx.globalAlpha=1;
+        }
       }
     } else if(ci===2){ // ===== MIGUEL オオカミ - 両手銃スタイル =====
       if(atk===0){
@@ -482,7 +487,7 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirb
   }
 
   // キャラ固有追加パーツ
-  {const t2=Date.now();
+  {const t2=frameTime;
   if(ci===0){ // 鷹 - 翼 (攻撃時は広げる)
     const wf2=atk>0?(atk===3?-5:Math.sin(t2/190)*3|0):moving?Math.sin(t2/190)*3|0:0;
     _r(OL,-4, 8+wf2, 7,26);_r('#9a6020',-3, 9+wf2, 5,24);_r('#c07828',-3, 9+wf2, 5, 5);
@@ -512,43 +517,35 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirb
     _r(OL,-5,15, 6,18);_r('#445566',-4,16, 5,16);_r('#99bbcc',-4,16, 5, 2);
     _r(OL,28,15, 8,18);_r('#445566',29,16, 6,16);_r('#99bbcc',29,16, 6, 2);
     if(atk>=3){_r('#aabbcc',37,15, 4,14);_r('#bbccdd',40,13, 3,16);_r('#ccddee',43,11, 2,18);}
-  } else if(ci===5){ // メカ竜 BUSTER - 竜の翼＋尻尾＋ブレス (暗黒竜)
-    const t2b=Date.now();
-    const wfd=atk>0?10:moving?Math.sin(t2b/180)*9|0:Math.sin(t2b/440)*3|0;
-    // 翼膜 (先に描いてボーンを上書き)
-    ctx.save();
-    ctx.globalAlpha=0.88;
-    _r('#3a0a3a',-21,-2+wfd,16, 9);_r('#320838',-19, 6+wfd,14, 7);
-    _r('#2a0630',-16,12+wfd,11, 6);_r('#200428',-12,17+wfd, 8, 5);
-    ctx.globalAlpha=0.42;
-    _r('#dd1100',-22,-3+wfd,17,10);_r('#cc0900',-20, 5+wfd,15, 8);
-    _r('#bb0700',-17,11+wfd,12, 7);_r('#aa0500',-13,16+wfd, 9, 6);
-    ctx.globalAlpha=1;ctx.restore();
-    // 翼の骨格 (上腕→前腕→指骨)
-    _r(OL,-6,10+wfd, 5,16);_r('#3a1030',-5,11+wfd, 3,14);
-    _r(OL,-11, 4+wfd, 5,12);_r('#2e0c28',-10, 5+wfd, 3,10);
-    _r(OL,-18,-4+wfd, 5,14);_r('#240920',-17,-3+wfd, 3,12);
-    _r(OL,-22, 1+wfd, 4,12);_r('#1e0818',-21, 2+wfd, 2,10);
-    // 翼爪 (赤い先端)
-    _r('#cc2200',-19,-6+wfd, 3, 5);_r('#ff5500',-18,-7+wfd, 2, 3);
-    _r('#aa1800',-23, 1+wfd, 3, 4);_r('#ff3300',-22, 0+wfd, 2, 3);
-    // 肩装甲 (暗い金属)
-    _r(OL,-5,16, 6,16);_r('#100818',-4,17, 5,14);_r('#ff3300',-4,17, 5, 2);
-    _r(OL,28,16, 8,16);_r('#100818',29,17, 6,14);_r('#ff3300',29,17, 6, 2);
-    // 尻尾 (下に垂れる)
-    const ts2=atk>0?2:Math.sin(t2b/270)*4|0;
-    _r(OL,-4,34, 6, 6);_r('#100818',-3,35, 4, 4);
-    _r(OL,-6,39+ts2, 5, 7);_r('#0a0612',-5,40+ts2, 3, 5);
-    _r(OL,-6,46+ts2, 4, 7);_r('#100818',-5,47+ts2, 2, 5);
-    _r(OL,-8,52+ts2, 4, 5);_r('#0a080e',-7,53+ts2, 2, 3);_r('#ff2200',-7,55+ts2, 2, 3);
-    // 口元ブレスエフェクト
+  } else if(ci===5){ // 装甲ロボット BUSTER - 肩キャノン＋バックスラスター
+    const t2b=frameTime;
+    // バックスラスターパック
+    _r(OL,-8,17, 7,18);_r('#1a2530',-7,18, 5,16);_r('#2a3540',-7,18, 5, 2);
+    _r(OL,-9,32, 6, 6);_r('#0e1824',-8,33, 4, 5); // ノズル
+    // スラスター炎 (移動・攻撃・ジェット中)
+    if(moving||atk>0||isJetting){
+      const fl=Math.sin(t2b/75)*.3+.7;
+      ctx.globalAlpha=fl*.85;_r('#ff6600',-8,37, 5, 7);
+      ctx.globalAlpha=fl*.5; _r('#ffcc00',-7,40, 3, 9);
+      ctx.globalAlpha=fl*.22;_r('#ffffff',-7,43, 3, 6);
+      ctx.globalAlpha=1;
+    }
+    // 左肩キャノン
+    _r(OL,-6,13,11,10);_r('#1a2530',-5,14, 9, 8);_r('#2a3a4a',-5,14, 9, 2);
+    _r(OL,-10,16, 5, 6);_r('#0e1824',-9,17, 3, 4);_r('#2a4466',-10,20, 5, 2); // 砲口
+    // 右肩キャノン
+    _r(OL,27,13,11,10);_r('#1a2530',28,14, 9, 8);_r('#2a3a4a',28,14, 9, 2);
+    _r(OL,37,16, 5, 6);_r('#0e1824',38,17, 3, 4);_r('#2a4466',37,20, 5, 2);
+    // 胸部コアライト
+    _r('#ffaa00',11,24, 8, 4);_r('#ffcc44',12,25, 6, 2);_r('#ffffff',13,25, 2, 1);
+    // レーザー発射エフェクト (atk時)
     if(atk>=1){
       ctx.save();
       const bA=atk>=3?0.92:0.68;
-      ctx.globalAlpha=bA;   _r('#ff1100',34, 6,10, 6);
-      ctx.globalAlpha=bA*.7;_r('#ff5500',42, 4,14, 8);
-      ctx.globalAlpha=bA*.5;_r('#ffaa00',54, 2,18,10);
-      ctx.globalAlpha=bA*.25;_r('#ffffff',70, 0,22,13);
+      ctx.globalAlpha=bA;   _r('#ff8800',34, 6,10, 6);
+      ctx.globalAlpha=bA*.7;_r('#ffaa44',42, 4,14, 8);
+      ctx.globalAlpha=bA*.5;_r('#ffcc88',54, 2,18,10);
+      ctx.globalAlpha=bA*.22;_r('#ffffff',70, 0,22,13);
       ctx.globalAlpha=1;ctx.restore();
     }
   }}
@@ -685,45 +682,33 @@ function drawAnimalHead(ci,_r,AC,atk){
     _r('#223344',18,15,14, 2); _r('#334455',19,15,12, 1);
     break;
   }
-  case 5: { // ===== メカ竜 BUSTER - 竜の頭 (暗黒竜) =====
-    const DK1='#2a2030',DK2='#1e1826',DK3='#14101e',DKSH='#0a080e';
-    // 大角2本 (後ろに大きく反る)
-    _r(OL, 3,-28, 7,30); _r('#330000', 4,-27, 5,28); _r('#770000', 4,-28, 4,12); _r('#cc2200', 5,-30, 2, 8); _r('#ff5500', 5,-32, 2, 5);
-    _r(OL,17,-16, 6,18); _r('#220000',18,-15, 4,16); _r('#550000',18,-16, 3, 7); _r('#cc1100',19,-17, 2, 4);
-    // 頭本体 (暗紫グレー - 竜らしい非爬虫類系)
-    _r(OL, 2, 0,24,14); _r(DK2, 3, 1,22,12); _r(DK1, 3, 1,22, 2);
-    _r(OL, 0, 3,26, 8); _r(DK3, 1, 4,24, 6);
-    // 鱗模様ハイライト
-    _r('#332a40', 4, 3, 4, 2); _r('#332a40',10, 3, 4, 2); _r('#332a40',16, 4, 4, 2);
-    _r('#332a40', 6, 6, 4, 2); _r('#332a40',12, 6, 4, 2); _r('#332a40',20, 6, 4, 2);
-    // 眉骨 (重くせり出した竜眉)
-    _r(DKSH,13, 1,16, 4); _r('#0a0808',15, 0,12, 3);
-    // 燃える金色の目 (竜眼)
-    _r(OL,15, 3,11, 7); _r('#080400',16, 4, 9, 5);
-    ctx.globalAlpha=0.62;_r('#ff7700',13, 2,14, 9);ctx.globalAlpha=1.0;
-    _r('#cc5500',17, 4, 7, 5); _r('#ff9900',18, 4, 5, 5);
-    _r('#ffcc00',18, 4, 4, 2); _r('#ffffff',18, 4, 2, 1);
-    _r('#1a0800',21, 5, 1, 3);
-    // 上顎の牙
-    _r(OL,22, 1, 3, 6); _r(DK3,23, 2, 2, 5); _r('#dd2200',23, 1, 2, 1);
-    _r(OL,28, 0, 3, 7); _r(DK3,29, 1, 2, 6); _r('#dd2200',29, 0, 2, 1);
-    _r(OL,33,-1, 3, 7); _r(DK3,34, 0, 2, 6); _r('#dd2200',34,-1, 2, 1);
-    // 長い顎
-    _r(OL,22, 5,18, 8); _r(DK3,23, 6,16, 6); _r(DK2,23, 6,16, 2);
-    _r(OL,36, 5, 9, 8); _r(DKSH,37, 6, 7, 6);
-    _r(DK3,34, 9, 3, 3); _r(DKSH,35,10, 2, 2);
-    // 下顎 (攻撃で大きく開く)
+  case 5: { // ===== 装甲ロボット BUSTER =====
+    const MT1='#1a2838',MT2='#243444',MT3='#2e4050',MHL='#4a6070',MGW=AC;
+    // アンテナ (センサー)
+    _r(OL,13,-10, 4, 6);_r(MT2,14,-9, 2, 5);_r('#ff2200',13,-11, 4, 3);
+    // ヘルメット上面プレート
+    _r(OL, 2, 0,28, 4);_r(MT3, 3, 1,26, 3);_r(MHL, 3, 1,26, 1);
+    // サイドパネル(左)
+    _r(OL, 2, 4, 8,14);_r(MT2, 3, 5, 6,12);_r(MHL, 3, 5, 6, 1);
+    _r(MT1, 4, 7, 4, 3);_r(MT1, 4,12, 4, 3); // リベット
+    // サイドパネル(右)
+    _r(OL,22, 4, 8,14);_r(MT2,23, 5, 6,12);_r(MHL,23, 5, 6, 1);
+    _r(MT1,24, 7, 4, 3);_r(MT1,24,12, 4, 3);
+    // バイザー (大きな横長スロット)
+    _r(OL, 9, 4,14, 9);_r('#040c14',10, 5,12, 7); // バイザー枠・黒地
+    ctx.globalAlpha=0.9;_r(MGW,10, 5,12, 3);ctx.globalAlpha=0.45;_r(MGW,10, 8,12, 4);ctx.globalAlpha=1;
+    _r('#ffffff',11, 5, 4, 1); // 光沢
+    // 攻撃時: バイザー輝度UP
     if(atk>0){
-      _r(OL,22,13,22, 9); _r(DKSH,23,14,20, 7);
-      _r('#ffe8bb',23,12, 2, 5); _r('#ffe8bb',28,12, 2, 5); _r('#ffe8bb',33,12, 2, 5); _r('#ffe8bb',38,12, 2, 4);
-      _r('#ffe8bb',26,20, 2,-4); _r('#ffe8bb',31,20, 2,-4); _r('#ffe8bb',36,20, 2,-4);
-      _r('#ff0000',24,13,16, 7); _r('#ff4400',25,14,14, 5); _r('#ff8800',27,15,10, 4); _r('#ffcc00',29,16, 6, 2); _r('#ffffff',31,17, 3, 1);
-    } else {
-      _r(OL,22,13,22, 5); _r(DKSH,23,14,20, 3);
-      _r('#ffe8bb',24,12, 2, 3); _r('#ffe8bb',29,12, 2, 3); _r('#ffe8bb',35,12, 2, 3);
+      ctx.globalAlpha=0.28+atk*.07;_r(MGW, 8, 3,16,11);ctx.globalAlpha=1;
     }
-    // 首移行
-    _r(OL, 3,14,20, 5); _r(DKSH, 4,15,18, 4); _r(DK3, 4,15, 9, 2);
+    // 頭頂~後部装甲
+    _r(OL, 9, 0,14, 5);_r(MT2,10, 1,12, 4);
+    // 顎グリル
+    _r(OL, 4,16,24, 5);_r(MT2, 5,17,22, 4);
+    for(let k=0;k<4;k++){_r(MT1, 6+k*5,18, 3, 3);}
+    // 首プレート
+    _r(OL, 3,19,22, 2);_r(MT3, 4,19,20, 2);
     break;
   }
   }
@@ -738,7 +723,7 @@ const CHARS=[
   {name:'オオカミ型',nick:'MIGUEL', dna:'狼DNA',  col:'#3a4aaa',w:30,h:48,spd:5.5,jmp:-9.0,maxHp:5,atkCd:16,atkLabel:'剣閃撃',    glide:false,djump:true, wallSlide:true, ability:'二段ジャンプ・壁張付き【主人公】'},
   {name:'サル型',   nick:'KIBA',    dna:'猿DNA',  col:'#aa7722',w:28,h:44,spd:6.8,jmp:-10.0,maxHp:5,atkCd:14,atkLabel:'電磁ムチ',  glide:false,djump:true, wallSlide:true, ability:'最速・電磁ムチ引寄せ・壁張付き・二段J・踏みつけトランポリン'},
   {name:'サイ型',   nick:'REX',     dna:'犀DNA',  col:'#556677',w:36,h:46,spd:5.5,jmp:-9.0, maxHp:7, atkCd:20,atkLabel:'猛突進',    glide:false,djump:true, wallSlide:false,ability:'HP最大・攻撃1.5倍・ボス被ダメ軽減・突進無敵'},
-  {name:'メカ竜型', nick:'BUSTER',  dna:'竜DNA',  col:'#1a1030',w:36,h:48,spd:4.8,jmp:-9.2, maxHp:10,atkCd:22,atkLabel:'レーザー砲', glide:true, djump:true, wallSlide:false,ability:'レーザー砲・アーマー(2回に1回無効化)・ホーミングミサイル・空中突進無制限'},
+  {name:'ロボ型',   nick:'BUSTER',  dna:'メカコア',col:'#1e2c3a',w:36,h:48,spd:4.8,jmp:-9.2, maxHp:10,atkCd:22,atkLabel:'レーザー砲', glide:true, djump:true, wallSlide:false,ability:'レーザー砲・アーマー(2回に1回無効化)・ホーミングミサイル・空中突進無制限'},
 ];
 
 // ================================================================
@@ -986,10 +971,11 @@ function buildStageData(){
 }
 
 // 星
-const STARS=Array.from({length:200},()=>({
+const STARS=Array.from({length:120},()=>({
   x:Math.random()*WORLD_W, y:Math.random()*350,
   s:Math.random()<.15?2:1, p:.05+Math.random()*.35, b:Math.random()>.8
 }));
+let frameTime=0;
 
 // ================================================================
 //  ゲーム変数
@@ -1448,7 +1434,7 @@ function doJet(){
     particles.push({x:ox,y:player.y+player.h*.6,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1.2,col:Math.random()<.4?'#ffffff':jtCol,life:20});
   }
 }
-const MAX_PARTICLES=280;
+const MAX_PARTICLES=180;
 function burst(x,y,col,n){for(let i=0;i<n;i++){if(particles.length>=MAX_PARTICLES)break;const a=Math.random()*Math.PI*2,s=Math.random()*4+1;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1.5,col,life:22});}}
 function deathBurst(x,y){for(let i=0;i<14;i++){const a=Math.random()*Math.PI*2,s=Math.random()*5+2;particles.push({x:x+15,y:y+18,vx:Math.cos(a)*s,vy:Math.sin(a)*s-2,col:'#ff5533',life:36});}}
 
@@ -2366,7 +2352,7 @@ function dr(x,y,w,h,col){ctx.fillStyle=col;ctx.fillRect(Math.floor(x),Math.floor
 //  敵描画 (タイプ別・手続き型)
 // ================================================================
 function drawEnemies(){
-  const t=Date.now();
+  const t=frameTime;
   enemies.forEach(e=>{
     if(e.hp<=0)return;
     const ex=Math.floor(e.x-cam.x);if(ex>W+60||ex+e.w<-60)return;
@@ -2547,7 +2533,7 @@ function drawEnemies(){
     }
     // 毒インジケーター
     if(e.poisoned>0){
-      const pg=Math.floor(Date.now()/250)%2;
+      const pg=Math.floor(frameTime/250)%2;
       ctx.globalAlpha=0.28+pg*.14;dr(ex,ey,e.w,e.h,'#22ee00');ctx.globalAlpha=1;
       for(let k=0;k<e.poisoned;k++)dr(ex+4+k*7,ey-15,5,5,'#44ff22');
     }
@@ -2581,7 +2567,7 @@ function drawGoal(){
   if(bossTriggered&&!bossDefeated)return;
   const gx=Math.floor(GOAL_X-cam.x);
   if(gx>W+60||gx+20<-60)return;
-  const t=Date.now();
+  const t=frameTime;
   // 石柱
   dr(gx-6,H-60-150,12,150,'#1a1a28');dr(gx-10,H-60-154,20,8,'#22223a');
   dr(gx-6,H-60-150,12,3,'#2e2e44');
@@ -2659,7 +2645,7 @@ function drawBoss(){
   if(!boss||boss.hp<=0)return;
   const bx=Math.floor(boss.x-cam.x),by=Math.floor(boss.y);
   if(bx>W+160||bx+boss.w<-160)return;
-  const t=Date.now();
+  const t=frameTime;
   switch(boss.type){
     case 'susanoo':   drawBossSusanoo(bx,by,t);break;
     case 'takemikazu':drawBossTakemikazu(bx,by,t);break;
@@ -2984,7 +2970,7 @@ function drawStageClear(){
   const rankColMap={S:'#ffdd00',A:'#aaffaa',B:'#88aaff',C:'#cc8888'};
   const rankCol=rankColMap[rank]||'#888888';
   dr(0,0,W,H,'#020210');
-  STARS.forEach(s=>{const sx=(s.x%W+W)%W;if(!(s.b&&Math.floor(Date.now()/500)%2))dr(sx,s.y,s.s,s.s,'#fff');});
+  STARS.forEach(s=>{const sx=(s.x%W+W)%W;if(!(s.b&&Math.floor(frameTime/500)%2))dr(sx,s.y,s.s,s.s,'#fff');});
   ctx.textAlign='center';
   // ステージ番号バッジ
   dr(W/2-60,H*.08,120,22,'#0a1430');
@@ -3037,7 +3023,7 @@ function drawStageClear(){
       ctx.fillText(`${i+1}. ${s.char}  ${String(s.score).padStart(7,'0')}  ${s.date}`,W/2,H*.70+i*17);
     });
   }
-  if(Math.floor(Date.now()/500)%2){
+  if(Math.floor(frameTime/500)%2){
     ctx.fillStyle=isLast?'#ff88ff':'#aabbff';
     ctx.font=`bold ${Math.min(W*.022,16)}px monospace`;ctx.textAlign='center';
     ctx.fillText(isLast?'>> PRESS START TO TITLE <<':'>> PRESS START - NEXT STAGE >>',W/2,H*.96);
@@ -3052,7 +3038,7 @@ function drawBg(){
   const scfg=STAGE_CFG[currentStage-1];
   dr(0,0,W,H,scfg?scfg.bgMain:'#01010a');
 
-  const t=Date.now();
+  const t=frameTime;
   const st=currentStage;
 
   if(st<=5){
@@ -3275,7 +3261,7 @@ function drawBg(){
 function drawTerrain(){
   const scfg=STAGE_CFG[currentStage-1];
   const tM=scfg.tMain,tH=scfg.tHL,tH2=scfg.tHL2,tS=scfg.tSide,tA=scfg.tAcc;
-  const t=Date.now();
+  const t=frameTime;
   TERRAIN.forEach(ter=>{
     const tx=ter.x-cam.x;if(tx>W+60||tx+ter.w<-60)return;
     // 天井 (ceil)
@@ -3374,7 +3360,7 @@ function drawBossOrb(){
   const oy=Math.floor(bossOrb.y);
   if(ox<-50||ox>W+50)return;
   const col=ORB_COLORS[bossOrb.stage-1];
-  const t=Date.now();
+  const t=frameTime;
   const gl=Math.sin(t/280)*.5+.5;
   // 外グロウ
   ctx.globalAlpha=0.18+gl*.16;
@@ -3406,7 +3392,7 @@ function drawBossOrb(){
   }
 }
 function drawStageItems(){
-  const t=Date.now()/400;
+  const t=frameTime/400;
   stageItems.forEach(it=>{
     if(it.collected)return;
     const ix=Math.floor(it.x-cam.x);
@@ -3438,7 +3424,7 @@ function drawStageItems(){
       ctx.globalAlpha=0.16+Math.sin(it.anim+t*1.2)*.08;dr(ix-1,iy-20,22,30,'#4488ff');ctx.globalAlpha=1;
     }else{
       // Chip crystal - ~20x22px
-      const g=Math.floor(Date.now()/200)%2;
+      const g=Math.floor(frameTime/200)%2;
       dr(ix,iy+6,20,12,'#443300');dr(ix+2,iy+8,16,8,g?'#ffcc00':'#aa8800');
       dr(ix+6,iy,8,22,'#443300');dr(ix+8,iy+1,4,20,g?'#ffee44':'#ccaa00');
       dr(ix+7,iy+8,6,6,'#ffffff');
@@ -3569,7 +3555,7 @@ function drawHUD(){
   ctx.font='bold 9px monospace';ctx.textAlign='left';
   let stX=10;
   if(player.powerTimer>0){
-    const pBlink=player.powerTimer<120&&Math.floor(Date.now()/200)%2;
+    const pBlink=player.powerTimer<120&&Math.floor(frameTime/200)%2;
     ctx.fillStyle=pBlink?'#ff4400':'#ff8800';
     ctx.fillText('PWR! '+Math.ceil(player.powerTimer/60)+'s',stX,58);stX+=68;
   }
@@ -3615,7 +3601,7 @@ function drawHUD(){
       ctx.globalAlpha=1;
     }
     // 現在のステージのオーブがまだなら点滅
-    if(bossOrb&&!bossOrb.collected&&Math.floor(Date.now()/350)%2){
+    if(bossOrb&&!bossOrb.collected&&Math.floor(frameTime/350)%2){
       const cx=32+(currentStage-1)*14,cy=orbY-5;
       ctx.globalAlpha=0.6;ctx.fillStyle=ORB_COLORS[currentStage-1];
       ctx.beginPath();ctx.arc(cx,cy,5,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
@@ -3629,7 +3615,7 @@ function drawHUD(){
   if(lvupFlash>0){
     const fa=lvupFlash>120?1:lvupFlash/120;
     ctx.globalAlpha=fa;
-    const fg=Math.floor(Date.now()/100)%2?'#ffee00':'#ffffff';
+    const fg=Math.floor(frameTime/100)%2?'#ffee00':'#ffffff';
     ctx.fillStyle=fg;ctx.font=`bold ${Math.min(W*.048,20)}px monospace`;ctx.textAlign='center';
     ctx.fillText(`★ WEAPON LV.${player.weaponLv+1} ★`,W/2,H*.42);
     ctx.fillStyle='#ff8800';ctx.font=`bold ${Math.min(W*.03,13)}px monospace`;
@@ -3680,7 +3666,7 @@ function drawCircleBtn(b,held,bg,hbg,br,hbr,tc,lb){
 }
 function drawBtns(){
   const z=getBtns();
-  const jetOn=player&&player.jetActive&&Math.floor(Date.now()/60)%2;
+  const jetOn=player&&player.jetActive&&Math.floor(frameTime/60)%2;
   const jetBg='#081a12',jetHbg='#116644',jetBr='#224433',jetHbr='#33ffaa',jetTc='#33bb88';
   const btns=[
     {b:z.left,  lb:'◀',   held:touchHeld.left||keys['ArrowLeft']||keys['a'],
@@ -3751,7 +3737,7 @@ function scanlines(){ctx.fillStyle='rgba(0,0,0,0.16)';for(let y=0;y<H;y+=3)ctx.f
 // ================================================================
 function drawStory(){
   dr(0,0,W,H,'#02020e');
-  STARS.forEach(s=>{const sx=(s.x%W+W)%W;if(!(s.b&&Math.floor(Date.now()/500)%2))dr(sx,s.y,s.s,s.s,'#fff');});
+  STARS.forEach(s=>{const sx=(s.x%W+W)%W;if(!(s.b&&Math.floor(frameTime/500)%2))dr(sx,s.y,s.s,s.s,'#fff');});
   const fs=Math.min(W*.042,17), lh=fs+10;
   const lines=[
     ['月の裏側','#d8eaff',true],
@@ -3833,7 +3819,7 @@ function drawStory(){
   if(!storyDone){
     const sw2=54,sh2=Math.min(H*.28,100),sx2=W-sw2-6,sy2=H/2-sh2/2;
     ctx.globalAlpha=0.55;dr(sx2,sy2,sw2,sh2,'#001133');ctx.globalAlpha=1;
-    ctx.strokeStyle=Math.floor(Date.now()/400)%2?'#335566':'#4488aa';ctx.lineWidth=1.5;
+    ctx.strokeStyle=Math.floor(frameTime/400)%2?'#335566':'#4488aa';ctx.lineWidth=1.5;
     ctx.strokeRect(sx2,sy2,sw2,sh2);
     ctx.fillStyle='#6699bb';ctx.font=`bold ${Math.min(W*.028,12)}px monospace`;ctx.textAlign='center';
     // 縦書き風に "SKIP"
@@ -3844,8 +3830,8 @@ function drawStory(){
   if(storyDone){
     const bw=Math.min(W*.5,220),bh=36,bx=W/2-bw/2,by=H*.85;
     ctx.globalAlpha=0.85;dr(bx,by,bw,bh,'#001133');ctx.globalAlpha=1;
-    ctx.strokeStyle=Math.floor(Date.now()/350)%2?'#4488ff':'#88bbff';ctx.lineWidth=2;ctx.strokeRect(bx,by,bw,bh);
-    ctx.fillStyle=Math.floor(Date.now()/350)%2?'#88bbff':'#ffffff';
+    ctx.strokeStyle=Math.floor(frameTime/350)%2?'#4488ff':'#88bbff';ctx.lineWidth=2;ctx.strokeRect(bx,by,bw,bh);
+    ctx.fillStyle=Math.floor(frameTime/350)%2?'#88bbff':'#ffffff';
     ctx.font=`bold ${Math.min(W*.036,15)}px monospace`;ctx.textAlign='center';
     ctx.fillText('▼  GAME  START  ▼',W/2,by+bh*.68);
   }
@@ -3857,7 +3843,7 @@ function drawStory(){
 // ================================================================
 function drawTitle(){
   dr(0,0,W,H,'#02020e');
-  STARS.forEach(s=>{const sx=(s.x%W+W)%W;if(!(s.b&&Math.floor(Date.now()/500)%2))dr(sx,s.y,s.s,s.s,'#fff');});
+  STARS.forEach(s=>{const sx=(s.x%W+W)%W;if(!(s.b&&Math.floor(frameTime/500)%2))dr(sx,s.y,s.s,s.s,'#fff');});
   const EX=70,EY=55,ER=44;
   for(let dy=-ER;dy<=ER;dy+=2)for(let dx=-ER;dx<=ER;dx+=2){if(dx*dx+dy*dy<=ER*ER)dr(EX+dx,EY+dy,2,2,(dx+dy)%8<3?'#1a4a90':'#1a6a28');}
   // 月面
@@ -3891,7 +3877,7 @@ function drawTitle(){
     ctx.fillStyle='#334';ctx.font=`${Math.min(W*.018,10)}px monospace`;
     ctx.fillText('(セーブデータが消えます)',W/2,tb.newg.y+42);
   }else{
-    if(Math.floor(Date.now()/500)%2){ctx.fillStyle='#ffee44';ctx.font=`bold ${Math.min(W*.025,18)}px monospace`;ctx.fillText('>> PRESS START <<',W/2,H*.8);}
+    if(Math.floor(frameTime/500)%2){ctx.fillStyle='#ffee44';ctx.font=`bold ${Math.min(W*.025,18)}px monospace`;ctx.fillText('>> PRESS START <<',W/2,H*.8);}
   }
   scanlines();
 }
@@ -3944,7 +3930,7 @@ function drawCharSelect(){
 
 function drawArenaWalls(){
   if(!bossTriggered||bossDefeated)return;
-  const t=Date.now();
+  const t=frameTime;
   const gl=Math.sin(t/220)*.5+.5;
   const drawWall=(wx)=>{
     const sx=Math.floor(wx-cam.x);
@@ -3974,7 +3960,7 @@ function drawArenaWalls(){
 }
 
 function drawHazards(){
-  const now=Date.now();
+  const now=frameTime;
   // 天井レーザー
   HAZARD_LASERS.forEach(l=>{
     const sx=Math.floor(l.x-cam.x);
@@ -4036,7 +4022,7 @@ function drawPitSpikes(){
 //  ゲームプレイ描画
 // ================================================================
 function drawZeroGZones(){
-  const t=Date.now();
+  const t=frameTime;
   ZERO_G_ZONES.forEach(z=>{
     const x1=Math.floor(z.x1-cam.x),x2=Math.floor(z.x2-cam.x);
     if(x2<-60||x1>W+60)return;
@@ -4073,7 +4059,7 @@ function drawPlay(){
     burst(player.x-cam.x+(player.wallDir>0?player.w:0),player.y+player.h*.6,'#aabbff',1);
   // Lv2 オーラ
   if(player&&player.weaponLv===2){
-    const ax=Math.floor(player.x-cam.x+player.w/2),ay=Math.floor(player.y+player.h/2),tt=Date.now();
+    const ax=Math.floor(player.x-cam.x+player.w/2),ay=Math.floor(player.y+player.h/2),tt=frameTime;
     ctx.globalAlpha=0.14+Math.sin(tt/130)*.07;ctx.fillStyle='#ff8800';
     ctx.beginPath();ctx.arc(ax,ay,28,0,Math.PI*2);ctx.fill();
     ctx.globalAlpha=0.1+Math.sin(tt/90)*.06;ctx.fillStyle='#ffdd44';
@@ -4083,7 +4069,7 @@ function drawPlay(){
   // LVアップグロー
   if(player&&lvupFlash>0){
     const ax=Math.floor(player.x-cam.x+player.w/2),ay=Math.floor(player.y+player.h/2);
-    const fa=(lvupFlash/180)*Math.abs(Math.sin(Date.now()/55));
+    const fa=(lvupFlash/180)*Math.abs(Math.sin(frameTime/55));
     ctx.globalAlpha=fa*0.55;ctx.fillStyle='#ffee00';
     ctx.beginPath();ctx.arc(ax,ay,44,0,Math.PI*2);ctx.fill();
     ctx.globalAlpha=fa*0.35;ctx.fillStyle='#ffffff';
@@ -4094,7 +4080,7 @@ function drawPlay(){
   projectiles.forEach(p=>{
     const bx=Math.floor(p.x-cam.x),by=Math.floor(p.y);
     if(p.wlv>=1){
-      const now=Date.now(),cr=Math.max(p.w,p.h)/2;
+      const now=frameTime,cr=Math.max(p.w,p.h)/2;
       ctx.globalAlpha=0.16+Math.sin(now/90)*.06;
       ctx.fillStyle=p.wlv===2?'#ff8800':'#ffdd44';
       ctx.beginPath();ctx.arc(bx+p.w/2,by+p.h/2,cr+8,0,Math.PI*2);ctx.fill();
@@ -4182,7 +4168,7 @@ function drawPlay(){
       ctx.globalAlpha=0.5;ctx.beginPath();ctx.arc(-r2*.3,-r2*.35,r2*.35,0,Math.PI*2);ctx.fillStyle='#888855';ctx.fill();ctx.globalAlpha=1;
       // 導火線（上方向）
       ctx.fillStyle='#774422';ctx.fillRect(-1,-r2-5,2,5);
-      if(Math.floor(Date.now()/80)%2){ctx.fillStyle='#ffcc00';ctx.fillRect(-2,-r2-9,3,3);}
+      if(Math.floor(frameTime/80)%2){ctx.fillStyle='#ffcc00';ctx.fillRect(-2,-r2-9,3,3);}
       else{ctx.fillStyle='#ff8800';ctx.fillRect(-1,-r2-8,2,2);}
       ctx.restore();
     }else if(p.needle){
@@ -4258,7 +4244,7 @@ function drawPlay(){
     if(player.jetActive){
       const scx=Math.floor(player.x-cam.x)+player.w/2;
       const scy=Math.floor(player.y)+player.h/2;
-      const pulse=Math.sin(Date.now()*.022);
+      const pulse=Math.sin(frameTime*.022);
       const sr=player.w*1.1+pulse*4;
       const sc='#5599ff';
       ctx.save();
@@ -4276,7 +4262,7 @@ function drawPlay(){
       ctx.globalAlpha=0.22+pulse*.08;
       ctx.strokeStyle=sc;ctx.lineWidth=1;
       for(let a=0;a<6;a++){
-        const ang=a*Math.PI/3+Date.now()*.0004;
+        const ang=a*Math.PI/3+frameTime*.0004;
         const x1=scx+Math.cos(ang)*(sr*.6),y1=scy+Math.sin(ang)*(sr*.6);
         const x2=scx+Math.cos(ang+Math.PI/3)*(sr*.6),y2=scy+Math.sin(ang+Math.PI/3)*(sr*.6);
         ctx.beginPath();ctx.moveTo(scx,scy);ctx.lineTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
@@ -4340,7 +4326,7 @@ function drawPlay(){
     ctx.fillStyle='rgba(0,0,24,0.84)';ctx.fillRect(0,0,W,H);
     // タイトル
     ctx.textAlign='center';
-    const pt=Date.now();
+    const pt=frameTime;
     ctx.globalAlpha=0.7+Math.sin(pt/400)*.15;
     ctx.fillStyle='#cc44ff';ctx.font=`bold ${Math.min(W*.07,44)}px monospace`;
     ctx.fillText('PAUSE',W/2,H*.24);
@@ -4429,7 +4415,7 @@ function draw(){
   else if(state==='gameover')drawGameOver();
   ctx.restore();
 }
-function loop(){update();draw();requestAnimationFrame(loop);}
+function loop(){frameTime=Date.now();update();draw();requestAnimationFrame(loop);}
 loop();
 </script>
 </body>
