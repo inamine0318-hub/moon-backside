@@ -4597,33 +4597,28 @@ function drawCharSelect(){
   ctx.fillStyle=AC;ctx.font=`${Math.min(W*.025,10)}px monospace`;
   ctx.fillText(c.name+'  /  '+c.dna,rx,ry+28);
 
-  // ステータスバー
+  // ステータスバー + 右側に評価テキスト
   const stats=[
     ['HP',   (c.maxHp-4)/6,  '#44ff88'],
     ['SPD',  (c.spd-3)/4,    '#44ccff'],
     ['ATK',  1-(c.atkCd-12)/22,'#ffaa44'],
     ['JMP',  (-c.jmp-8.5)/2, '#ff88ff'],
   ];
+  const grade=r=>r>=.85?'S':r>=.65?'A':r>=.40?'B':'C';
+  const desc=[['タフさ','素早さ','攻撃力','跳躍力']];
   stats.forEach(([lbl,ratio,col],si)=>{
-    const sy=ry+42+si*18,bw2=Math.floor(rw*.8);
+    const sy=ry+42+si*18, bw2=Math.floor(rw*.42), r=Math.min(1,Math.max(0,ratio));
     ctx.fillStyle='#1a1a2a';ctx.fillRect(rx,sy,bw2,10);
-    ctx.fillStyle=col;ctx.fillRect(rx,sy,Math.floor(bw2*Math.min(1,Math.max(0,ratio))),10);
+    ctx.fillStyle=col;ctx.fillRect(rx,sy,Math.floor(bw2*r),10);
     ctx.fillStyle='#aabbcc';ctx.font=`${Math.min(W*.02,9)}px monospace`;ctx.textAlign='left';
     ctx.fillText(lbl,rx-30,sy+9);
+    // 評価グレード
+    ctx.fillStyle=col;ctx.font=`bold ${Math.min(W*.028,11)}px monospace`;
+    ctx.fillText(grade(r),rx+bw2+8,sy+9);
+    // 説明
+    ctx.fillStyle='#556677';ctx.font=`${Math.min(W*.02,8)}px monospace`;
+    ctx.fillText(['タフさ','素早さ','攻撃力','跳躍力'][si],rx+bw2+26,sy+9);
   });
-
-  // アビリティ説明 (2行に折り返し)
-  ctx.fillStyle='#556688';ctx.font=`${Math.min(W*.02,9)}px monospace`;ctx.textAlign='center';
-  ctx.fillText('─── ABILITY ───',W/2,panY+panH-44);
-  ctx.fillStyle='#8899bb';ctx.font=`${Math.min(W*.022,9)}px monospace`;
-  const abl=c.ability,mid=Math.floor(abl.length/2);
-  const sp=abl.indexOf('・',mid-6);
-  if(sp>0&&abl.length>22){
-    ctx.fillText(abl.slice(0,sp),W/2,panY+panH-30);
-    ctx.fillText(abl.slice(sp+1),W/2,panY+panH-16);
-  } else {
-    ctx.fillText(abl,W/2,panY+panH-22);
-  }
 
   // STARTボタン
   const s=z.start;
