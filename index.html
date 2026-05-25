@@ -221,8 +221,8 @@ function drawSprite(ox,oy,flip){
 // ================================================================
 //  キャラクター描画 (二足歩行宇宙服 手続き型 fillRect)
 // ================================================================
-const SC_SUIT  =['#c07828','#7a4a22','#3a4aaa','#aa7722','#556677','#c8ccd8','#d0e8ff'];
-const SC_ACCNT =['#ff8800','#cc3300','#5566ee','#ffcc00','#99bbcc','#2288ff','#88ccff'];
+const SC_SUIT  =['#c07828','#7a4a22','#3a4aaa','#aa7722','#556677','#1e2c3a','#d0e8ff'];
+const SC_ACCNT =['#ff8800','#cc3300','#5566ee','#ffcc00','#99bbcc','#ffaa00','#88ccff'];
 
 function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirborne){
   ctx.save();
@@ -628,67 +628,36 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirb
       _r('#e8f4ff', 6,12, atk*6+4,26);
       ctx.globalAlpha=1;
     }
-  } else if(ci===5){ // 装甲ロボット BUSTER - 多層肩装甲＋デュアルスラスター＋アークリアクター
+  } else if(ci===5){ // 装甲ロボット BUSTER - 肩キャノン＋バックスラスター
     const t2b=frameTime;
-    const pulse=Math.sin(t2b/350);
-    const pgl=pulse*.25+.75; // パルス強度 0.5~1.0
-
-    // ====バックスラスターパック (デュアルノズル)====
-    _r(OL,-10,16, 9,22); _r('#0e1c2a',-9,17, 7,20); _r('#162030',-9,17, 7, 3);
-    _r(OL,-11,20, 4, 4); _r('#0a1420',-10,21, 2, 3); // 冷却フィン左
-    _r(OL,-11,25, 4, 4); _r('#0a1420',-10,26, 2, 3); // 冷却フィン右
-    _r(OL,-11,33, 4, 7); _r('#0a1420',-10,34, 2, 6); // ノズルA
-    _r(OL, -7,35, 4, 5); _r('#0a1420', -6,36, 2, 4); // ノズルB
+    // バックスラスターパック
+    _r(OL,-8,17, 7,18);_r('#1a2530',-7,18, 5,16);_r('#2a3540',-7,18, 5, 2);
+    _r(OL,-9,32, 6, 6);_r('#0e1824',-8,33, 4, 5);
     // スラスター炎
     if(moving||atk>0||isJetting){
-      const fl=pulse*.35+.65;
-      ctx.globalAlpha=fl*.92; _r('#ff5500',-11,39, 4,10); _r('#ff6600',-7,41, 4, 7);
-      ctx.globalAlpha=fl*.58; _r('#ffbb00',-10,44, 3,12); _r('#ffcc33',-7,46, 3, 9);
-      ctx.globalAlpha=fl*.24; _r('#ffffff', -9,49, 2, 9);  _r('#ffffff',-7,49, 2, 7);
+      const fl=Math.sin(t2b/75)*.3+.7;
+      ctx.globalAlpha=fl*.85;_r('#ff6600',-8,37, 5, 7);
+      ctx.globalAlpha=fl*.5; _r('#ffcc00',-7,40, 3, 9);
+      ctx.globalAlpha=fl*.22;_r('#ffffff',-7,43, 3, 6);
       ctx.globalAlpha=1;
     }
-
-    // ====左肩装甲 (3層プレート)====
-    _r(OL,-9,11,14,14); _r('#0e1c2a',-8,12,12,12); _r('#1a2e40',-8,12,12, 2); // 下層(大)
-    _r(OL,-7, 9,11, 6); _r('#162438',-6,10, 9, 5); _r('#2e4a60',-6,10, 9, 1); // 中層
-    _r(OL,-5, 7, 8, 4); _r('#243850',-4, 8, 6, 3); _r('#3a5870',-4, 8, 6, 1); // 上層(小)
-    // キャノン砲身
-    _r(OL,-13,17, 7, 8); _r('#0a1420',-12,18, 5, 6);
-    _r('#1a3050',-14,24, 8, 2); // 砲口フランジ
-    _r('#2a4466',-13,23, 2, 2); _r('#2a4466',-10,23, 2, 2); // 砲口ディテール
-    if(atk>0){ ctx.globalAlpha=0.28+atk*.12+pulse*.08; _r(AC,-14,16, 9,10); ctx.globalAlpha=1; }
-
-    // ====右肩装甲 (3層)====
-    _r(OL,27,11,14,14); _r('#0e1c2a',28,12,12,12); _r('#1a2e40',28,12,12, 2);
-    _r(OL,28, 9,11, 6); _r('#162438',29,10, 9, 5); _r('#2e4a60',29,10, 9, 1);
-    _r(OL,29, 7, 8, 4); _r('#243850',30, 8, 6, 3); _r('#3a5870',30, 8, 6, 1);
-    _r(OL,38,17, 7, 8); _r('#0a1420',39,18, 5, 6);
-    _r('#1a3050',38,24, 8, 2);
-    _r('#2a4466',39,23, 2, 2); _r('#2a4466',42,23, 2, 2);
-    if(atk>0){ ctx.globalAlpha=0.28+atk*.12+pulse*.08; _r(AC,37,16, 9,10); ctx.globalAlpha=1; }
-
-    // ====胸部アークリアクター (円形グロー)====
-    ctx.save();
-    const rcx=15, rcy=26;
-    ctx.globalAlpha=pgl*.22; ctx.fillStyle=AC;
-    ctx.beginPath(); ctx.arc(rcx,rcy,10,0,Math.PI*2); ctx.fill();
-    ctx.globalAlpha=pgl*.55; ctx.fillStyle=AC;
-    ctx.beginPath(); ctx.arc(rcx,rcy, 6,0,Math.PI*2); ctx.fill();
-    ctx.globalAlpha=pgl*.90; ctx.fillStyle='#ffdd88';
-    ctx.beginPath(); ctx.arc(rcx,rcy, 3,0,Math.PI*2); ctx.fill();
-    ctx.globalAlpha=1;       ctx.fillStyle='#ffffff';
-    ctx.beginPath(); ctx.arc(rcx,rcy, 1,0,Math.PI*2); ctx.fill();
-    ctx.restore();
-
-    // ====レーザー発射エフェクト====
+    // 左肩キャノン
+    _r(OL,-6,13,11,10);_r('#1a2530',-5,14, 9, 8);_r('#2a3a4a',-5,14, 9, 2);
+    _r(OL,-10,16, 5, 6);_r('#0e1824',-9,17, 3, 4);_r('#2a4466',-10,20, 5, 2);
+    // 右肩キャノン
+    _r(OL,27,13,11,10);_r('#1a2530',28,14, 9, 8);_r('#2a3a4a',28,14, 9, 2);
+    _r(OL,37,16, 5, 6);_r('#0e1824',38,17, 3, 4);_r('#2a4466',37,20, 5, 2);
+    // 胸部コアライト
+    _r('#ffaa00',11,24, 8, 4);_r('#ffcc44',12,25, 6, 2);_r('#ffffff',13,25, 2, 1);
+    // レーザー発射エフェクト
     if(atk>=1){
       ctx.save();
-      const bA=atk>=3?0.95:0.70;
-      ctx.globalAlpha=bA;    _r('#ff8800',34, 4,12, 8);
-      ctx.globalAlpha=bA*.72;_r('#ffaa44',44, 2,18,11);
-      ctx.globalAlpha=bA*.45;_r('#ffcc88',60, 0,22,14);
-      ctx.globalAlpha=bA*.20;_r('#ffffff',78,-2,26,18);
-      ctx.globalAlpha=1; ctx.restore();
+      const bA=atk>=3?0.92:0.68;
+      ctx.globalAlpha=bA;   _r('#ff8800',34, 6,10, 6);
+      ctx.globalAlpha=bA*.7;_r('#ffaa44',42, 4,14, 8);
+      ctx.globalAlpha=bA*.5;_r('#ffcc88',54, 2,18,10);
+      ctx.globalAlpha=bA*.22;_r('#ffffff',70, 0,22,13);
+      ctx.globalAlpha=1;ctx.restore();
     }
   }}
 
@@ -824,61 +793,30 @@ function drawAnimalHead(ci,_r,AC,atk){
     _r('#223344',18,15,14, 2); _r('#334455',19,15,12, 1);
     break;
   }
-  case 5: { // ===== 装甲ロボット BUSTER (白グレー/ブルー釣り目) =====
-    const MK='#1a1c24', MG1='#9aa0b0', MG2='#c0c6d4', MG3='#dde0ea', MHL='#f0f4ff';
-    const BLU=AC, BLU2='#88ccff'; // ブルーアクセント
-    const sc=Math.floor(frameTime/32)%30;
-
-    // ====ヘルメット上部プレート====
-    _r(OL, 1, 0,30, 6); _r(MG2, 2, 1,28, 5); _r(MHL, 2, 1,28, 1);
-    // 中央リブライン
-    _r(MK,14, 0, 4, 6); _r(MG3,15, 1, 2, 5);
-
-    // ====イヤーユニット左 (外に張り出す)====
-    _r(OL,-3, 5, 5,13); _r(MK,-2, 6, 3,11);
-    _r(BLU,-3, 9, 5, 4);   // センサー(青)
-    _r(MG1,-2, 6, 2, 3); _r(MG1,-2,11, 2, 3);
-    _r(OL, 2, 5, 7,14); _r(MG3, 3, 6, 5,12); _r(MHL, 3, 6, 5, 1);
-    // ====イヤーユニット右====
-    _r(OL,30, 5, 5,13); _r(MK,31, 6, 3,11);
-    _r(BLU,30, 9, 5, 4);
-    _r(MG1,32, 6, 2, 3); _r(MG1,32,11, 2, 3);
-    _r(OL,23, 5, 7,14); _r(MG3,24, 6, 5,12); _r(MHL,24, 6, 5, 1);
-
-    // ====フェイスプレート====
-    _r(OL, 1, 6,30,16); _r(MG2, 2, 7,28,14); _r(MHL, 2, 7,28, 1);
-
-    // ====釣り目 (外側が上がる鋭い目)====
-    // 左眼窩
-    _r(MK, 3, 8,12, 7);
-    // 右眼窩
-    _r(MK,17, 8,12, 7);
-    // 左眼: 釣り目 (左=outer=高い, 右=inner=低い)
-    _r(BLU, 3, 9, 4, 2); _r(BLU, 5,11, 5, 2); _r(BLU, 7,13, 4, 1);
-    _r(BLU2, 4, 9, 2, 1); _r(BLU2, 6,11, 2, 1);
-    _r(MHL, 4, 9, 1, 1);
-    // 右眼: 釣り目 (右=outer=高い, 左=inner=低い)
-    _r(BLU,25, 9, 4, 2); _r(BLU,22,11, 5, 2); _r(BLU,21,13, 4, 1);
-    _r(BLU2,26, 9, 2, 1); _r(BLU2,23,11, 2, 1);
-    _r(MHL,27, 9, 1, 1);
-    // スキャンライン
-    if(sc<26){ctx.globalAlpha=0.45;_r(BLU2,3+sc,8,2,7);ctx.globalAlpha=1;}
-    // 攻撃時: 目が強発光
-    if(atk>0){ctx.globalAlpha=0.2+atk*.06;_r(BLU2, 0, 7,32,9);ctx.globalAlpha=1;}
-
-    // 鼻ブリッジ
-    _r(OL,13,14, 6, 3); _r(MG2,14,14, 4, 3); _r(MHL,14,14, 4, 1);
-
-    // ====チークベント====
-    _r(MK, 3,16, 8, 2); _r(MK, 4,18, 7, 2); _r(MHL, 4,16, 3, 1);
-    _r(MK,21,16, 8, 2); _r(MK,21,18, 7, 2); _r(MHL,22,16, 3, 1);
-
-    // ====顎グリル====
-    _r(OL, 8,19,16, 5); _r(MK, 9,20,14, 4); _r(MHL, 9,20,14, 1);
-    for(let k=0;k<5;k++){_r(MG2,10+k*2,21, 1, 3);}
-
+  case 5: { // ===== 装甲ロボット BUSTER =====
+    const MT1='#1a2838',MT2='#243444',MT3='#2e4050',MHL='#4a6070',MGW=AC;
+    // アンテナ (センサー)
+    _r(OL,13,-10, 4, 6);_r(MT2,14,-9, 2, 5);_r('#ff2200',13,-11, 4, 3);
+    // ヘルメット上面プレート
+    _r(OL, 2, 0,28, 4);_r(MT3, 3, 1,26, 3);_r(MHL, 3, 1,26, 1);
+    // サイドパネル(左)
+    _r(OL, 2, 4, 8,14);_r(MT2, 3, 5, 6,12);_r(MHL, 3, 5, 6, 1);
+    _r(MT1, 4, 7, 4, 3);_r(MT1, 4,12, 4, 3);
+    // サイドパネル(右)
+    _r(OL,22, 4, 8,14);_r(MT2,23, 5, 6,12);_r(MHL,23, 5, 6, 1);
+    _r(MT1,24, 7, 4, 3);_r(MT1,24,12, 4, 3);
+    // バイザー (大きな横長スロット)
+    _r(OL, 9, 4,14, 9);_r('#040c14',10, 5,12, 7);
+    ctx.globalAlpha=0.9;_r(MGW,10, 5,12, 3);ctx.globalAlpha=0.45;_r(MGW,10, 8,12, 4);ctx.globalAlpha=1;
+    _r('#ffffff',11, 5, 4, 1);
+    if(atk>0){ctx.globalAlpha=0.28+atk*.07;_r(MGW, 8, 3,16,11);ctx.globalAlpha=1;}
+    // 頭頂~後部装甲
+    _r(OL, 9, 0,14, 5);_r(MT2,10, 1,12, 4);
+    // 顎グリル
+    _r(OL, 4,16,24, 5);_r(MT2, 5,17,22, 4);
+    for(let k=0;k<4;k++){_r(MT1, 6+k*5,18, 3, 3);}
     // 首プレート
-    _r(OL, 2,22,28, 2); _r(MG3, 3,22,26, 2); _r(MHL, 3,22,10, 1);
+    _r(OL, 3,19,22, 2);_r(MT3, 4,19,20, 2);
     break;
   }
   case 6: { // ===== 月神型 TSUKUYOMI (神格・ウサギ耳) =====
@@ -5300,7 +5238,7 @@ function draw(){
   else if(state==='ending')drawEnding();
   ctx.restore();
 }
-function loop(){frameTime=Date.now();update();draw();requestAnimationFrame(loop);}
+function loop(){frameTime=Date.now();try{update();draw();}catch(e){console.error('[LOOP]',e);}requestAnimationFrame(loop);}
 loop();
 </script>
 </body>
