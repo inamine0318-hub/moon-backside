@@ -882,7 +882,7 @@ const CHARS=[
   {name:'サル型',   nick:'KIBA',    dna:'猿DNA',  col:'#aa7722',w:28,h:44,spd:6.8,jmp:-10.0,maxHp:5,atkCd:14,atkLabel:'電磁ムチ',  glide:false,djump:true, wallSlide:true, ability:'最速・電磁ムチ引寄せ・壁張付き・二段J・踏みつけトランポリン'},
   {name:'サイ型',   nick:'REX',     dna:'犀DNA',  col:'#556677',w:36,h:46,spd:5.5,jmp:-9.0, maxHp:7, atkCd:20,atkLabel:'猛突進',    glide:false,djump:true, wallSlide:false,ability:'HP最大・攻撃1.5倍・ボス被ダメ軽減・突進無敵'},
   {name:'ロボ型',   nick:'BUSTER',  dna:'メカコア',col:'#1e2c3a',w:36,h:48,spd:4.8,jmp:-9.2, maxHp:10,atkCd:22,atkLabel:'レーザー砲', glide:true, djump:true, wallSlide:false,ability:'レーザー砲・アーマー(2回に1回無効化)・ホーミングミサイル・空中突進無制限'},
-  {name:'TSUKUYOMI',  nick:'TSUKUYOMI',dna:'月霊DNA', col:'#c0ddff',w:30,h:44,spd:6.4,jmp:-9.6, maxHp:4, atkCd:14,atkLabel:'瞬身斬',   glide:false,djump:true, wallSlide:true, ability:'瞬身斬（ワープ斬）・幻影分身3体・常時半透明・残像移動'},
+  {name:'TSUKUYOMI',  nick:'TSUKUYOMI',dna:'月霊DNA', col:'#c0ddff',w:30,h:44,spd:6.4,jmp:-9.6, maxHp:12,atkCd:14,atkLabel:'瞬身斬',   glide:false,djump:true, wallSlide:true, ability:'瞬身斬（ワープ斬）・幻影分身3体・常時半透明・残像移動'},
 ];
 
 // ================================================================
@@ -1596,24 +1596,24 @@ function doAttack(){
       player.ghostTrail.push({x:player.x,y:player.y,facing:player.facing,life:14});
       if(step<2){
         // 瞬身斬: ワープ経路スラッシュ
-        const slashW=step===0?50:64, slashDmg=step===0?2:3;
+        const slashW=step===0?50:64, slashDmg=step===0?3:4;
         const sx2=f>0?player.x+player.w:nx-slashW+player.w;
         projectiles.push({x:sx2,y:player.y+2,vx:f*1,vy:0,w:slashW,h:player.h-8,col:'#88ccff',dmg:slashDmg,life:6,hit:[],pierce:true,homing:false,slash_tsuku:true});
         burst(player.x+player.w*.5+(f>0?slashW*.5:-slashW*.5),player.y+player.h*.5,'#c0ddff',step===0?6:9);
         player.x=nx;sfx('slash');addShake(step===0?2:3);
       }else{
         // フィニッシャー: ワープ大斬り + lv強化で飛ぶ斬撃
-        const bigW=58+lv*8, bigDmg=2+lv;
+        const bigW=58+lv*8, bigDmg=3+lv;
         projectiles.push({x:f>0?player.x+player.w:player.x-bigW,y:player.y+2,vx:f*2,vy:0,w:bigW,h:player.h-6,col:'#c0ddff',dmg:bigDmg,life:7,hit:[],pierce:true,homing:false,slash_tsuku:true});
         player.x=nx;
         if(lv>=1){
           // 強化: 画面端まで飛ぶ斬撃
-          const fw=lv>=2?88:60, fdmg=lv>=2?3:2;
+          const fw=lv>=2?88:60, fdmg=lv>=2?4:3;
           projectiles.push({x:f>0?player.x+player.w:player.x-fw,y:player.y+4,vx:f*14,vy:0,w:fw,h:player.h-10,col:lv>=2?'#e0f0ff':'#a8d0ff',dmg:fdmg,life:30,hit:[],pierce:true,homing:false,slash_tsuku:true});
         }
         burst(player.x+player.w*.5,player.y+player.h*.5,'#c0ddff',18);addShake(4);sfx('slash');
       }
-      player.invincible=Math.max(player.invincible,14);
+      player.invincible=Math.max(player.invincible,24);
       break;
     }
   }
