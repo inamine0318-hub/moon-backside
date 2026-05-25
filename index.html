@@ -1498,8 +1498,8 @@ function doAttack(){
     }
     case 3:{ // KIBA サル - 電磁ムチ (近接引寄せ)
       const wr=step<2?58:80;
-      const wpull=lv>=1&&step===2;
-      const wdmg=step<2?1:lv>=2?3:2;
+      const wpull=step===2;
+      const wdmg=step<2?2:lv>=2?4:3;
       const wx=f>0?px+pw:px-wr, wy=py+6;
       projectiles.push({x:wx,y:wy,vx:f*1,vy:0,w:wr,h:ph-12,col:'#ffcc00',dmg:wdmg,life:9,hit:[],pierce:true,homing:false,whip:true,pull:wpull});
       burst(wx+wr/2,wy+ph/2,'#ffdd44',step<2?4:9);sfx('slash');
@@ -1555,7 +1555,7 @@ function doAttack(){
     case 4:{ // REX サイ - 強パンチ＋空中タックル
       if(!player.onGround){ // 空中: 水平タックル (2回まで)
         if(!player.charging){
-          if(player.airTackleCount>=2){ break; } // 3回目以降は不可→落下
+          if(player.airTackleCount>=3){ break; } // 4回目以降は不可→落下
           player.airTackleCount++;
           player.charging=true;player.chargeTimer=20;player.chargeDir=f;
           player.chargeSpd=17;player.chargeAir=true;
@@ -1573,7 +1573,7 @@ function doAttack(){
       burst(f>0?px+pw+4:px-4,py+ph/2,'#aabbcc',pdmg>=3?9:5);
       sfx('hit');
       if(step===2&&lv>=1){ // フィニッシャー: 衝撃波 (×1.5)
-        effects.push({type:'explode',x:px+pw/2,y:py+ph,r:lv>=2?90:68,maxTimer:18,timer:18,dmg:lv>=2?4:3,applied:false});
+        effects.push({type:'explode',x:px+pw/2,y:py+ph,r:lv>=2?115:88,maxTimer:18,timer:18,dmg:lv>=2?4:3,applied:false});
       }
       if(step===2&&lv>=2&&!player.charging){ // lv2: 突進発動
         player.charging=true;player.chargeTimer=22;player.chargeDir=f;
