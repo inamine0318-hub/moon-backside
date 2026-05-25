@@ -1742,12 +1742,14 @@ function spawnBoss(){
     dmgCd:0,onGround:false,dir:-1,chargeDir:-1,bob:0,id:9999,dropCounter:0,
     weakTimer:0,weakPoint:false,prevState:'walk',spawnTimer:280
   };
-  // ボスアリーナ用 消える足場 (既存のblink足場をリセットしてから追加)
+  // ボスアリーナ用 消える足場: ステージ3,4,7のみ
   for(let i=TERRAIN.length-1;i>=0;i--){if(TERRAIN[i].type==='blink')TERRAIN.splice(i,1);}
-  TERRAIN.push({x:7300,y:348,w:110,h:16,type:'blink',phase:0});
-  TERRAIN.push({x:7580,y:308,w:100,h:16,type:'blink',phase:500});
-  TERRAIN.push({x:7860,y:348,w:110,h:16,type:'blink',phase:250});
-  TERRAIN.push({x:8140,y:298,w:100,h:16,type:'blink',phase:750});
+  if([3,4,7].includes(currentStage)){
+    TERRAIN.push({x:7300,y:348,w:110,h:16,type:'blink',phase:0});
+    TERRAIN.push({x:7580,y:308,w:100,h:16,type:'blink',phase:500});
+    TERRAIN.push({x:7860,y:348,w:110,h:16,type:'blink',phase:250});
+    TERRAIN.push({x:8140,y:298,w:100,h:16,type:'blink',phase:750});
+  }
 }
 
 // ================================================================
@@ -2587,7 +2589,7 @@ function updateBoss(){
     boss.spawnTimer--;
     if(boss.spawnTimer<=0){
       boss.spawnTimer=boss.phase===2?300:480;
-      if(enemies.filter(e=>e.fromBoss).length<2)spawnBossMinion();
+      if(currentStage>=5&&enemies.filter(e=>e.fromBoss).length<2)spawnBossMinion();
     }
   }
   // KIBA ボスストンプ
