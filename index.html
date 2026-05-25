@@ -877,7 +877,7 @@ function drawAnimalHead(ci,_r,AC,atk){
 // ================================================================
 const CHARS=[
   {name:'タカ型',   nick:'BRUCE',   dna:'鷹DNA',  col:'#c07828',w:30,h:42,spd:5.2,jmp:-8.8,maxHp:5,atkCd:18,atkLabel:'急降下斬',  glide:true, djump:true, wallSlide:false,ability:'滑空・二段J・空中ATKで急降下爆撃'},
-  {name:'クマ型',   nick:'LARC',    dna:'熊DNA',  col:'#7a4a22',w:34,h:46,spd:5.5,jmp:-8.5,maxHp:5,atkCd:30,atkLabel:'熊パンチ',  glide:false,djump:true, wallSlide:false,ability:'攻撃力2倍・被ダメ時40%で怒り発動(1.6倍速)'},
+  {name:'クマ型',   nick:'LARC',    dna:'熊DNA',  col:'#7a4a22',w:34,h:46,spd:5.5,jmp:-8.5,maxHp:5,atkCd:20,atkLabel:'熊パンチ',  glide:false,djump:true, wallSlide:false,ability:'攻撃力2倍・被ダメ時40%で怒り発動(1.6倍速)'},
   {name:'オオカミ型',nick:'MIGUEL', dna:'狼DNA',  col:'#3a4aaa',w:30,h:48,spd:5.5,jmp:-9.0,maxHp:5,atkCd:16,atkLabel:'剣閃撃',    glide:false,djump:true, wallSlide:true, ability:'二段ジャンプ・壁張付き【主人公】'},
   {name:'サル型',   nick:'KIBA',    dna:'猿DNA',  col:'#aa7722',w:28,h:44,spd:6.8,jmp:-10.0,maxHp:5,atkCd:14,atkLabel:'電磁ムチ',  glide:false,djump:true, wallSlide:true, ability:'最速・電磁ムチ引寄せ・壁張付き・二段J・踏みつけトランポリン'},
   {name:'サイ型',   nick:'REX',     dna:'犀DNA',  col:'#556677',w:36,h:46,spd:5.5,jmp:-9.0, maxHp:7, atkCd:20,atkLabel:'猛突進',    glide:false,djump:true, wallSlide:false,ability:'HP最大・攻撃1.5倍・ボス被ダメ軽減・突進無敵'},
@@ -1462,7 +1462,9 @@ function doAttack(){
     }
     case 1:{ // LARC 熊 - 爆弾投げ（水平ロブ→バウンド爆発）
       const throwY=py+4;
+      const rageMult=(player.rageTimer>0)?1.6:1;
       const mkBomb=(vx,vy,w,dmg,rad,life)=>{
+        dmg=Math.ceil(dmg*rageMult);
         projectiles.push({x:mx,y:throwY,vx,vy,w,h:w,col:'#555520',dmg,life,hit:[],pierce:false,homing:false,bomb:true,rad,gravity:true,gravMult:0.8,bounces:0,maxBounces:2});
         for(let i=0;i<6;i++){const a=Math.PI/2+(Math.random()-.5)*.8,sp=Math.random()*2+1.5;particles.push({x:mx,y:throwY,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,col:Math.random()<.5?'#aaaa44':'#888822',life:18});}
         sfx('bomb');
@@ -2273,8 +2275,8 @@ function update(){
 }
 function tryRage(){
   if(!player||player.ci!==1||player.rageTimer>0)return;
-  if(Math.random()<0.4){
-    player.rageTimer=180;
+  if(Math.random()<0.55){
+    player.rageTimer=220;
     for(let k=0;k<18;k++){const a=Math.random()*Math.PI*2,s=Math.random()*4+2;particles.push({x:player.x+player.w/2,y:player.y+player.h*.4,vx:Math.cos(a)*s,vy:Math.sin(a)*s-2,col:k%2?'#ff6600':'#ffaa00',life:28});}
     addShake(4);
   }
