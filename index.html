@@ -1145,7 +1145,6 @@ let lvupFlash=0, stageBriefTimer=0, bossPhase2Started=false;
 let clearHp=5, clearTime=0, clearResultTimer=0;
 let cutsceneStep=0, cutsceneTimer=0, cutsceneFlash=0, cutsceneDone=false;
 let bossBannerTimer=0;
-let showHelp=false;
 let endingStartTime=0, endingDone=false;
 let enemies=[], projectiles=[], eProjectiles=[], effects=[], particles=[];
 let stageItems=[], ITEM_SPAWNS=[];
@@ -1396,13 +1395,6 @@ function handleCSTap(e){
   for(const t of e.changedTouches){
     const lp=toLogical(t.clientX,t.clientY);
     const tx=lp.x,ty=lp.y;
-    // ヘルプ表示中は閉じるボタンだけ受け付ける
-    if(showHelp){
-      if(tx>=W*.3&&tx<=W*.7&&ty>=H*.84&&ty<=H*.93)showHelp=false;
-      return;
-    }
-    // ?ボタン
-    if(tx>=W*.86&&tx<=W*.98&&ty>=H*.03&&ty<=H*.11){showHelp=true;return;}
     z.chars.forEach((b,i)=>{
       if(tx>=b.x&&tx<=b.x+b.w&&ty>=b.y&&ty<=b.y+b.h){
         if(i===6){if(getTsukuyomiUnlocked())selChar=6;}
@@ -4610,49 +4602,6 @@ function drawCharSelect(){
     ctx.fillStyle='#88ccff';ctx.font=`${Math.min(W*.022,9)}px monospace`;ctx.textAlign='center';
     ctx.fillText('▲ SELECTED',b.x+b.w/2,b.y-5);
     ctx.globalAlpha=1;
-  }
-  // ── 「?」ヘルプボタン ──
-  const hbx=W*.86,hby=H*.03,hbs=W*.12;
-  dr(hbx,hby,hbs,hbs,'#0d1428');
-  dr(hbx,hby,hbs,2,'#3355aa');dr(hbx,hby,2,hbs,'#3355aa');
-  ctx.fillStyle='#88aaff';ctx.font=`bold ${Math.min(W*.04,16)}px monospace`;ctx.textAlign='center';
-  ctx.fillText('?',hbx+hbs/2,hby+hbs*.72);
-
-  // ── ヘルプオーバーレイ ──
-  if(showHelp){
-    // 背景
-    ctx.globalAlpha=0.96;dr(W*.02,H*.03,W*.96,H*.94,'#020614');ctx.globalAlpha=1;
-    dr(W*.02,H*.03,W*.96,2,'#3366cc');dr(W*.02,H*.97-2,W*.96,2,'#3366cc');
-    dr(W*.02,H*.03,2,H*.94,'#3366cc');dr(W*.98-2,H*.03,2,H*.94,'#3366cc');
-
-    ctx.textAlign='center';
-    ctx.fillStyle='#aaccff';ctx.font=`bold ${Math.min(W*.042,16)}px monospace`;
-    ctx.fillText('HOW  TO  PLAY',W/2,H*.10);
-    dr(W*.06,H*.12,W*.88,1,'#223366');
-
-    const fs=Math.min(W*.028,11);
-    const row=(txt,col,y)=>{ctx.fillStyle=col;ctx.font=`${fs}px monospace`;ctx.textAlign='left';ctx.fillText(txt,W*.08,y);};
-    const hd=(txt,y)=>{ctx.fillStyle='#5588ff';ctx.font=`bold ${fs+1}px monospace`;ctx.textAlign='left';ctx.fillText(txt,W*.06,y);};
-
-    hd('── 操作 ──',H*.17);
-    row('左右ボタン  :  移動',         '#b8ccff',H*.24);
-    row('ジャンプボタン  :  ジャンプ / 二段J', '#b8ccff',H*.30);
-    row('ATKボタン  :  攻撃（連打でコンボ）','#b8ccff',H*.36);
-    row('JETボタン  :  滑空 / ジェット推進','#b8ccff',H*.42);
-
-    hd('── バトルの基本 ──',H*.50);
-    row('敵を倒してスコアを稼ごう',       '#99bbdd',H*.57);
-    row('ボス撃破後にオーブを回収してゴール','#99bbdd',H*.63);
-
-    hd('── コツ ──',H*.71);
-    row('★ ボスが攻撃後に光ったら弱点！ダメージ2倍','#ffcc44',H*.78);
-    row('★ アイテムでHP回復・攻撃力UP','#ffcc44',H*.84);
-
-    // 閉じるボタン
-    const cx=W*.3,cy=H*.89,cw=W*.4,ch=H*.07;
-    dr(cx,cy,cw,ch,'#0a1a44');dr(cx,cy,cw,2,'#3355cc');
-    ctx.fillStyle='#ffffff';ctx.font=`bold ${fs+1}px monospace`;ctx.textAlign='center';
-    ctx.fillText('×  CLOSE',W/2,cy+ch*.65);
   }
 
   scanlines();
