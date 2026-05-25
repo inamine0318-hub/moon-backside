@@ -877,7 +877,7 @@ function drawAnimalHead(ci,_r,AC,atk){
 // ================================================================
 const CHARS=[
   {name:'タカ型',   nick:'BRUCE',   dna:'鷹DNA',  col:'#c07828',w:30,h:42,spd:5.2,jmp:-8.8,maxHp:5,atkCd:18,atkLabel:'急降下斬',  glide:true, djump:true, wallSlide:false,ability:'滑空・二段J・空中ATKで急降下爆撃'},
-  {name:'クマ型',   nick:'LARC',    dna:'熊DNA',  col:'#7a4a22',w:34,h:46,spd:3.2,jmp:-8.5,maxHp:5,atkCd:30,atkLabel:'熊パンチ',  glide:false,djump:true, wallSlide:false,ability:'攻撃力2倍・被ダメ時40%で怒り発動(1.6倍速)'},
+  {name:'クマ型',   nick:'LARC',    dna:'熊DNA',  col:'#7a4a22',w:34,h:46,spd:5.5,jmp:-8.5,maxHp:5,atkCd:30,atkLabel:'熊パンチ',  glide:false,djump:true, wallSlide:false,ability:'攻撃力2倍・被ダメ時40%で怒り発動(1.6倍速)'},
   {name:'オオカミ型',nick:'MIGUEL', dna:'狼DNA',  col:'#3a4aaa',w:30,h:48,spd:5.5,jmp:-9.0,maxHp:5,atkCd:16,atkLabel:'剣閃撃',    glide:false,djump:true, wallSlide:true, ability:'二段ジャンプ・壁張付き【主人公】'},
   {name:'サル型',   nick:'KIBA',    dna:'猿DNA',  col:'#aa7722',w:28,h:44,spd:6.8,jmp:-10.0,maxHp:5,atkCd:14,atkLabel:'電磁ムチ',  glide:false,djump:true, wallSlide:true, ability:'最速・電磁ムチ引寄せ・壁張付き・二段J・踏みつけトランポリン'},
   {name:'サイ型',   nick:'REX',     dna:'犀DNA',  col:'#556677',w:36,h:46,spd:5.5,jmp:-9.0, maxHp:7, atkCd:20,atkLabel:'猛突進',    glide:false,djump:true, wallSlide:false,ability:'HP最大・攻撃1.5倍・ボス被ダメ軽減・突進無敵'},
@@ -3297,18 +3297,18 @@ function drawStageClear(){
   ctx.textAlign='center';
   // ステージ番号バッジ
   dr(W/2-60,H*.08,120,22,'#0a1430');
-  ctx.fillStyle='#5566aa';ctx.font=`bold ${Math.min(W*.018,12)}px monospace`;
+  ctx.fillStyle='#5566aa';ctx.font=`bold ${Math.min(W*.025,14)}px monospace`;
   ctx.fillText(`STAGE ${currentStage} / ${TOTAL_STAGES}  ${scfg.name}`,W/2,H*.08+15);
   // タイトル
   ctx.fillStyle='#040418';ctx.font=`bold ${Math.min(W*.052,42)}px monospace`;ctx.fillText('STAGE  CLEAR',W/2+2,H*.22+2);
   ctx.fillStyle=isLast?'#ff88ff':'#ffee44';ctx.fillText('STAGE  CLEAR',W/2,H*.22);
   // 次ステージ予告 or ALL CLEAR
   if(isLast){
-    ctx.fillStyle='#ff44ff';ctx.font=`bold ${Math.min(W*.024,18)}px monospace`;
+    ctx.fillStyle='#ff44ff';ctx.font=`bold ${Math.min(W*.032,20)}px monospace`;
     ctx.fillText('★ ALL STAGES COMPLETE! ★',W/2,H*.22+34);
   } else {
     const next=STAGE_CFG[currentStage];
-    ctx.fillStyle='#7788cc';ctx.font=`${Math.min(W*.02,14)}px monospace`;
+    ctx.fillStyle='#7788cc';ctx.font=`${Math.min(W*.028,16)}px monospace`;
     ctx.fillText(`NEXT: STAGE ${currentStage+1} - ${next.name} [${next.bossName}]`,W/2,H*.22+34);
   }
   const rows=[
@@ -3322,33 +3322,33 @@ function drawStageClear(){
   rows.forEach((r,i)=>{
     const isRank=r[0]==='RANK';
     dr(W/2-118,H*.33+i*24-10,236,isRank?28:22,'#0a0a22');
-    ctx.fillStyle='#556688';ctx.font=`${Math.min(W*.015,11)}px monospace`;
+    ctx.fillStyle='#556688';ctx.font=`${Math.min(W*.030,15)}px monospace`;
     ctx.textAlign='left';ctx.fillText(r[0],W/2-108,H*.33+i*24+5);
     if(isRank){
       const fs=Math.min(W*.08,38);
       ctx.fillStyle=r[2];ctx.font=`bold ${fs}px monospace`;ctx.textAlign='right';
       ctx.fillText(r[1],W/2+108,H*.33+i*24+fs*.55);
       const desc={S:'PERFECT',A:'GREAT',B:'GOOD',C:'TRY AGAIN'}[r[1]]||'';
-      ctx.fillStyle=r[2];ctx.font=`${Math.min(W*.018,11)}px monospace`;
+      ctx.fillStyle=r[2];ctx.font=`${Math.min(W*.025,13)}px monospace`;
       ctx.fillText(desc,W/2-10,H*.33+i*24+14);
     } else {
-      ctx.fillStyle=r[2];ctx.font=`bold ${Math.min(W*.018,13)}px monospace`;
+      ctx.fillStyle=r[2];ctx.font=`bold ${Math.min(W*.025,15)}px monospace`;
       ctx.textAlign='right';ctx.fillText(r[1],W/2+108,H*.33+i*24+5);
     }
   });
   const scores=getScores();
   if(scores.length){
-    ctx.fillStyle='#334455';ctx.font=`bold ${Math.min(W*.015,10)}px monospace`;ctx.textAlign='center';
+    ctx.fillStyle='#334455';ctx.font=`bold ${Math.min(W*.030,15)}px monospace`;ctx.textAlign='center';
     ctx.fillText('── BEST SCORES ──',W/2,H*.65);
     scores.forEach((s,i)=>{
       ctx.fillStyle=i===0?'#ffcc00':'#7788aa';
-      ctx.font=`${Math.min(W*.014,10)}px monospace`;ctx.textAlign='center';
+      ctx.font=`${Math.min(W*.020,13)}px monospace`;ctx.textAlign='center';
       ctx.fillText(`${i+1}. ${s.char}  ${String(s.score).padStart(7,'0')}  ${s.date}`,W/2,H*.70+i*17);
     });
   }
   if(Math.floor(frameTime/500)%2){
     ctx.fillStyle=isLast?'#ff88ff':'#aabbff';
-    ctx.font=`bold ${Math.min(W*.022,16)}px monospace`;ctx.textAlign='center';
+    ctx.font=`bold ${Math.min(W*.030,18)}px monospace`;ctx.textAlign='center';
     ctx.fillText(isLast?'>> PRESS START TO TITLE <<':'>> PRESS START - NEXT STAGE >>',W/2,H*.96);
   }
   scanlines();
@@ -4219,7 +4219,7 @@ function drawCutscene(){
   dr(cx+10,cy+16,12,2,'#b08868');
 
   // ネームプレート
-  const nfs=Math.min(W*.022,13);
+  const nfs=Math.min(W*.030,15);
   ctx.textAlign='center';
   ctx.fillStyle='#223344';ctx.font=`bold ${nfs}px monospace`;
   ctx.fillText('────────────────',W/2,H*.36);
@@ -4257,7 +4257,7 @@ function drawCutscene(){
   // タップ促進 (点滅)
   if(cutsceneTimer<=0&&cutsceneStep<CUTSCENE_LINES.length){
     if(Math.floor(frameTime/400)%2){
-      ctx.fillStyle='#8866aa';ctx.font=`${Math.min(W*.022,12)}px monospace`;
+      ctx.fillStyle='#8866aa';ctx.font=`${Math.min(W*.030,15)}px monospace`;
       ctx.textAlign='center';ctx.fillText('▼ TAP TO CONTINUE',W/2,by+bh-10);
     }
   }
@@ -4351,7 +4351,7 @@ function drawEnding(){
   const gBot=ctx.createLinearGradient(0,H*.84,0,H*.95);gBot.addColorStop(0,'transparent');gBot.addColorStop(1,'#01010a');
   dr(0,H*.84,W,H*.12,gBot);
   if(endingDone&&Math.floor(frameTime/500)%2){
-    ctx.fillStyle='#8899bb';ctx.font=`bold ${Math.min(W*.022,14)}px monospace`;ctx.textAlign='center';
+    ctx.fillStyle='#8899bb';ctx.font=`bold ${Math.min(W*.030,16)}px monospace`;ctx.textAlign='center';
     ctx.fillText('>> PRESS TO TITLE <<',W/2,H*.94);
   }
   scanlines();
@@ -4446,10 +4446,10 @@ function drawStory(){
     ctx.globalAlpha=0.55;dr(sx2,sy2,sw2,sh2,'#001133');ctx.globalAlpha=1;
     ctx.strokeStyle=Math.floor(frameTime/400)%2?'#335566':'#4488aa';ctx.lineWidth=1.5;
     ctx.strokeRect(sx2,sy2,sw2,sh2);
-    ctx.fillStyle='#6699bb';ctx.font=`bold ${Math.min(W*.028,12)}px monospace`;ctx.textAlign='center';
+    ctx.fillStyle='#6699bb';ctx.font=`bold ${Math.min(W*.036,15)}px monospace`;ctx.textAlign='center';
     // 縦書き風に "SKIP"
     'SKIP'.split('').forEach((ch,i)=>ctx.fillText(ch,sx2+sw2/2,sy2+sh2*.22+i*(sh2*.18)));
-    ctx.fillStyle='#4477aa';ctx.font=`${Math.min(W*.024,10)}px monospace`;
+    ctx.fillStyle='#4477aa';ctx.font=`${Math.min(W*.032,13)}px monospace`;
     ctx.fillText('▶▶',sx2+sw2/2,sy2+sh2*.82);
   }
   if(storyDone){
@@ -4493,16 +4493,16 @@ function drawTitle(){
     dr(tb.cont.x,tb.cont.y,tb.cont.w,3,'#4488ff');
     ctx.fillStyle='#88ccff';ctx.font=`bold ${Math.min(W*.038,22)}px monospace`;ctx.textAlign='center';
     ctx.fillText('つづきから',W/2,tb.cont.y+28);
-    ctx.fillStyle='#445566';ctx.font=`${Math.min(W*.022,13)}px monospace`;
+    ctx.fillStyle='#445566';ctx.font=`${Math.min(W*.030,15)}px monospace`;
     ctx.fillText(`ST.${sv.stage}  SCORE: ${sv.score}`,W/2,tb.cont.y+42);
     dr(tb.newg.x,tb.newg.y,tb.newg.w,tb.newg.h,'#0a0a16');
     dr(tb.newg.x,tb.newg.y,tb.newg.w,2,'#333');
     ctx.fillStyle='#556677';ctx.font=`bold ${Math.min(W*.033,18)}px monospace`;ctx.textAlign='center';
     ctx.fillText('はじめから',W/2,tb.newg.y+28);
-    ctx.fillStyle='#334';ctx.font=`${Math.min(W*.018,10)}px monospace`;
+    ctx.fillStyle='#334';ctx.font=`${Math.min(W*.025,13)}px monospace`;
     ctx.fillText('(セーブデータが消えます)',W/2,tb.newg.y+42);
   }else{
-    if(Math.floor(frameTime/500)%2){ctx.fillStyle='#ffee44';ctx.font=`bold ${Math.min(W*.025,18)}px monospace`;ctx.fillText('>> PRESS START <<',W/2,H*.8);}
+    if(Math.floor(frameTime/500)%2){ctx.fillStyle='#ffee44';ctx.font=`bold ${Math.min(W*.033,20)}px monospace`;ctx.fillText('>> PRESS START <<',W/2,H*.8);}
   }
   scanlines();
 }
@@ -4561,18 +4561,18 @@ function drawCharSelect(){
       ctx.globalAlpha=pulse;
       ctx.fillStyle='#5588aa';ctx.font=`bold ${Math.min(W*.052,20)}px monospace`;ctx.textAlign='center';
       ctx.fillText('☽',b.x+b.w/2,b.y+b.h*.5);
-      ctx.font=`${Math.min(W*.022,9)}px monospace`;
+      ctx.font=`${Math.min(W*.030,13)}px monospace`;
       ctx.fillText('？？？',b.x+b.w/2,b.y+b.h-14);
       ctx.globalAlpha=1;
     } else {
       // 通常: キャラスプライト
       ctx.save();ctx.translate(b.x+b.w/2-13,b.y+5);ctx.scale(.72,.72);
       drawCharacter(0,0,i,1,0,false,0);ctx.restore();
-      ctx.fillStyle=sel?'#ffffff':'#778';ctx.font=`bold ${Math.min(W*.022,9)}px monospace`;ctx.textAlign='center';
+      ctx.fillStyle=sel?'#ffffff':'#778';ctx.font=`bold ${Math.min(W*.030,13)}px monospace`;ctx.textAlign='center';
       ctx.fillText(c.nick,b.x+b.w/2,b.y+b.h-10);
     }
     // 主人公バッジ
-    if(i===2){ctx.fillStyle='#ffdd22';ctx.font=`${Math.min(W*.018,7)}px monospace`;ctx.fillText('★',b.x+b.w-7,b.y+8);}
+    if(i===2){ctx.fillStyle='#ffdd22';ctx.font=`${Math.min(W*.032,13)}px monospace`;ctx.fillText('★',b.x+b.w-7,b.y+8);}
   });
 
   // ── 選択キャラ 詳細パネル ──
@@ -4594,7 +4594,7 @@ function drawCharSelect(){
   ctx.textAlign='left';
   ctx.fillStyle='#ffffff';ctx.font=`bold ${Math.min(W*.036,14)}px monospace`;
   ctx.fillText(c.nick,rx,ry+14);
-  ctx.fillStyle=AC;ctx.font=`${Math.min(W*.025,10)}px monospace`;
+  ctx.fillStyle=AC;ctx.font=`${Math.min(W*.033,13)}px monospace`;
   ctx.fillText(c.name+'  /  '+c.dna,rx,ry+28);
 
   // ステータスバー + 右側に評価テキスト
@@ -4610,13 +4610,13 @@ function drawCharSelect(){
     const sy=ry+42+si*18, bw2=Math.floor(rw*.42), r=Math.min(1,Math.max(0,ratio));
     ctx.fillStyle='#1a1a2a';ctx.fillRect(rx,sy,bw2,10);
     ctx.fillStyle=col;ctx.fillRect(rx,sy,Math.floor(bw2*r),10);
-    ctx.fillStyle='#aabbcc';ctx.font=`${Math.min(W*.02,9)}px monospace`;ctx.textAlign='left';
+    ctx.fillStyle='#aabbcc';ctx.font=`${Math.min(W*.036,15)}px monospace`;ctx.textAlign='left';
     ctx.fillText(lbl,rx-30,sy+9);
     // 評価グレード
-    ctx.fillStyle=col;ctx.font=`bold ${Math.min(W*.028,11)}px monospace`;
+    ctx.fillStyle=col;ctx.font=`bold ${Math.min(W*.036,14)}px monospace`;
     ctx.fillText(grade(r),rx+bw2+8,sy+9);
     // 説明
-    ctx.fillStyle='#556677';ctx.font=`${Math.min(W*.02,8)}px monospace`;
+    ctx.fillStyle='#556677';ctx.font=`${Math.min(W*.036,15)}px monospace`;
     ctx.fillText(['タフさ','素早さ','攻撃力','跳躍力'][si],rx+bw2+26,sy+9);
   });
 
@@ -4635,7 +4635,7 @@ function drawCharSelect(){
   if(tsukuUnlocked&&selChar===6){
     const b=z.chars[6];
     ctx.globalAlpha=Math.sin(t/200)*.2+.6;
-    ctx.fillStyle='#88ccff';ctx.font=`${Math.min(W*.022,9)}px monospace`;ctx.textAlign='center';
+    ctx.fillStyle='#88ccff';ctx.font=`${Math.min(W*.030,13)}px monospace`;ctx.textAlign='center';
     ctx.fillText('▲ SELECTED',b.x+b.w/2,b.y-5);
     ctx.globalAlpha=1;
   }
@@ -5078,7 +5078,7 @@ function drawPlay(){
     ctx.fillText(cfg.name+'  —  '+cfg.sub,W/2,H*.57);
     // フェーズ通知
     ctx.globalAlpha=alpha*0.6;
-    ctx.fillStyle='#884455';ctx.font=`${Math.min(W*.026,11)}px monospace`;
+    ctx.fillStyle='#884455';ctx.font=`${Math.min(W*.034,14)}px monospace`;
     ctx.fillText(`STAGE ${currentStage} / ${TOTAL_STAGES}  BOSS BATTLE`,W/2,H*.63);
     ctx.globalAlpha=1;ctx.restore();
   }
@@ -5092,14 +5092,14 @@ function drawPlay(){
     const scfg=STAGE_CFG[currentStage-1];
     ctx.globalAlpha=alpha;
     ctx.textAlign='center';
-    ctx.fillStyle='#556699';ctx.font=`${Math.min(W*.025,11)}px monospace`;
+    ctx.fillStyle='#556699';ctx.font=`${Math.min(W*.033,14)}px monospace`;
     ctx.fillText(`STAGE ${currentStage}  ─  MISSION BRIEFING`,W/2,H*.30);
     ctx.fillStyle='#aaccff';ctx.font=`bold ${Math.min(W*.042,18)}px monospace`;
     ctx.fillText(scfg.name,W/2,H*.36);
     const brief=STAGE_BRIEF[currentStage-1]||'';
     ctx.fillStyle='#8899bb';ctx.font=`${Math.min(W*.03,13)}px monospace`;
     brief.split('\n').forEach((line,i)=>ctx.fillText(line,W/2,H*.44+i*20));
-    ctx.fillStyle='#334466';ctx.font=`${Math.min(W*.022,10)}px monospace`;
+    ctx.fillStyle='#334466';ctx.font=`${Math.min(W*.030,13)}px monospace`;
     ctx.fillText('[ TAP TO DISMISS ]',W/2,H*.62);
     ctx.globalAlpha=1;
     ctx.restore();
@@ -5123,12 +5123,12 @@ function drawPlay(){
       ctx.strokeStyle=top;ctx.lineWidth=1;ctx.globalAlpha=0.5;ctx.strokeRect(b.x,b.y,b.w,b.h);ctx.globalAlpha=1;
       ctx.fillStyle=tc;ctx.font=`bold ${Math.min(W*.042,22)}px monospace`;ctx.textAlign='center';
       ctx.fillText(label,W/2,b.y+b.h*.58);
-      if(sub){ctx.fillStyle='#445566';ctx.font=`${Math.min(W*.02,11)}px monospace`;ctx.fillText(sub,W/2,b.y+b.h*.88);}
+      if(sub){ctx.fillStyle='#445566';ctx.font=`${Math.min(W*.028,14)}px monospace`;ctx.fillText(sub,W/2,b.y+b.h*.88);}
     };
     drawPBtn(pm.resume,  '#5566ff','#aabbff','▶  ゲーム再開',null);
     drawPBtn(pm.savequit,'#cc8844','#ddaa66','💾  セーブして終了','現在地・HPを保存');
     drawPBtn(pm.title,   '#446688','#7799aa','⏎  タイトルへ戻る','セーブせずに戻る');
-    ctx.fillStyle='#334455';ctx.font=`${Math.min(W*.018,11)}px monospace`;
+    ctx.fillStyle='#334455';ctx.font=`${Math.min(W*.025,13)}px monospace`;
     ctx.fillText('P / ESC でつづける',W/2,H*.92);
   }
   scanlines();
@@ -5148,11 +5148,11 @@ function drawGameOver(){
   ctx.fillText('SCORE '+String(score).padStart(6,'0'),W/2,H*.44);
   const scores=getScores();
   if(scores.length){
-    ctx.fillStyle='#334455';ctx.font=`bold ${Math.min(W*.015,10)}px monospace`;
+    ctx.fillStyle='#334455';ctx.font=`bold ${Math.min(W*.030,15)}px monospace`;
     ctx.fillText('── BEST SCORES ──',W/2,H*.54);
     scores.slice(0,3).forEach((s,i)=>{
       ctx.fillStyle=i===0?'#ffcc00':'#7788aa';
-      ctx.font=`${Math.min(W*.014,10)}px monospace`;
+      ctx.font=`${Math.min(W*.020,13)}px monospace`;
       ctx.fillText(`${i+1}. ${s.char}  ${String(s.score).padStart(7,'0')}`,W/2,H*.59+i*14);
     });
   }
@@ -5162,13 +5162,13 @@ function drawGameOver(){
   dr(gb.retry.x,gb.retry.y,gb.retry.w,3,'#4466ff');
   ctx.fillStyle='#88aaff';ctx.font=`bold ${Math.min(W*.042,22)}px monospace`;
   ctx.fillText('▶  リトライ',W/2,gb.retry.y+gb.retry.h*.65);
-  ctx.fillStyle='#334466';ctx.font=`${Math.min(W*.02,11)}px monospace`;
+  ctx.fillStyle='#334466';ctx.font=`${Math.min(W*.028,14)}px monospace`;
   ctx.fillText(`ST.${currentStage}から再開`,W/2,gb.retry.y+gb.retry.h*.92);
   ctx.globalAlpha=0.9;dr(gb.charsel.x,gb.charsel.y,gb.charsel.w,gb.charsel.h,'#0a0a14');ctx.globalAlpha=1;
   dr(gb.charsel.x,gb.charsel.y,gb.charsel.w,2,'#445566');
   ctx.fillStyle='#667788';ctx.font=`bold ${Math.min(W*.038,20)}px monospace`;
   ctx.fillText('キャラ選択へ',W/2,gb.charsel.y+gb.charsel.h*.68);
-  ctx.fillStyle='#334455';ctx.font=`${Math.min(W*.018,11)}px monospace`;
+  ctx.fillStyle='#334455';ctx.font=`${Math.min(W*.025,13)}px monospace`;
   ctx.fillText('ENTER:リトライ  ESC:キャラ選択',W/2,H*.94);
   scanlines();
 }
