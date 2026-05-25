@@ -1602,16 +1602,14 @@ function doAttack(){
         burst(player.x+player.w*.5+(f>0?slashW*.5:-slashW*.5),player.y+player.h*.5,'#c0ddff',step===0?6:9);
         player.x=nx;sfx('slash');addShake(step===0?2:3);
       }else{
-        // フィニッシャー: 大斬り + 幻影分身3体 (常時)
+        // フィニッシャー: ワープ大斬り + lv強化で飛ぶ斬撃
         const bigW=58+lv*8, bigDmg=2+lv;
         projectiles.push({x:f>0?player.x+player.w:player.x-bigW,y:player.y+2,vx:f*2,vy:0,w:bigW,h:player.h-6,col:'#c0ddff',dmg:bigDmg,life:7,hit:[],pierce:true,homing:false,slash_tsuku:true});
         player.x=nx;
-        if(!player.phantoms)player.phantoms=[];
-        player.phantoms=[];
-        // 3体を横並びに配置 (プレイヤーの両脇)
-        const offsets=[f*-60, f*60, f*-110];
-        for(let k=0;k<3;k++){
-          player.phantoms.push({x:player.x+offsets[k],y:player.y,facing:k===1?-f:f,life:100,atkCd:4+k*6});
+        if(lv>=1){
+          // 強化: 画面端まで飛ぶ斬撃
+          const fw=lv>=2?88:60, fdmg=lv>=2?3:2;
+          projectiles.push({x:f>0?player.x+player.w:player.x-fw,y:player.y+4,vx:f*14,vy:0,w:fw,h:player.h-10,col:lv>=2?'#e0f0ff':'#a8d0ff',dmg:fdmg,life:30,hit:[],pierce:true,homing:false,slash_tsuku:true});
         }
         burst(player.x+player.w*.5,player.y+player.h*.5,'#c0ddff',18);addShake(4);sfx('slash');
       }
@@ -1795,27 +1793,6 @@ function update(){
     if(!player.ghostTrail)player.ghostTrail=[];
     if(player.moving&&gameTimer%4===0)player.ghostTrail.push({x:player.x,y:player.y,facing:player.facing,life:9});
     for(let k=player.ghostTrail.length-1;k>=0;k--){player.ghostTrail[k].life--;if(player.ghostTrail[k].life<=0)player.ghostTrail.splice(k,1);}
-    if(!player.phantoms)player.phantoms=[];
-    const ph_w=player.w;
-    for(let k=player.phantoms.length-1;k>=0;k--){
-      const ph=player.phantoms[k];
-      ph.life--;if(ph.life<=0){player.phantoms.splice(k,1);continue;}
-      if(ph.atkCd>0){ph.atkCd--;continue;}
-      // 最近の敵/ボスを探して自動攻撃 (分身は動かず射撃のみ)
-      let tgt=null,md=320;
-      for(const e of enemies){if(e.hp<=0)continue;const d=Math.hypot(e.x+e.w/2-ph.x,e.y+e.h/2-ph.y);if(d<md){md=d;tgt=e;}}
-      if(boss&&boss.hp>0){const d=Math.hypot(boss.x+boss.w/2-ph.x,boss.y+boss.h/2-ph.y);if(d<md){md=d;tgt=boss;}}
-      if(tgt){
-        ph.atkCd=18;
-        const dir=tgt.x+tgt.w/2>ph.x?1:-1;ph.facing=dir;
-        projectiles.push({x:dir>0?ph.x+ph_w:ph.x-52,y:ph.y+4,vx:dir*4,vy:0,w:52,h:38,col:'#88ccff',dmg:1,life:6,hit:[],pierce:true,homing:false,slash_tsuku:true,wlv:player.weaponLv});
-        burst(ph.x+16,ph.y+20,'#c0ddff',4);
-      } else {
-        // 敵がいなければ少しずつプレイヤー方向に漂う
-        ph.x+=(player.x-ph.x)*0.015;
-        ph.atkCd=8;
-      }
-    }
   }
   // BRUCE 急降下ダイブ
   if(player.ci===0&&player.diving){
@@ -4976,19 +4953,6 @@ function drawPlay(){
         player.ghostTrail.forEach(g=>{
           ctx.globalAlpha=g.life/18*0.32;
           drawCharacter(Math.floor(g.x-cam.x),Math.floor(g.y),6,g.facing,0,false,0,false,false);
-          ctx.globalAlpha=1;
-        });
-      }
-      if(player.phantoms){
-        player.phantoms.forEach(ph=>{
-          const fa=Math.min(ph.life/100,1)*0.62;
-          // グロー
-          ctx.globalAlpha=fa*0.4;
-          ctx.fillStyle='#88ccff';
-          ctx.beginPath();ctx.arc(Math.floor(ph.x-cam.x+15),Math.floor(ph.y+22),24,0,Math.PI*2);ctx.fill();
-          // キャラ本体
-          ctx.globalAlpha=fa;
-          drawCharacter(Math.floor(ph.x-cam.x),Math.floor(ph.y),6,ph.facing,0,false,0,false,false);
           ctx.globalAlpha=1;
         });
       }
