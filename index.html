@@ -277,15 +277,33 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirb
 
   // 胴体 (クマスラムは少し前傾)
   const bodyX=bearSlam?2:0;
-  _r(OL, 3+bodyX,19,24,17); _r(SC, 4+bodyX,20,22,15); _r(HL, 4+bodyX,20,22, 2); _r(SH, 4+bodyX,32,22, 2);
-  // 丸みある肩
-  ctx.fillStyle=OL;ctx.beginPath();ctx.arc(4+bodyX,22,7,Math.PI*.4,Math.PI*1.6);ctx.fill();
-  ctx.fillStyle=OL;ctx.beginPath();ctx.arc(27+bodyX,22,7,Math.PI*1.4,Math.PI*.6);ctx.fill();
-  ctx.fillStyle=SC;ctx.beginPath();ctx.arc(4+bodyX,22,6,Math.PI*.4,Math.PI*1.6);ctx.fill();
-  ctx.fillStyle=SC;ctx.beginPath();ctx.arc(27+bodyX,22,6,Math.PI*1.4,Math.PI*.6);ctx.fill();
-  _r(AC, 6+bodyX,23,14, 4); _r(HL, 6+bodyX,23,14, 1);
-  _r('#0a0a12',13+bodyX,24, 3, 3); _r('#00ff44',14+bodyX,25, 1, 1);
-  _r(OL, 3+bodyX,35,24, 4); _r(AC, 4+bodyX,36,22, 2); _r(HL, 4+bodyX,36,10, 1);
+  if(ci===6){
+    // TSUKUYOMI: 丸みある胴体 (roundRect)
+    const rr6=(col,x,y,w,h,r)=>{ctx.fillStyle=col;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();};
+    rr6(OL, 3+bodyX,19,24,17,6); rr6(SC, 4+bodyX,20,22,15,5);
+    rr6(HL, 4+bodyX,20,22, 2,3); rr6(SH, 4+bodyX,32,22, 2,2);
+    // 丸みある肩球
+    ctx.fillStyle=OL;ctx.beginPath();ctx.arc(4+bodyX,22,7,Math.PI*.4,Math.PI*1.6);ctx.fill();
+    ctx.fillStyle=OL;ctx.beginPath();ctx.arc(27+bodyX,22,7,Math.PI*1.4,Math.PI*.6);ctx.fill();
+    ctx.fillStyle=SC;ctx.beginPath();ctx.arc(4+bodyX,22,6,Math.PI*.4,Math.PI*1.6);ctx.fill();
+    ctx.fillStyle=SC;ctx.beginPath();ctx.arc(27+bodyX,22,6,Math.PI*1.4,Math.PI*.6);ctx.fill();
+    // 胸の月紋
+    const glt=Math.sin(frameTime/150)*.18+.82;
+    ctx.globalAlpha=glt*.7;rr6('#88ccff',10+bodyX,22,10,4,3);
+    ctx.globalAlpha=glt*.4;rr6('#e8f4ff',11+bodyX,22, 8,2,2);
+    ctx.globalAlpha=1;
+    rr6(OL, 3+bodyX,35,24, 4,3); rr6('#88ccff',4+bodyX,36,22,2,2);
+  } else {
+    _r(OL, 3+bodyX,19,24,17); _r(SC, 4+bodyX,20,22,15); _r(HL, 4+bodyX,20,22, 2); _r(SH, 4+bodyX,32,22, 2);
+    // 丸みある肩
+    ctx.fillStyle=OL;ctx.beginPath();ctx.arc(4+bodyX,22,7,Math.PI*.4,Math.PI*1.6);ctx.fill();
+    ctx.fillStyle=OL;ctx.beginPath();ctx.arc(27+bodyX,22,7,Math.PI*1.4,Math.PI*.6);ctx.fill();
+    ctx.fillStyle=SC;ctx.beginPath();ctx.arc(4+bodyX,22,6,Math.PI*.4,Math.PI*1.6);ctx.fill();
+    ctx.fillStyle=SC;ctx.beginPath();ctx.arc(27+bodyX,22,6,Math.PI*1.4,Math.PI*.6);ctx.fill();
+    _r(AC, 6+bodyX,23,14, 4); _r(HL, 6+bodyX,23,14, 1);
+    _r('#0a0a12',13+bodyX,24, 3, 3); _r('#00ff44',14+bodyX,25, 1, 1);
+    _r(OL, 3+bodyX,35,24, 4); _r(AC, 4+bodyX,36,22, 2); _r(HL, 4+bodyX,36,10, 1);
+  }
 
   // ===== 腕 アニメーション (キャラ別) =====
   const ext=atk===1?7:atk===2?13:atk>=3?19:0;
@@ -363,32 +381,39 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirb
       }
     }
   } else { // ===== 鷹/熊/狼/竜/ツクヨミ =====
-    if(ci===6){ // ===== TSUKUYOMI 月兎型 - 閃光月刀 =====
+    if(ci===6){ // ===== TSUKUYOMI - 丸みある月光アーム =====
       const BL='#c0ddff', BL2='#88ccff', BLG='#e8f4ff';
+      // カプセル形ヘルパー (arc上下 + rect中央)
+      const cap=(col,cx,ty,w,h)=>{const r=w/2;ctx.fillStyle=col;ctx.beginPath();ctx.arc(cx,ty+r,r,Math.PI,0);ctx.rect(cx-r,ty+r,w,h-r*2);ctx.arc(cx,ty+h-r,r,0,Math.PI);ctx.closePath();ctx.fill();};
       if(atk===0){
         const sw=moving?(wf===0?1:-1):0;
-        // 後腕 (軽く添え)
-        _r(OL, 1,22, 4,12); _r(BL, 2,23, 2,10); _r(BL2, 2,23, 2, 3);
-        _r(OL, 4,18, 8, 5); _r(BL, 5,19, 6, 3); _r(BL2, 5,19, 6, 2);
-        // 前腕 (収刀ポーズ)
-        _r(OL,20+sw,17, 7,11); _r(BL,21+sw,18, 5, 9); _r(BL2,21+sw,18, 5, 3);
-        _r(OL,26+sw,14, 5, 5); _r(BL,27+sw,15, 3, 3);
+        // 後腕 (カプセル)
+        cap(OL, 3,21, 6,13); cap(BL, 3,22, 4,11); cap(BL2,3,22, 4, 4);
+        // 前腕 (カプセル)
+        cap(OL,23+sw,16, 7,12); cap(BL,23+sw,17, 5,10); cap(BL2,23+sw,17, 5, 4);
+        // 手首球
+        ctx.fillStyle=OL;ctx.beginPath();ctx.arc(27+sw,28,4,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle=BL;ctx.beginPath();ctx.arc(27+sw,28,3,0,Math.PI*2);ctx.fill();
         // 刀身 (細い光の刃・収刀)
         _r(OL,30+sw,10, 3,18); _r(BL2,31+sw,11, 1,16);
-        ctx.globalAlpha=0.45; _r(BLG,30+sw, 9, 4,19); ctx.globalAlpha=1;
+        ctx.globalAlpha=0.45;_r(BLG,30+sw,9,4,19);ctx.globalAlpha=1;
       } else {
         // 斬撃: 腕を繰り出す
-        _r(OL,-bkPull,21, 4,13); _r(BL,1-bkPull,22, 2,11); _r(BL2,1-bkPull,22, 2, 3);
-        _r(OL,-1-bkPull,31, 6, 4); _r(BL,-bkPull,32, 4, 3);
+        cap(OL, 2-bkPull,20, 6,14); cap(BL,2-bkPull,21, 4,12);
+        // 肘球
+        ctx.fillStyle=OL;ctx.beginPath();ctx.arc(2-bkPull,33,4,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle=BL;ctx.beginPath();ctx.arc(2-bkPull,33,3,0,Math.PI*2);ctx.fill();
         const eA=Math.floor(ext*.22),eB=Math.floor(ext*.38);
-        _r(OL,22,19, 7+eA, 5); _r(BL,23,20, 5+eA, 3); _r(BL2,23,20, 5+eA, 2);
-        _r(OL,27+eB,14, 6+eA, 7); _r(BL,28+eB,15, 4+eA, 5); _r(BL2,28+eB,15, 4+eA, 2);
+        cap(OL,25,17, 7+eA, 6); cap(BL,25,18, 5+eA, 4);
+        cap(OL,30+eB,13, 6+eA, 8); cap(BL,30+eB,14, 4+eA, 6);
+        // 手首球
+        ctx.fillStyle=OL;ctx.beginPath();ctx.arc(33+eB+eA,13,4,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle=BL;ctx.beginPath();ctx.arc(33+eB+eA,13,3,0,Math.PI*2);ctx.fill();
         // 閃光刀身
         const tsx=33+ext;
-        _r(OL,tsx, 5, 3,30); _r(BL2,tsx+1, 6, 1,28);
-        ctx.globalAlpha=0.55+atk*.1; _r(BLG,tsx-1, 4, 5,32); ctx.globalAlpha=1;
+        _r(OL,tsx,5,3,30);_r(BL2,tsx+1,6,1,28);
+        ctx.globalAlpha=0.55+atk*.1;_r(BLG,tsx-1,4,5,32);ctx.globalAlpha=1;
         if(atk>=3){
-          // フィニッシャー: 三日月エネルギー
           ctx.save();
           ctx.globalAlpha=0.78;ctx.fillStyle=BL2;
           ctx.beginPath();ctx.arc(tsx+1,7,17,-Math.PI*.72,Math.PI*.72);ctx.arc(tsx-5,7,12,Math.PI*.72,-Math.PI*.72,true);ctx.closePath();ctx.fill();
@@ -859,15 +884,27 @@ function drawAnimalHead(ci,_r,AC,atk){
   case 6: { // ===== 月神型 TSUKUYOMI (神格・ウサギ耳) =====
     const MDK='#071228', MDK2='#0e1e3a', MDK3='#142244', EYE='#88ccff', EYE2='#e8f4ff';
     const gl=Math.sin(frameTime/150)*.18+.82;
-    // 長耳 左 (光の結晶耳・内部が発光)
-    _r(MDK2, 5,-22, 7,24); _r(MDK3, 6,-21, 5,22);
-    ctx.globalAlpha=gl*.7;_r(EYE, 7,-20, 3,18);ctx.globalAlpha=1;
-    ctx.globalAlpha=gl*.3;_r(EYE2, 7,-20, 2, 8);ctx.globalAlpha=1;
-    // 長耳 右
-    _r(MDK2,19,-20, 7,22); _r(MDK3,20,-19, 5,20);
-    ctx.globalAlpha=gl*.7;_r(EYE,21,-18, 3,16);ctx.globalAlpha=1;
-    ctx.globalAlpha=gl*.3;_r(EYE2,21,-18, 2, 7);ctx.globalAlpha=1;
-    // 月冠 (耳の間に浮かぶ光点)
+    // 長耳 左 (細長い楕円・丸みあり)
+    ctx.fillStyle='#040d1a';
+    ctx.beginPath();ctx.ellipse(8,-9,5,15,-0.07,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=MDK2;
+    ctx.beginPath();ctx.ellipse(8,-9,4,14,-0.07,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=gl*.72;ctx.fillStyle=EYE;
+    ctx.beginPath();ctx.ellipse(8,-9,2.2,10,-0.07,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=gl*.32;ctx.fillStyle=EYE2;
+    ctx.beginPath();ctx.ellipse(8,-9,1.1,6,-0.07,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=1;
+    // 長耳 右 (わずかに右傾)
+    ctx.fillStyle='#040d1a';
+    ctx.beginPath();ctx.ellipse(22,-8,5,15,0.1,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=MDK2;
+    ctx.beginPath();ctx.ellipse(22,-8,4,14,0.1,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=gl*.72;ctx.fillStyle=EYE;
+    ctx.beginPath();ctx.ellipse(22,-8,2.2,10,0.1,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=gl*.32;ctx.fillStyle=EYE2;
+    ctx.beginPath();ctx.ellipse(22,-8,1.1,6,0.1,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=1;
+    // 月冠 (耳の間に浮かぶ光球)
     ctx.globalAlpha=gl*.65;ctx.fillStyle=EYE;
     ctx.beginPath();ctx.arc(15,-6,3.5,0,Math.PI*2);ctx.fill();
     ctx.globalAlpha=1;
