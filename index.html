@@ -279,7 +279,7 @@ function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirb
   const bodyX=bearSlam?2:0;
   if(ci===6){
     // TSUKUYOMI: 丸みある胴体 (roundRect)
-    const rr6=(col,x,y,w,h,r)=>{ctx.fillStyle=col;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();};
+    const rr6=(col,x,y,w,h,r)=>{ctx.fillStyle=col;ctx.beginPath();if(ctx.roundRect){ctx.roundRect(x,y,w,h,r);}else{ctx.rect(x,y,w,h);}ctx.fill();};
     rr6(OL, 3+bodyX,19,24,17,6); rr6(SC, 4+bodyX,20,22,15,5);
     rr6(HL, 4+bodyX,20,22, 2,3); rr6(SH, 4+bodyX,32,22, 2,2);
     // 丸みある肩球
@@ -4579,7 +4579,7 @@ function drawCharSelect(){
 
   // ── キャラカード(上段) ──
   const z=csLayout();
-  CHARS.forEach((c,i)=>{
+  CHARS.slice(0,6).forEach((c,i)=>{
     const b=z.chars[i],sel=i===selChar;
     const glow=sel?(Math.sin(t/180)*.12+.88):0;
     // カード背景
