@@ -1176,7 +1176,7 @@ const STAGE_CFG=[
    tMain:'#1c1a38',tHL:'#2e2c58',tHL2:'#4040aa',tSide:'#141230',tAcc:'#2a1a50',nebula:['#110033','#220044'],gimmick:'wind'},
   {name:'崩落回廊',  sub:'COLLAPSED RUINS',bgMain:'#0a0806',bossType:'tsukuyomi', bossHp:70, bossW:46,bossH:62,bossName:'ツクヨミ',
    tMain:'#2e2418',tHL:'#4a3c28',tHL2:'#625040',tSide:'#1e1810',tAcc:'#3a2c1a',nebula:['#1a1008','#0c0804'],gimmick:'quake'},
-  {name:'機械神殿の核',sub:'MECH CORE',   bgMain:'#010509',bossType:'izanami',   bossHp:150,bossW:68,bossH:94,bossName:'イザナミ',
+  {name:'機械神殿の核',sub:'MECH CORE',   bgMain:'#010509',bossType:'izanami',   bossHp:82, bossW:68,bossH:94,bossName:'イザナミ',
    tMain:'#0c1c28',tHL:'#163040',tHL2:'#1e4860',tSide:'#081018',tAcc:'#0e2030',nebula:['#001a20','#002030'],gimmick:'core'},
 ];
 const TOTAL_STAGES=STAGE_CFG.length;
@@ -1321,8 +1321,9 @@ document.addEventListener('keydown',e=>{
   if(state==='cutscene'){if(e.key==='Enter'||e.key===' ')advanceCutscene();return;}
   if(state==='ending'){if((e.key==='Enter'||e.key===' ')&&endingDone){clearSave();currentStage=1;state='charselect';bgmPlay('title');}return;}
   if(state==='charselect'){
-    if(e.key==='ArrowLeft')selChar=(selChar-1+CHARS.length)%CHARS.length;
-    if(e.key==='ArrowRight')selChar=(selChar+1)%CHARS.length;
+    { const maxSel=getTsukuyomiUnlocked()?CHARS.length-1:5;
+      if(e.key==='ArrowLeft')selChar=(selChar-1+maxSel+1)%(maxSel+1);
+      if(e.key==='ArrowRight')selChar=(selChar+1)%(maxSel+1); }
     if(e.key==='Enter')startGame(true);return;
   }
   if(state==='gameover'&&(e.key==='Enter'||e.key===' ')){retryStage();return;}
@@ -1402,12 +1403,12 @@ function handleCSTap(e){
     }
     // ?ボタン
     if(tx>=W*.86&&tx<=W*.98&&ty>=H*.03&&ty<=H*.11){showHelp=true;return;}
-    CHARS.slice(0,6).forEach((_,i)=>{const b=z.chars[i];if(tx>=b.x&&tx<=b.x+b.w&&ty>=b.y&&ty<=b.y+b.h)selChar=i;});
-    const sc2=z.secret;
-    if(tx>=sc2.x&&tx<=sc2.x+sc2.w&&ty>=sc2.y&&ty<=sc2.y+sc2.h){
-      if(getTsukuyomiUnlocked())selChar=6;
-      else{/* 未解放: 何もしない */}
-    }
+    z.chars.forEach((b,i)=>{
+      if(tx>=b.x&&tx<=b.x+b.w&&ty>=b.y&&ty<=b.y+b.h){
+        if(i===6){if(getTsukuyomiUnlocked())selChar=6;}
+        else selChar=i;
+      }
+    });
     const s=z.start;if(tx>=s.x&&tx<=s.x+s.w&&ty>=s.y&&ty<=s.y+s.h){tryFullscreen();startGame(true);}
   }
 }
@@ -1599,6 +1600,8 @@ function doAttack(){
     }
     case 6:{ // TSUKUYOMI 月兎型 - 瞬身斬（ワープ斬）+ 幻影分身
       if(!player.ghostTrail)player.ghostTrail=[];
+      // 空中攻撃: 落下を抑制して連続攻撃しやすくする
+      if(!player.onGround&&player.vy>1)player.vy=Math.max(player.vy-4,-2);
       const blinkAmt=step<2?(f>0?60:-60):(f>0?80:-80);
       const nxBoss=bossTriggered&&!bossDefeated;
       const nx=nxBoss
@@ -1613,28 +1616,19 @@ function doAttack(){
         projectiles.push({x:sx2,y:player.y+2,vx:f*1,vy:0,w:slashW,h:player.h-8,col:'#88ccff',dmg:slashDmg,life:6,hit:[],pierce:true,homing:false,slash_tsuku:true});
         burst(player.x+player.w*.5+(f>0?slashW*.5:-slashW*.5),player.y+player.h*.5,'#c0ddff',step===0?6:9);
         player.x=nx;sfx('slash');addShake(step===0?2:3);
-      }else if(lv<2){
-        // フィニッシャーlv0/1: 大斬り + 月光弾
-        const bigW=lv>=1?72:58,bigDmg=lv>=1?4:3;
+      }else{
+        // フィニッシャー: 大斬り + 幻影分身3体 (常時)
+        const bigW=58+lv*8, bigDmg=2+lv;
         projectiles.push({x:f>0?player.x+player.w:player.x-bigW,y:player.y+2,vx:f*2,vy:0,w:bigW,h:player.h-6,col:'#c0ddff',dmg:bigDmg,life:7,hit:[],pierce:true,homing:false,slash_tsuku:true});
         player.x=nx;
-        for(let k=0;k<2;k++){
-          setTimeout(()=>{if(player){const f2=player.facing;
-            projectiles.push({x:player.x+player.w*.5,y:player.y+player.h*.3,vx:f2*(13+k*3),vy:(k===0?-2.5:2.5),w:22,h:10,col:'#88ccff',dmg:2,life:16,hit:[],pierce:true,homing:false,slash_tsuku:true});
-            sfx('slash');
-          }},k*85);
-        }
-        burst(player.x+player.w*.5,player.y+player.h*.5,'#e8f4ff',12);addShake(4);sfx('slash');
-      }else{
-        // フィニッシャーlv2: 幻影分身 (3体・90フレーム)
         if(!player.phantoms)player.phantoms=[];
         player.phantoms=[];
+        // 3体を横並びに配置 (プレイヤーの両脇)
+        const offsets=[f*-60, f*60, f*-110];
         for(let k=0;k<3;k++){
-          const offX=f*(38+k*32), offY=(k-1)*20;
-          player.phantoms.push({x:player.x+offX,y:player.y+offY,facing:player.facing,life:90,atkCd:6+k*4});
+          player.phantoms.push({x:player.x+offsets[k],y:player.y,facing:k===1?-f:f,life:100,atkCd:4+k*6});
         }
-        player.x=nx;
-        burst(player.x+player.w*.5,player.y+player.h*.5,'#c0ddff',20);addShake(5);sfx('slash');
+        burst(player.x+player.w*.5,player.y+player.h*.5,'#c0ddff',18);addShake(4);sfx('slash');
       }
       player.invincible=Math.max(player.invincible,14);
       break;
@@ -1744,7 +1738,7 @@ function spawnBoss(){
     type:cfg.bossType,x:7400,y:280,w:cfg.bossW,h:cfg.bossH,
     hp:cfg.bossHp,maxHp:cfg.bossHp,vx:0,vy:0,
     phase:1,state:'walk',stateTimer:0,
-    atkTimer:[150,130,120,110,100,90][currentStage-1],
+    atkTimer:[150,130,120,110,100,90,82][currentStage-1],
     dmgCd:0,onGround:false,dir:-1,chargeDir:-1,bob:0,id:9999,dropCounter:0,
     weakTimer:0,weakPoint:false,prevState:'walk',spawnTimer:280
   };
@@ -1815,21 +1809,24 @@ function update(){
     if(player.moving&&gameTimer%4===0)player.ghostTrail.push({x:player.x,y:player.y,facing:player.facing,life:9});
     for(let k=player.ghostTrail.length-1;k>=0;k--){player.ghostTrail[k].life--;if(player.ghostTrail[k].life<=0)player.ghostTrail.splice(k,1);}
     if(!player.phantoms)player.phantoms=[];
+    const ph_w=player.w;
     for(let k=player.phantoms.length-1;k>=0;k--){
       const ph=player.phantoms[k];
       ph.life--;if(ph.life<=0){player.phantoms.splice(k,1);continue;}
       if(ph.atkCd>0){ph.atkCd--;continue;}
-      // 最近の敵/ボスを探して自動攻撃
-      let tgt=null,md=200;
+      // 最近の敵/ボスを探して自動攻撃 (分身は動かず射撃のみ)
+      let tgt=null,md=320;
       for(const e of enemies){if(e.hp<=0)continue;const d=Math.hypot(e.x+e.w/2-ph.x,e.y+e.h/2-ph.y);if(d<md){md=d;tgt=e;}}
       if(boss&&boss.hp>0){const d=Math.hypot(boss.x+boss.w/2-ph.x,boss.y+boss.h/2-ph.y);if(d<md){md=d;tgt=boss;}}
       if(tgt){
-        ph.atkCd=20;
+        ph.atkCd=18;
         const dir=tgt.x+tgt.w/2>ph.x?1:-1;ph.facing=dir;
-        const hx=dir>0?ph.x+28:ph.x-52;
-        projectiles.push({x:hx,y:ph.y+4,vx:dir*2,vy:0,w:52,h:player.h-10,col:'#88ccff',dmg:1,life:5,hit:[],pierce:true,homing:false,slash_tsuku:true,wlv:player.weaponLv});
-        ph.x=Math.max(0,Math.min(WORLD_W-30,ph.x+dir*32));
-        burst(ph.x+16,ph.y+player.h*.5,'#c0ddff',3);
+        projectiles.push({x:dir>0?ph.x+ph_w:ph.x-52,y:ph.y+4,vx:dir*4,vy:0,w:52,h:38,col:'#88ccff',dmg:1,life:6,hit:[],pierce:true,homing:false,slash_tsuku:true,wlv:player.weaponLv});
+        burst(ph.x+16,ph.y+20,'#c0ddff',4);
+      } else {
+        // 敵がいなければ少しずつプレイヤー方向に漂う
+        ph.x+=(player.x-ph.x)*0.015;
+        ph.atkCd=8;
       }
     }
   }
@@ -2378,7 +2375,7 @@ function updateBoss(){
   boss.vy+=GRAVITY*.65;if(boss.vy>18)boss.vy=18;
   boss.stateTimer--;
   const spd=(boss.phase===2?1.9:1.2)*(1+currentStage*.07);
-  const atkBase=[155,135,125,115,105,95,88][currentStage-1]||88;
+  const atkBase=[155,135,125,115,105,95,80][currentStage-1]||80;
   const col=['#cc00ff','#ffff00','#ff6600','#44ffff','#eeeeff','#cc6600','#cc44ff'][currentStage-1];
 
   boss.weakPoint=false; // デフォルトは弱点なし
@@ -2589,8 +2586,8 @@ function updateBoss(){
   if(boss.hp>0){
     boss.spawnTimer--;
     if(boss.spawnTimer<=0){
-      boss.spawnTimer=boss.phase===2?160:280;
-      if(enemies.filter(e=>e.fromBoss).length<4)spawnBossMinion();
+      boss.spawnTimer=boss.phase===2?300:480;
+      if(enemies.filter(e=>e.fromBoss).length<2)spawnBossMinion();
     }
   }
   // KIBA ボスストンプ
@@ -4211,7 +4208,7 @@ function drawCutscene(){
   dr(bx,by+bh-6,6,6,'#8822cc');dr(bx+bw-6,by+bh-6,6,6,'#8822cc');
 
   // テキスト (折り返し)
-  const tfs=Math.min(W*.036,14);
+  const tfs=Math.min(W*.046,18);
   ctx.font=`${tfs}px monospace`;
   ctx.textAlign='left';
   const words=line.txt;
@@ -4250,7 +4247,7 @@ function drawCutscene(){
 function drawEnding(){
   dr(0,0,W,H,'#01010a');
   STARS.forEach(s=>{const sx=(s.x%W+W)%W;if(!(s.b&&Math.floor(frameTime/500)%2))dr(sx,s.y,s.s,s.s,'#fff');});
-  const fs=Math.min(W*.042,17), lh=fs+10;
+  const fs=Math.min(W*.056,22), lh=fs+12;
   const lines=[
     ['月の裏側　最終記録','#d8eaff',true],
     ['','',''],
@@ -4486,13 +4483,13 @@ function drawTitle(){
 //  キャラ選択
 // ================================================================
 function csLayout(){
-  const bw=62,bh=114,gap=4;
-  const mainCount=6;
-  const total=mainCount*(bw+gap)-gap,sx=(W-total)/2,by=H*.35;
+  const bw=51,bh=100,gap=3;
+  const mainCount=7;
+  const total=mainCount*(bw+gap)-gap,sx=(W-total)/2,by=H*.34;
   return{
-    chars:CHARS.slice(0,mainCount).map((_,i)=>({x:sx+i*(bw+gap),y:by,w:bw,h:bh})),
+    chars:Array.from({length:mainCount},(_,i)=>({x:sx+i*(bw+gap),y:by,w:bw,h:bh})),
     start:{x:W/2-78,y:H*.78,w:156,h:42},
-    secret:{x:W/2-52,y:H*.905,w:104,h:32}
+    secret:null
   };
 }
 function drawCharSelect(){
@@ -4515,28 +4512,39 @@ function drawCharSelect(){
   ctx.fillStyle='#aabbff';ctx.font=`bold ${Math.min(W*.04,16)}px monospace`;
   ctx.fillText('SELECT  CHARACTER',W/2,H*.07);
 
-  // ── キャラカード(上段) ──
+  // ── キャラカード (全7体) ──
   const z=csLayout();
-  CHARS.slice(0,6).forEach((c,i)=>{
+  const tsukuUnlocked=getTsukuyomiUnlocked();
+  Array.from({length:7},(_,i)=>{
     const b=z.chars[i],sel=i===selChar;
+    const isTsuku=(i===6);
+    const locked=isTsuku&&!tsukuUnlocked;
+    const c=locked?{col:'#334466',nick:'？？？'}:CHARS[i];
     const glow=sel?(Math.sin(t/180)*.12+.88):0;
     // カード背景
     dr(b.x,b.y,b.w,b.h,sel?'#0d1628':'#06060f');
-    // 選択時: グロー枠
-    if(sel){
-      ctx.globalAlpha=glow*.7;dr(b.x-2,b.y-2,b.w+4,b.h+4,c.col);ctx.globalAlpha=1;
-    }
+    if(sel){ctx.globalAlpha=glow*.7;dr(b.x-2,b.y-2,b.w+4,b.h+4,c.col);ctx.globalAlpha=1;}
     dr(b.x,b.y,b.w,b.h,sel?'#0d1628':'#06060f');
     dr(b.x,b.y,b.w,2,sel?c.col:'#222');
     dr(b.x,b.y+b.h-2,b.w,2,sel?'#111':'#0a0a0a');
-    // キャラスプライト
-    ctx.save();ctx.translate(b.x+b.w/2-14,b.y+6);ctx.scale(.78,.78);
-    drawCharacter(0,0,i,1,0,false,0);ctx.restore();
-    // NICK
-    ctx.fillStyle=sel?'#ffffff':'#778';ctx.font=`bold ${Math.min(W*.026,10)}px monospace`;ctx.textAlign='center';
-    ctx.fillText(c.nick,b.x+b.w/2,b.y+b.h-10);
+    if(locked){
+      // 未解放: 三日月＋ロック表示
+      const pulse=Math.sin(t/700)*.15+.35;
+      ctx.globalAlpha=pulse;
+      ctx.fillStyle='#5588aa';ctx.font=`bold ${Math.min(W*.052,20)}px monospace`;ctx.textAlign='center';
+      ctx.fillText('☽',b.x+b.w/2,b.y+b.h*.5);
+      ctx.font=`${Math.min(W*.022,9)}px monospace`;
+      ctx.fillText('？？？',b.x+b.w/2,b.y+b.h-14);
+      ctx.globalAlpha=1;
+    } else {
+      // 通常: キャラスプライト
+      ctx.save();ctx.translate(b.x+b.w/2-13,b.y+5);ctx.scale(.72,.72);
+      drawCharacter(0,0,i,1,0,false,0);ctx.restore();
+      ctx.fillStyle=sel?'#ffffff':'#778';ctx.font=`bold ${Math.min(W*.022,9)}px monospace`;ctx.textAlign='center';
+      ctx.fillText(c.nick,b.x+b.w/2,b.y+b.h-10);
+    }
     // 主人公バッジ
-    if(i===2){ctx.fillStyle='#ffdd22';ctx.font=`${Math.min(W*.02,8)}px monospace`;ctx.fillText('★',b.x+b.w-8,b.y+9);}
+    if(i===2){ctx.fillStyle='#ffdd22';ctx.font=`${Math.min(W*.018,7)}px monospace`;ctx.fillText('★',b.x+b.w-7,b.y+8);}
   });
 
   // ── 選択キャラ 詳細パネル ──
@@ -4600,28 +4608,13 @@ function drawCharSelect(){
   ctx.fillText('▶  START MISSION',W/2,s.y+s.h*.65);
   ctx.globalAlpha=1;
 
-  // ── 秘密キャラスロット ──
-  { const sc2=z.secret, unlocked=getTsukuyomiUnlocked(), sel=(selChar===6);
-    const pulse=Math.sin(t/220)*.3+.7;
-    if(unlocked){
-      // 解放済み: 月光グロー枠
-      ctx.globalAlpha=pulse*.7;dr(sc2.x-2,sc2.y-2,sc2.w+4,sc2.h+4,'#88ccff');ctx.globalAlpha=1;
-      dr(sc2.x,sc2.y,sc2.w,sc2.h,sel?'#0a1a2e':'#050e1c');
-      dr(sc2.x,sc2.y,sc2.w,2,'#88ccff');
-      // 三日月アイコン
-      ctx.fillStyle='#aaddff';ctx.font=`${Math.min(W*.04,14)}px monospace`;ctx.textAlign='center';
-      ctx.fillText('☽  TSUKUYOMI  ☽',sc2.x+sc2.w/2,sc2.y+sc2.h*.68);
-      ctx.fillStyle='#5588aa';ctx.font=`${Math.min(W*.02,9)}px monospace`;
-      ctx.fillText('SECRET CHARACTER',sc2.x+sc2.w/2,sc2.y+sc2.h*.88+6);
-      if(sel){ctx.globalAlpha=pulse;ctx.fillStyle='#88ccff';ctx.fillText('▲ SELECTED',sc2.x+sc2.w/2,sc2.y-6);ctx.globalAlpha=1;}
-    } else {
-      // 未解放: 薄い三日月のみ
-      ctx.globalAlpha=0.18+Math.sin(t/800)*.06;
-      dr(sc2.x,sc2.y,sc2.w,sc2.h,'#0a1020');
-      ctx.fillStyle='#334466';ctx.font=`${Math.min(W*.04,14)}px monospace`;ctx.textAlign='center';
-      ctx.fillText('☽  ？？？  ☽',sc2.x+sc2.w/2,sc2.y+sc2.h*.68);
-      ctx.globalAlpha=1;
-    }
+  // ── 解放済みなら7枠目にグローヒント ──
+  if(tsukuUnlocked&&selChar===6){
+    const b=z.chars[6];
+    ctx.globalAlpha=Math.sin(t/200)*.2+.6;
+    ctx.fillStyle='#88ccff';ctx.font=`${Math.min(W*.022,9)}px monospace`;ctx.textAlign='center';
+    ctx.fillText('▲ SELECTED',b.x+b.w/2,b.y-5);
+    ctx.globalAlpha=1;
   }
   // ── 「?」ヘルプボタン ──
   const hbx=W*.86,hby=H*.03,hbs=W*.12;
@@ -5044,10 +5037,12 @@ function drawPlay(){
       }
       if(player.phantoms){
         player.phantoms.forEach(ph=>{
-          const fa=Math.min(ph.life/90*0.42,0.38);
-          ctx.globalAlpha=fa*0.5;
+          const fa=Math.min(ph.life/100,1)*0.62;
+          // グロー
+          ctx.globalAlpha=fa*0.4;
           ctx.fillStyle='#88ccff';
-          ctx.beginPath();ctx.arc(Math.floor(ph.x-cam.x+15),Math.floor(ph.y+22),20,0,Math.PI*2);ctx.fill();
+          ctx.beginPath();ctx.arc(Math.floor(ph.x-cam.x+15),Math.floor(ph.y+22),24,0,Math.PI*2);ctx.fill();
+          // キャラ本体
           ctx.globalAlpha=fa;
           drawCharacter(Math.floor(ph.x-cam.x),Math.floor(ph.y),6,ph.facing,0,false,0,false,false);
           ctx.globalAlpha=1;
@@ -5103,21 +5098,21 @@ function drawPlay(){
     ctx.globalAlpha=alpha;
     ctx.textAlign='center';
     // BOSS INCOMING ラベル
-    ctx.fillStyle='#cc0033';ctx.font=`bold ${Math.min(W*.022,11)}px monospace`;
+    ctx.fillStyle='#cc0033';ctx.font=`bold ${Math.min(W*.034,14)}px monospace`;
     ctx.fillText('─────  BOSS APPROACHING  ─────',W/2,H*.33);
     // ボス名 (大)
     const pulse=Math.sin(frameTime/90)*.06+.94;
     ctx.globalAlpha=alpha*pulse;
-    ctx.fillStyle='#ff3355';ctx.font=`bold ${Math.min(W*.1,42)}px monospace`;
-    ctx.fillText(cfg.bossName,W/2,H*.47);
+    ctx.fillStyle='#ff3355';ctx.font=`bold ${Math.min(W*.14,56)}px monospace`;
+    ctx.fillText(cfg.bossName,W/2,H*.48);
     // ステージ名
     ctx.globalAlpha=alpha*0.8;
-    ctx.fillStyle='#ff8899';ctx.font=`${Math.min(W*.028,13)}px monospace`;
-    ctx.fillText(cfg.name+'  —  '+cfg.sub,W/2,H*.56);
+    ctx.fillStyle='#ff8899';ctx.font=`${Math.min(W*.044,18)}px monospace`;
+    ctx.fillText(cfg.name+'  —  '+cfg.sub,W/2,H*.57);
     // フェーズ通知
     ctx.globalAlpha=alpha*0.6;
-    ctx.fillStyle='#884455';ctx.font=`${Math.min(W*.02,10)}px monospace`;
-    ctx.fillText(`STAGE ${currentStage} / ${TOTAL_STAGES}  BOSS BATTLE`,W/2,H*.62);
+    ctx.fillStyle='#884455';ctx.font=`${Math.min(W*.026,11)}px monospace`;
+    ctx.fillText(`STAGE ${currentStage} / ${TOTAL_STAGES}  BOSS BATTLE`,W/2,H*.63);
     ctx.globalAlpha=1;ctx.restore();
   }
   // ステージブリーフィングオーバーレイ
