@@ -678,43 +678,46 @@ function drawAnimalHead(ci,_r,AC,atk){
     break;
   }
   case 5: { // ===== メカ竜 BUSTER - 竜の頭 (暗黒竜) =====
-    const DG1='#3a4a30',DG2='#2a3820',DG3='#1a2814',DGDR='#0e1a0a';
-    // 後頭部クレスト (鋭い4本スパイク・赤)
-    _r(OL, 0,-16, 4,18); _r('#660000', 1,-15, 2,17); _r('#ff2200', 1,-16, 2, 4);
-    _r(OL, 5,-21, 5,24); _r('#880000', 6,-20, 3,22); _r('#ff3300', 6,-21, 3, 5);
-    _r(OL,11,-15, 4,17); _r('#660000',12,-14, 2,16); _r('#ff2200',12,-15, 2, 3);
-    _r(OL,16,-11, 3,13); _r('#550000',17,-10, 2,12); _r('#ff1100',17,-11, 2, 2);
-    // 頭本体 (暗い爬虫類グリーン)
-    _r(OL, 2, 0,24,14); _r(DG2, 3, 1,22,12); _r(DG1, 3, 1,22, 2);
-    _r(OL, 0, 3,26, 8); _r(DG3, 1, 4,24, 6);
-    // 眉骨 (重くせり出した龍眉)
-    _r(DGDR,14, 1,15, 4); _r('#0a0800',16, 0,11, 3);
-    // 燃える金色の目 (竜眼グロー)
-    _r(OL,15, 3,11, 7); _r('#0a0500',16, 4, 9, 5);
-    ctx.globalAlpha=0.55;_r('#ff8800',13, 2,14, 9);ctx.globalAlpha=1.0;
-    _r('#cc6600',17, 4, 7, 5); _r('#ffaa00',18, 4, 5, 5);
-    _r('#ffee00',18, 4, 4, 2); _r('#ffffff',18, 4, 2, 1);
-    _r('#1a0000',21, 5, 1, 3);
-    // 上顎スパイク (鋭く多数)
-    _r(OL,22, 1, 3, 6); _r(DG3,23, 2, 2, 5); _r('#ff2200',23, 1, 2, 1);
-    _r(OL,28, 0, 3, 7); _r(DG3,29, 1, 2, 6); _r('#ff2200',29, 0, 2, 1);
-    _r(OL,33,-1, 3, 7); _r(DG3,34, 0, 2, 6); _r('#ff3300',34,-1, 2, 1);
-    // 長い顎〜鼻先
-    _r(OL,22, 5,18, 8); _r(DG3,23, 6,16, 6); _r(DG2,23, 6,16, 2);
-    _r(OL,36, 5, 9, 8); _r(DGDR,37, 6, 7, 6);
-    _r(DG3,34, 9, 3, 3); _r(DGDR,35,10, 2, 2);
+    const DK1='#2a2030',DK2='#1e1826',DK3='#14101e',DKSH='#0a080e';
+    // 竜角4本 (炎の先端・後ろから前) - ドラゴンクラウン
+    _r(OL, 2,-20, 5,22); _r('#880000', 3,-19, 3,20); _r('#ff3300', 3,-20, 3, 5); _r('#ff6600', 4,-22, 1, 3);
+    _r(OL, 9,-26, 6,28); _r('#bb0000',10,-25, 4,26); _r('#ff4400',10,-26, 3, 7); _r('#ff9900',11,-28, 2, 4);
+    _r(OL,16,-18, 5,20); _r('#770000',17,-17, 3,18); _r('#ff2200',17,-18, 3, 5); _r('#ff5500',18,-20, 1, 3);
+    _r(OL,22,-11, 4,13); _r('#550000',23,-10, 2,12); _r('#ff1100',23,-11, 2, 3);
+    // 頭本体 (暗紫グレー - 竜らしい非爬虫類系)
+    _r(OL, 2, 0,24,14); _r(DK2, 3, 1,22,12); _r(DK1, 3, 1,22, 2);
+    _r(OL, 0, 3,26, 8); _r(DK3, 1, 4,24, 6);
+    // 鱗模様ハイライト
+    _r('#332a40', 4, 3, 4, 2); _r('#332a40',10, 3, 4, 2); _r('#332a40',16, 4, 4, 2);
+    _r('#332a40', 6, 6, 4, 2); _r('#332a40',12, 6, 4, 2); _r('#332a40',20, 6, 4, 2);
+    // 眉骨 (重くせり出した竜眉)
+    _r(DKSH,13, 1,16, 4); _r('#0a0808',15, 0,12, 3);
+    // 燃える金色の目 (竜眼)
+    _r(OL,15, 3,11, 7); _r('#080400',16, 4, 9, 5);
+    ctx.globalAlpha=0.62;_r('#ff7700',13, 2,14, 9);ctx.globalAlpha=1.0;
+    _r('#cc5500',17, 4, 7, 5); _r('#ff9900',18, 4, 5, 5);
+    _r('#ffcc00',18, 4, 4, 2); _r('#ffffff',18, 4, 2, 1);
+    _r('#1a0800',21, 5, 1, 3);
+    // 上顎の牙
+    _r(OL,22, 1, 3, 6); _r(DK3,23, 2, 2, 5); _r('#dd2200',23, 1, 2, 1);
+    _r(OL,28, 0, 3, 7); _r(DK3,29, 1, 2, 6); _r('#dd2200',29, 0, 2, 1);
+    _r(OL,33,-1, 3, 7); _r(DK3,34, 0, 2, 6); _r('#dd2200',34,-1, 2, 1);
+    // 長い顎
+    _r(OL,22, 5,18, 8); _r(DK3,23, 6,16, 6); _r(DK2,23, 6,16, 2);
+    _r(OL,36, 5, 9, 8); _r(DKSH,37, 6, 7, 6);
+    _r(DK3,34, 9, 3, 3); _r(DKSH,35,10, 2, 2);
     // 下顎 (攻撃で大きく開く)
     if(atk>0){
-      _r(OL,22,13,22, 9); _r(DGDR,23,14,20, 7);
+      _r(OL,22,13,22, 9); _r(DKSH,23,14,20, 7);
       _r('#ffe8bb',23,12, 2, 5); _r('#ffe8bb',28,12, 2, 5); _r('#ffe8bb',33,12, 2, 5); _r('#ffe8bb',38,12, 2, 4);
       _r('#ffe8bb',26,20, 2,-4); _r('#ffe8bb',31,20, 2,-4); _r('#ffe8bb',36,20, 2,-4);
       _r('#ff0000',24,13,16, 7); _r('#ff4400',25,14,14, 5); _r('#ff8800',27,15,10, 4); _r('#ffcc00',29,16, 6, 2); _r('#ffffff',31,17, 3, 1);
     } else {
-      _r(OL,22,13,22, 5); _r(DGDR,23,14,20, 3);
+      _r(OL,22,13,22, 5); _r(DKSH,23,14,20, 3);
       _r('#ffe8bb',24,12, 2, 3); _r('#ffe8bb',29,12, 2, 3); _r('#ffe8bb',35,12, 2, 3);
     }
     // 首移行
-    _r(OL, 3,14,20, 5); _r(DGDR, 4,15,18, 4); _r(DG3, 4,15, 9, 2);
+    _r(OL, 3,14,20, 5); _r(DKSH, 4,15,18, 4); _r(DK3, 4,15, 9, 2);
     break;
   }
   }
@@ -1213,6 +1216,7 @@ function startGame(resetStage){
   if(resetStage)currentStage=1;
   buildStageData();
   player=mkPlayer(selChar);cam.x=0;score=0;
+  if(!resetStage){const sv=getSave();if(sv){player.weaponLv=sv.weaponLv||0;player.weaponArmor=sv.weaponArmor||3;player.weaponGauge=sv.weaponGauge||0;}}
   spawnEnemies();projectiles=[];eProjectiles=[];effects=[];particles=[];
   stageItems=ITEM_SPAWNS.map(d=>({x:d.x,y:d.y,type:d.type,collected:false,anim:Math.random()*Math.PI*2}));
   damageNums=[];comboTexts=[];shakeAmt=0;hitStop=0;
@@ -1366,25 +1370,25 @@ function doAttack(){
       }
       // 地上: 口からブレス (ステップ別)
       const mouthX=f>0?px+pw+2:px-2, mouthY=py+ph*0.18;
-      if(step<2){ // ステップ1-2: ブレス (画面端まで届く)
-        const lw=step===0?380:430, ldmg=step===0?2:3;
-        projectiles.push({x:f>0?mouthX:mouthX-lw,y:mouthY,vx:f*4,vy:0,w:lw,h:12,col:'#ff6600',dmg:ldmg,life:14,hit:[],pierce:true,homing:false,laser:true});
+      if(step<2){ // ステップ1-2: ブレス (画面端まで届く・固定)
+        const lw=step===0?440:490, ldmg=step===0?2:3;
+        projectiles.push({x:f>0?mouthX:mouthX-lw,y:mouthY,vx:0,vy:0,w:lw,h:12,col:'#ff6600',dmg:ldmg,life:14,hit:[],pierce:true,homing:false,laser:true});
         burst(mouthX,mouthY,'#ff8800',step===0?6:10);sfx('laser');
       } else if(lv===0){ // フィニッシャーlv0: 強ブレス + ミサイル3発
-        projectiles.push({x:f>0?mouthX:mouthX-460,y:mouthY,vx:f*3,vy:0,w:460,h:15,col:'#ffcc00',dmg:3,life:15,hit:[],pierce:true,homing:false,laser:true});
+        projectiles.push({x:f>0?mouthX:mouthX-520,y:mouthY,vx:0,vy:0,w:520,h:15,col:'#ffcc00',dmg:3,life:15,hit:[],pierce:true,homing:false,laser:true});
         burst(mouthX,mouthY,'#ffcc00',12);sfx('laser');
         for(let k=0;k<3;k++){
           setTimeout(()=>{if(player){projectiles.push({x:player.x+(player.facing>0?player.w+2:-2),y:player.y+player.h*.2,vx:player.facing*(14+Math.random()*4),vy:-4+Math.random()*3,w:10,h:10,col:'#ff4400',dmg:2,life:120,hit:[],pierce:false,homing:true,missile:true});sfx('needle');}},k*100);
         }
         addShake(4);
       } else if(lv===1){ // lv1フィニッシャー: 大ブレス + ミサイル5発
-        projectiles.push({x:f>0?mouthX:mouthX-500,y:mouthY,vx:f*3,vy:0,w:500,h:18,col:'#ff8800',dmg:4,life:16,hit:[],pierce:true,homing:false,laser:true});
+        projectiles.push({x:f>0?mouthX:mouthX-560,y:mouthY,vx:0,vy:0,w:560,h:18,col:'#ff8800',dmg:4,life:16,hit:[],pierce:true,homing:false,laser:true});
         burst(mouthX,mouthY,'#ff8800',16);sfx('laser');addShake(5);
         for(let k=0;k<5;k++){
           setTimeout(()=>{if(player){projectiles.push({x:player.x+(player.facing>0?player.w+2:-2),y:player.y+player.h*.2,vx:player.facing*(16+Math.random()*4),vy:-4+Math.random()*4,w:10,h:10,col:'#ff6600',dmg:2,life:130,hit:[],pierce:false,homing:true,missile:true});sfx('needle');}},k*80);
         }
       } else { // lv2フィニッシャー: メガブレス + 全方位ミサイル
-        projectiles.push({x:f>0?mouthX:mouthX-540,y:mouthY,vx:f*2,vy:0,w:540,h:22,col:'#ffffff',dmg:5,life:18,hit:[],pierce:true,homing:false,laser:true});
+        projectiles.push({x:f>0?mouthX:mouthX-600,y:mouthY,vx:0,vy:0,w:600,h:22,col:'#ffffff',dmg:5,life:18,hit:[],pierce:true,homing:false,laser:true});
         burst(mouthX,mouthY,'#ffffff',22);sfx('laser');addShake(7);
         for(let k=0;k<6;k++){
           const spread=(k-2.5)*1.2;
