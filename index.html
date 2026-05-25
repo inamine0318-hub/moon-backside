@@ -1260,7 +1260,8 @@ function doJet(){
     particles.push({x:ox,y:player.y+player.h*.6,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1.2,col:Math.random()<.4?'#ffffff':jtCol,life:20});
   }
 }
-function burst(x,y,col,n){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=Math.random()*4+1;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1.5,col,life:22});}}
+const MAX_PARTICLES=280;
+function burst(x,y,col,n){for(let i=0;i<n;i++){if(particles.length>=MAX_PARTICLES)break;const a=Math.random()*Math.PI*2,s=Math.random()*4+1;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1.5,col,life:22});}}
 function deathBurst(x,y){for(let i=0;i<14;i++){const a=Math.random()*Math.PI*2,s=Math.random()*5+2;particles.push({x:x+15,y:y+18,vx:Math.cos(a)*s,vy:Math.sin(a)*s-2,col:'#ff5533',life:36});}}
 
 function landDust(x,y){
@@ -1673,6 +1674,7 @@ function update(){
     if(ef.type==='poison'){ef.tickCd--;if(ef.tickCd<=0&&ef.tickCount<3){ef.tickCd=18;ef.tickCount++;for(let j=0;j<enemies.length;j++){if(enemies[j].hp>0&&ov(ef,enemies[j]))hitE(j,ef.dmg);}}}
   }
   for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.15;p.life--;if(p.life<=0)particles.splice(i,1);}
+  if(particles.length>MAX_PARTICLES)particles.length=MAX_PARTICLES; // 安全キャップ
 
   // 敵 UPDATE (タイプ別)
   for(let i=0;i<enemies.length;i++){
