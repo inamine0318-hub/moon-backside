@@ -1487,27 +1487,20 @@ function doAttack(){
       }
       break;
     }
-    case 2:{ // MIGUEL 狼 - 銃撃 / カウンター3連射 / 3wayスプレッド
-      const sh=(vx,vy,w,h,col,dmg,opts)=>{
+    case 2:{ // MIGUEL 狼 - 爪弾 / 3way / 5way
+      const shot=(vx,vy,w,h,col,dmg,opts)=>{
         opts=opts||{};
-        projectiles.push({x:f>0?mx:mx-w,y:my-h/2,vx,vy,w,h,col,dmg,life:opts.life||12,hit:[],pierce:!!opts.pierce,homing:false});
-        burst(f>0?mx:mx-w/2,my,col,opts.n||3);sfx('needle');
+        projectiles.push({x:mx,y:my-h/2,vx,vy,w,h,col,dmg,life:opts.life||42,hit:[],pierce:!!opts.pierce,homing:false,claw:true});
+        burst(mx,my,col,opts.n||4);sfx('claw');
       };
-      if(player.counterWindow>0){
-        for(let k=0;k<3;k++)setTimeout(()=>{if(player){const f2=player.facing;const bx2=f2>0?player.x+player.w:player.x-14;projectiles.push({x:bx2,y:player.y+player.h*.35,vx:f2*18,vy:(k-1)*2,w:14,h:6,col:'#00ffaa',dmg:2,life:11,hit:[],pierce:true,homing:false});burst(bx2,player.y+player.h*.35,'#00ffaa',4);sfx('needle');}},k*80);
-        player.counterWindow=0;addShake(5);
-        break;
-      }
       if(step<2){
-        sh(f*15,0,step===0?12:14,6,step===0?'#aabbff':'#ccddff',1,{life:11,n:3});
+        shot(f*15,step?-0.8:0,20,18,'#8899ff',1,{life:42});
       }else if(lv===0){
-        sh(f*16,0,14,6,'#eeeeff',2,{life:12,pierce:true,n:5});
+        shot(f*17,0,26,22,'#aabbff',2,{life:48,n:7});
       }else if(lv===1){
-        sh(f*16,0,14,6,'#ffffff',2,{life:12,pierce:true,n:5});
-        setTimeout(()=>{if(player){const f2=player.facing;projectiles.push({x:f2>0?player.x+player.w:player.x-14,y:player.y+player.h*.35,vx:f2*16,vy:0,w:14,h:6,col:'#aaccff',dmg:2,life:11,hit:[],pierce:true,homing:false});burst(f2>0?player.x+player.w:player.x-7,player.y+player.h*.35,'#aaccff',4);sfx('needle');}},160);
+        for(let k=0;k<3;k++)shot(f*16,(k-1)*2.5,18,16,'#ccddff',1,{life:44,n:2});
       }else{
-        [0,-2.5,2.5].forEach((dvy,k)=>setTimeout(()=>{if(player){const f2=player.facing;const bx2=f2>0?player.x+player.w:player.x-14;projectiles.push({x:bx2,y:player.y+player.h*.35+dvy*3,vx:f2*15,vy:dvy,w:14,h:6,col:'#ffffff',dmg:2,life:12,hit:[],pierce:true,homing:false});burst(bx2,player.y+player.h*.35,'#8899ff',4);sfx('needle');}},k*40));
-        addShake(4);
+        for(let k=0;k<5;k++)shot(f*18,(k-2)*2.2,16,14,'#ddeeff',1,{life:42,n:2});addShake(3);
       }
       break;
     }
