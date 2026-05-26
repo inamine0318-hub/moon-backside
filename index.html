@@ -1290,9 +1290,9 @@ function getSysBtns(){
   };
 }
 function getBtns(){
-  const mg=8, lgap=10, rgap=26;
+  const mg=8, lgap=10, rgap=44;
   const jS=106;  // JUMP
-  const aS=106;  // ATK (JUMP�E�Ɠ��E�T�E�C�E�Y)
+  const aS=96;   // ATK (JUMPより少し小さく・左に離す)�E�Ɠ��E�T�E�C�E�Y)
   const eS=78;   // JET
   const mS=92;   // �E�ړ�
   const jmpX=W-mg-jS, jmpY=H-mg-jS;
@@ -1349,6 +1349,7 @@ canvas.addEventListener('touchstart',e=>{
     return; // �E��E��E�^�E�b�E�v�E�͖��E��E�
   }
   if(state==='charselect'){handleCSTap(e);return;}
+  if(state==='howtoplay'){startGame(true);return;}
   if(state==='cutscene'){advanceCutscene();return;}
   if(state==='ending'){
     if(endingDone){clearSave();currentStage=1;state='charselect';bgmPlay('title');}
@@ -1411,8 +1412,9 @@ document.addEventListener('keydown',e=>{
     { const maxSel=CHARS.length-1;
       if(e.key==='ArrowLeft'){selChar=(selChar-1+maxSel+1)%(maxSel+1);}
       if(e.key==='ArrowRight'){selChar=(selChar+1)%(maxSel+1);} }
-    if(e.key==='Enter')startGame(true);return;
+    if(e.key==='Enter'){state='howtoplay';return;}return;
   }
+  if(state==='howtoplay'){if(e.key==='Enter'||e.key===' ')startGame(true);return;}
   if(state==='gameover'&&(e.key==='Enter'||e.key===' ')){retryStage();return;}
   if(state==='gameover'&&e.key==='Escape'){state='charselect';bgmPlay('title');return;}
   if(state==='stageclear'&&(e.key==='Enter'||e.key===' ')){
@@ -1489,7 +1491,7 @@ function handleCSTap(e){
         else selChar=i;
       }
     });
-    const s=z.start;if(tx>=s.x&&tx<=s.x+s.w&&ty>=s.y&&ty<=s.y+s.h){tryFullscreen();startGame(true);}
+    const s=z.start;if(tx>=s.x&&tx<=s.x+s.w&&ty>=s.y&&ty<=s.y+s.h){tryFullscreen();state='howtoplay';}
   }
 }
 
@@ -4658,6 +4660,56 @@ function csLayout(){
     secret:null
   };
 }
+function drawHowToPlay(){
+  const t=frameTime;
+  dr(0,0,W,H,'#010108');
+  STARS.forEach(s=>{const sx=(s.x%W+W)%W;if(!(s.b&&Math.floor(t/500)%2))dr(sx,s.y,s.s,s.s,'#fff');});
+  // タイトル
+  ctx.textAlign='center';
+  ctx.fillStyle='#112244';ctx.font=`bold ${Math.min(W*.052,20)}px monospace`;
+  ctx.fillText('HOW  TO  PLAY',W/2+1,H*.09+1);
+  ctx.fillStyle='#aabbff';ctx.font=`bold ${Math.min(W*.052,20)}px monospace`;
+  ctx.fillText('HOW  TO  PLAY',W/2,H*.09);
+  dr(W*.06,Math.round(H*.115),W*.88,1,'#223355');
+
+  // 操作説明リスト
+  const rows=[
+    {icon:'← →',  col:'#66ccff', label:'移動',         sub:''},
+    {icon:'JUMP',  col:'#88ffaa', label:'ジャンプ',     sub:'2回押しで二段ジャンプ'},
+    {icon:'ATK',   col:'#ffaa44', label:'攻撃',         sub:'連打でコンボ、空中で急降下'},
+    {icon:'JET',   col:'#cc88ff', label:'回避ダッシュ', sub:'無敵あり・壁抜け注意'},
+  ];
+  const rowH=Math.round(H*.135), startY=Math.round(H*.145);
+  rows.forEach((row,i)=>{
+    const ry=startY+i*rowH;
+    const iw=Math.round(W*.28), ix=Math.round(W*.06), tx=Math.round(W*.42);
+    // アイコン枠
+    dr(ix,ry,iw,Math.round(rowH*.78),'#080e1e');
+    dr(ix,ry,iw,2,row.col);
+    ctx.fillStyle=row.col;ctx.font=`bold ${Math.min(W*.048,18)}px monospace`;ctx.textAlign='center';
+    ctx.fillText(row.icon,ix+iw/2,ry+Math.round(rowH*.52));
+    // ラベル
+    ctx.fillStyle='#ddeeff';ctx.font=`bold ${Math.min(W*.040,15)}px monospace`;ctx.textAlign='left';
+    ctx.fillText(row.label,tx,ry+Math.round(rowH*.38));
+    // サブ
+    if(row.sub){ctx.fillStyle='#445566';ctx.font=`${Math.min(W*.028,11)}px monospace`;ctx.fillText(row.sub,tx,ry+Math.round(rowH*.64));}
+  });
+
+  dr(W*.06,Math.round(H*.685),W*.88,1,'#223355');
+  // ヒント
+  ctx.fillStyle='#445577';ctx.font=`${Math.min(W*.030,12)}px monospace`;ctx.textAlign='center';
+  ctx.fillText('オーブを集めてゴールへ。ボスを倒してステージクリア！',W/2,H*.74);
+  // 選択キャラ表示
+  const ch=CHARS[selChar];
+  ctx.fillStyle='#334466';ctx.font=`${Math.min(W*.028,11)}px monospace`;
+  ctx.fillText(`選択中: ${ch.nick}  /  ${ch.ability.slice(0,18)}`,W/2,H*.80);
+  // TAP TO START 点滅
+  ctx.globalAlpha=Math.sin(t/320)*.35+.65;
+  ctx.fillStyle='#aaccff';ctx.font=`bold ${Math.min(W*.044,17)}px monospace`;
+  ctx.fillText('▶  TAP  TO  START',W/2,H*.91);
+  ctx.globalAlpha=1;
+  scanlines();
+}
 function drawCharSelect(){
   const t=frameTime;
   dr(0,0,W,H,'#01010c');
@@ -5493,6 +5545,7 @@ function draw(){
   else if(state==='title')drawTitle();
   else if(state==='story')drawStory();
   else if(state==='charselect')drawCharSelect();
+  else if(state==='howtoplay')drawHowToPlay();
   else if(state==='play')drawPlay();
   else if(state==='stageclear')drawStageClear();
   else if(state==='gameover')drawGameOver();
