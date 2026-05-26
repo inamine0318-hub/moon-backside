@@ -1643,27 +1643,32 @@ function doAttack(){
       player.invincible=Math.max(player.invincible,24);
       break;
     }
-    case 7:{ // わらしべ走者 - わら/アブ/ミカン/馬
+    case 7:{ // わらしべ走者
+      // 空中: スタンプ急降下
+      if(!player.onGround){
+        player.vy=Math.max(player.vy,11);
+        player.comboStep=0;player.comboTimer=0;
+        projectiles.push({x:px-10,y:py+ph,vx:0,vy:0,w:pw+20,h:14,col:'#cc8822',dmg:3+lv,life:14,hit:[],pierce:true,homing:false,stomp:true});
+        burst(px+pw*.5,py+ph,'#d4a830',10);addShake(3);sfx('bomb');
+        break;
+      }
+      // 地上コンボ: わら/アブ/ミカン/馬
       if(step<2){
         if(step===0){
-          // わら×2本 高速投げ
           for(let k=0;k<2;k++){
             projectiles.push({x:f>0?px+pw+2:px-28,y:py+ph*.35+(k-0.5)*8,vx:f*(13+k*2),vy:(k-0.5)*0.6,w:26,h:5,col:'#d4b44e',dmg:2,life:32,hit:[],pierce:false,homing:false,straw:true});
           }
           sfx('slash');
         }else{
-          // アブ: ゆるホーミング
           projectiles.push({x:f>0?px+pw+2:px-10,y:py+ph*.4,vx:f*5,vy:-1.5,w:10,h:10,col:'#886611',dmg:3,life:95,hit:[],pierce:false,homing:true,missile:true});
           sfx('needle');
         }
       }else{
         if(lv<2){
-          // ミカン: 転がる橙 爆弾
           const rad=lv===1?65:45, dmg=lv===1?6:4;
           projectiles.push({x:mx,y:py+ph*.4,vx:f*7,vy:-3.5,w:16,h:16,col:'#ff7700',dmg,life:110,hit:[],pierce:false,homing:false,bomb:true,rad,gravity:true,gravMult:0.6,bounces:0,maxBounces:3,mikan:true});
           sfx('bomb');
         }else{
-          // 馬: 画面端まで突進
           projectiles.push({x:f>0?px+pw:px-72,y:py,vx:f*22,vy:0,w:72,h:36,col:'#7a5218',dmg:9,life:55,hit:[],pierce:true,homing:false,horse:true});
           burst(f>0?px+pw+4:px-4,py+ph*.4,'#d4a830',18);addShake(5);sfx('bomb');
         }
