@@ -1349,7 +1349,6 @@ canvas.addEventListener('touchstart',e=>{
     return; // 他タップは無視
   }
   if(state==='charselect'){handleCSTap(e);return;}
-  if(state==='howtoplay'){startGame(true);return;}
   if(state==='cutscene'){advanceCutscene();return;}
   if(state==='ending'){
     if(endingDone){clearSave();currentStage=1;state='charselect';bgmPlay('title');}
@@ -1412,9 +1411,8 @@ document.addEventListener('keydown',e=>{
     { const maxSel=CHARS.length-1;
       if(e.key==='ArrowLeft'){selChar=(selChar-1+maxSel+1)%(maxSel+1);}
       if(e.key==='ArrowRight'){selChar=(selChar+1)%(maxSel+1);} }
-    if(e.key==='Enter'){state='howtoplay';return;}return;
+    if(e.key==='Enter')startGame(true);return;
   }
-  if(state==='howtoplay'){if(e.key==='Enter'||e.key===' ')startGame(true);return;}
   if(state==='gameover'&&(e.key==='Enter'||e.key===' ')){retryStage();return;}
   if(state==='gameover'&&e.key==='Escape'){state='charselect';bgmPlay('title');return;}
   if(state==='stageclear'&&(e.key==='Enter'||e.key===' ')){
@@ -1491,7 +1489,7 @@ function handleCSTap(e){
         else selChar=i;
       }
     });
-    const s=z.start;if(tx>=s.x&&tx<=s.x+s.w&&ty>=s.y&&ty<=s.y+s.h){tryFullscreen();state='howtoplay';}
+    const s=z.start;if(tx>=s.x&&tx<=s.x+s.w&&ty>=s.y&&ty<=s.y+s.h){tryFullscreen();startGame(true);}
   }
 }
 
@@ -4662,41 +4660,6 @@ function csLayout(){
     secret:null
   };
 }
-function drawHowToPlay(){
-  const t=frameTime;
-  dr(0,0,W,H,'#010108');
-  STARS.forEach(s=>{const sx=(s.x%W+W)%W;if(!(s.b&&Math.floor(t/500)%2))dr(sx,s.y,s.s,s.s,'#fff');});
-  ctx.textAlign='center';
-  ctx.fillStyle='#223355';ctx.font=`bold ${Math.min(W*.05,18)}px monospace`;
-  ctx.fillText('HOW  TO  PLAY',W/2+1,H*.1+1);
-  ctx.fillStyle='#aabbff';ctx.font=`bold ${Math.min(W*.05,18)}px monospace`;
-  ctx.fillText('HOW  TO  PLAY',W/2,H*.1);
-  const rows=[
-    {label:'← →',desc:'移動'},
-    {label:'JUMP','desc':'ジャンプ / 二段J'},
-    {label:'ATK', desc:'攻撃（長押し可）'},
-    {label:'JET', desc:'ジェット噴射（空中）'},
-  ];
-  rows.forEach((r,i)=>{
-    const y=H*.22+i*(H*.14);
-    ctx.fillStyle='#334466';ctx.fillRect(W*.06,y,W*.88,H*.11);
-    ctx.fillStyle='#aaddff';ctx.font=`bold ${Math.min(W*.044,16)}px monospace`;ctx.textAlign='left';
-    ctx.fillText(r.label,W*.10,y+H*.075);
-    ctx.fillStyle='#778899';ctx.font=`${Math.min(W*.036,13)}px monospace`;
-    ctx.fillText(r.desc,W*.36,y+H*.075);
-  });
-  const ch=CHARS[selChar];
-  ctx.textAlign='center';
-  ctx.fillStyle='#88bbdd';ctx.font=`bold ${Math.min(W*.030,11)}px monospace`;
-  ctx.fillText('選択中: '+ch.nick,W/2,H*.80);
-  ctx.fillStyle='#556677';ctx.font=`${Math.min(W*.026,10)}px monospace`;
-  ctx.fillText(ch.ability.slice(0,20),W/2,H*.86);
-  if(Math.floor(t/600)%2){
-    ctx.fillStyle='#aabbff';ctx.font=`bold ${Math.min(W*.036,13)}px monospace`;
-    ctx.fillText('TAP / ENTER TO START',W/2,H*.94);
-  }
-  scanlines();
-}
 function drawCharSelect(){
   const t=frameTime;
   dr(0,0,W,H,'#01010c');
@@ -5526,7 +5489,6 @@ function draw(){
   else if(state==='title')drawTitle();
   else if(state==='story')drawStory();
   else if(state==='charselect')drawCharSelect();
-  else if(state==='howtoplay')drawHowToPlay();
   else if(state==='play')drawPlay();
   else if(state==='stageclear')drawStageClear();
   else if(state==='gameover')drawGameOver();
