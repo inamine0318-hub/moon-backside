@@ -221,8 +221,8 @@ function drawSprite(ox,oy,flip){
 // ================================================================
 //  キャラクター描画 (二足歩行宇宙服 手続き型 fillRect)
 // ================================================================
-const SC_SUIT  =['#c07828','#7a4a22','#3a4aaa','#aa7722','#556677','#1e2c3a','#d0e8ff'];
-const SC_ACCNT =['#ff8800','#cc3300','#5566ee','#ffcc00','#99bbcc','#ffaa00','#88ccff'];
+const SC_SUIT  =['#c07828','#7a4a22','#3a4aaa','#aa7722','#556677','#1e2c3a','#d0e8ff','#8b7040'];
+const SC_ACCNT =['#ff8800','#cc3300','#5566ee','#ffcc00','#99bbcc','#ffaa00','#88ccff','#ffbb44'];
 
 function drawCharacter(sx,sy,ci,facing,walkFrame,moving,atkAnim,isJetting,isAirborne){
   ctx.save();
@@ -869,6 +869,30 @@ function drawAnimalHead(ci,_r,AC,atk){
     _r(MDK2, 3,22,25, 2); _r(EYE2, 4,22, 6, 1);
     break;
   }
+  case 7: { // ===== わらしべ走者 (農夫・麦わら帽) =====
+    // 麦わら帽ツバ
+    _r(OL,    1,-7,28,3);_r('#c8a832',2,-6,26,2);_r('#a88c28',3,-6,22,1);
+    // 帽子クラウン
+    _r(OL,    7,-14,16,9);_r('#d4b440',8,-13,14,8);_r('#c0a030',8,-13,14,1);
+    // 帽子バンド
+    _r('#7a5a10',9,-6,12,2);
+    // 顔本体
+    ctx.fillStyle=OL;ctx.beginPath();ctx.ellipse(15,9,12,12,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#f2c878';ctx.beginPath();ctx.ellipse(15,9,11,11,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#f6d68a';ctx.beginPath();ctx.ellipse(15,6,11,7,0,0,Math.PI*2);ctx.fill();
+    // 目
+    _r(OL, 9,5,4,5);_r('#ffffff',10,6,2,3);_r('#332200',10,7,2,2);_r('#ffffff',10,6,1,1);
+    _r(OL,18,5,4,5);_r('#ffffff',19,6,2,3);_r('#332200',19,7,2,2);_r('#ffffff',19,6,1,1);
+    // 眉
+    _r('#6b3d12',8,4,5,2);_r('#6b3d12',18,4,5,2);
+    // 鼻
+    _r('#d4955a',13,11,4,3);_r('#c07840',14,12,2,2);
+    // 口（笑顔）
+    _r(OL,10,14,10,3);_r('#e8503a',11,15,8,2);_r('#ffffff',11,15,3,1);_r('#ffffff',16,15,2,1);
+    // 頬
+    ctx.globalAlpha=0.32;_r('#ff9988',7,12,4,3);_r('#ff9988',20,12,4,3);ctx.globalAlpha=1;
+    break;
+  }
   }
 }
 
@@ -883,6 +907,7 @@ const CHARS=[
   {name:'サイ型',   nick:'REX',     dna:'犀DNA',  col:'#556677',w:36,h:46,spd:5.5,jmp:-9.0, maxHp:7, atkCd:20,atkLabel:'猛突進',    glide:false,djump:true, wallSlide:false,ability:'HP最大・攻撃1.5倍・ボス被ダメ軽減・突進無敵'},
   {name:'ロボ型',   nick:'BUSTER',  dna:'メカコア',col:'#1e2c3a',w:36,h:48,spd:4.8,jmp:-9.2, maxHp:10,atkCd:22,atkLabel:'レーザー砲', glide:true, djump:true, wallSlide:false,ability:'レーザー砲・アーマー(2回に1回無効化)・ホーミングミサイル・空中突進無制限'},
   {name:'TSUKUYOMI',  nick:'TSUKUYOMI',dna:'月霊DNA', col:'#c0ddff',w:30,h:44,spd:6.4,jmp:-9.6, maxHp:12,atkCd:14,atkLabel:'瞬身斬',   glide:false,djump:true, wallSlide:true, ability:'瞬身斬（ワープ斬）・幻影分身3体・常時半透明・残像移動'},
+  {name:'わらしべ走者',nick:'わらしべ走者',dna:'わらDNA',col:'#8b7040',w:28,h:42,spd:5.8,jmp:-9.2, maxHp:6,  atkCd:16,atkLabel:'わら投げ', glide:false,djump:true, wallSlide:false,ability:'わら・アブ・ミカン投げ・馬突進の連携攻撃'},
 ];
 
 // ================================================================
@@ -1320,9 +1345,9 @@ document.addEventListener('keydown',e=>{
   if(state==='cutscene'){if(e.key==='Enter'||e.key===' ')advanceCutscene();return;}
   if(state==='ending'){if((e.key==='Enter'||e.key===' ')&&endingDone){clearSave();currentStage=1;state='charselect';bgmPlay('title');}return;}
   if(state==='charselect'){
-    { const maxSel=getTsukuyomiUnlocked()?CHARS.length-1:5;
-      if(e.key==='ArrowLeft')selChar=(selChar-1+maxSel+1)%(maxSel+1);
-      if(e.key==='ArrowRight')selChar=(selChar+1)%(maxSel+1); }
+    { const maxSel=CHARS.length-1;
+      if(e.key==='ArrowLeft'){let ns=(selChar-1+maxSel+1)%(maxSel+1);if(ns===6&&!getTsukuyomiUnlocked())ns=5;selChar=ns;}
+      if(e.key==='ArrowRight'){let ns=(selChar+1)%(maxSel+1);if(ns===6&&!getTsukuyomiUnlocked())ns=7;selChar=ns;} }
     if(e.key==='Enter')startGame(true);return;
   }
   if(state==='gameover'&&(e.key==='Enter'||e.key===' ')){retryStage();return;}
@@ -1616,6 +1641,33 @@ function doAttack(){
         burst(player.x+player.w*.5,player.y+player.h*.5,'#c0ddff',18);addShake(4);sfx('slash');
       }
       player.invincible=Math.max(player.invincible,24);
+      break;
+    }
+    case 7:{ // わらしべ走者 - わら/アブ/ミカン/馬
+      if(step<2){
+        if(step===0){
+          // わら×2本 高速投げ
+          for(let k=0;k<2;k++){
+            projectiles.push({x:f>0?px+pw+2:px-28,y:py+ph*.35+(k-0.5)*8,vx:f*(13+k*2),vy:(k-0.5)*0.6,w:26,h:5,col:'#d4b44e',dmg:2,life:32,hit:[],pierce:false,homing:false,straw:true});
+          }
+          sfx('slash');
+        }else{
+          // アブ: ゆるホーミング
+          projectiles.push({x:f>0?px+pw+2:px-10,y:py+ph*.4,vx:f*5,vy:-1.5,w:10,h:10,col:'#886611',dmg:3,life:95,hit:[],pierce:false,homing:true,missile:true});
+          sfx('needle');
+        }
+      }else{
+        if(lv<2){
+          // ミカン: 転がる橙 爆弾
+          const rad=lv===1?65:45, dmg=lv===1?6:4;
+          projectiles.push({x:mx,y:py+ph*.4,vx:f*7,vy:-3.5,w:16,h:16,col:'#ff7700',dmg,life:110,hit:[],pierce:false,homing:false,bomb:true,rad,gravity:true,gravMult:0.6,bounces:0,maxBounces:3,mikan:true});
+          sfx('bomb');
+        }else{
+          // 馬: 画面端まで突進
+          projectiles.push({x:f>0?px+pw:px-72,y:py,vx:f*22,vy:0,w:72,h:36,col:'#7a5218',dmg:9,life:55,hit:[],pierce:true,homing:false,horse:true});
+          burst(f>0?px+pw+4:px-4,py+ph*.4,'#d4a830',18);addShake(5);sfx('bomb');
+        }
+      }
       break;
     }
   }
@@ -4513,11 +4565,15 @@ function drawTitle(){
 //  キャラ選択
 // ================================================================
 function csLayout(){
-  const bw=51,bh=100,gap=3;
-  const mainCount=7;
-  const total=mainCount*(bw+gap)-gap,sx=(W-total)/2,by=H*.34;
+  const bw=90,bh=70,gap=4;
+  const r1y=Math.floor(H*0.17), r2y=Math.floor(H*0.17)+bh+6;
+  const totalW=4*(bw+gap)-gap, sx=(W-totalW)/2;
+  const chars=[
+    ...Array.from({length:4},(_,i)=>({x:sx+i*(bw+gap),y:r1y,w:bw,h:bh})),
+    ...Array.from({length:4},(_,i)=>({x:sx+i*(bw+gap),y:r2y,w:bw,h:bh})),
+  ];
   return{
-    chars:Array.from({length:mainCount},(_,i)=>({x:sx+i*(bw+gap),y:by,w:bw,h:bh})),
+    chars,
     start:{x:W/2-78,y:H*.78,w:156,h:42},
     secret:null
   };
@@ -4542,10 +4598,10 @@ function drawCharSelect(){
   ctx.fillStyle='#aabbff';ctx.font=`bold ${Math.min(W*.04,16)}px monospace`;
   ctx.fillText('SELECT  CHARACTER',W/2,H*.07);
 
-  // ── キャラカード (全7体) ──
+  // ── キャラカード (全8体) ──
   const z=csLayout();
   const tsukuUnlocked=getTsukuyomiUnlocked();
-  Array.from({length:7},(_,i)=>{
+  Array.from({length:8},(_,i)=>{
     const b=z.chars[i],sel=i===selChar;
     const isTsuku=(i===6);
     const locked=isTsuku&&!tsukuUnlocked;
@@ -4564,14 +4620,14 @@ function drawCharSelect(){
       ctx.fillStyle='#5588aa';ctx.font=`bold ${Math.min(W*.052,20)}px monospace`;ctx.textAlign='center';
       ctx.fillText('☽',b.x+b.w/2,b.y+b.h*.5);
       ctx.font=`${Math.min(W*.030,13)}px monospace`;
-      ctx.fillText('？？？',b.x+b.w/2,b.y+b.h-14);
+      ctx.fillText('？？？',b.x+b.w/2,b.y+b.h-10);
       ctx.globalAlpha=1;
     } else {
       // 通常: キャラスプライト
-      ctx.save();ctx.translate(b.x+b.w/2-13,b.y+5);ctx.scale(.72,.72);
+      ctx.save();ctx.translate(b.x+b.w/2-13,b.y+4);ctx.scale(0.88,0.88);
       drawCharacter(0,0,i,1,0,false,0);ctx.restore();
-      ctx.fillStyle=sel?'#ffffff':'#778';ctx.font=`bold ${Math.min(W*.030,13)}px monospace`;ctx.textAlign='center';
-      ctx.fillText(c.nick,b.x+b.w/2,b.y+b.h-10);
+      ctx.fillStyle=sel?'#ffffff':'#778';ctx.font=`bold ${Math.min(W*.026,11)}px monospace`;ctx.textAlign='center';
+      ctx.fillText(c.nick,b.x+b.w/2,b.y+b.h-8);
     }
     // 主人公バッジ
     if(i===2){ctx.fillStyle='#ffdd22';ctx.font=`${Math.min(W*.032,13)}px monospace`;ctx.fillText('★',b.x+b.w-7,b.y+8);}
@@ -4950,6 +5006,55 @@ function drawPlay(){
       // ミサイル
       ctx.globalAlpha=0.5;dr(bx-1,by-1,p.w+2,p.h+2,p.col);ctx.globalAlpha=1;
       dr(bx,by,p.w,p.h,p.col);dr(bx+2,by+2,p.w-4,p.h-4,'#ffee88');
+    }else if(p.mikan){
+      // ミカン: 転がる橙
+      ctx.save();ctx.translate(bx+p.w/2,by+p.h/2);
+      const mr=p.w/2;
+      ctx.beginPath();ctx.arc(0,0,mr,0,Math.PI*2);ctx.fillStyle='#1a0800';ctx.fill();
+      ctx.beginPath();ctx.arc(0,0,mr-1,0,Math.PI*2);ctx.fillStyle='#ff7700';ctx.fill();
+      ctx.globalAlpha=0.55;ctx.beginPath();ctx.arc(-mr*.3,-mr*.3,mr*.32,0,Math.PI*2);ctx.fillStyle='#ffcc44';ctx.fill();ctx.globalAlpha=1;
+      ctx.fillStyle='#226600';ctx.fillRect(-2,-mr-3,4,5);
+      ctx.restore();
+    }else if(p.horse){
+      // 馬の突進
+      const dir=p.vx>=0?1:-1;
+      ctx.save();ctx.translate(bx+p.w/2,by+p.h/2);if(dir<0)ctx.scale(-1,1);
+      const hw=p.w/2,hh=p.h/2,li=(Math.floor(p.life/5)%2)*4;
+      // 胴体
+      ctx.fillStyle='#7a5218';ctx.fillRect(-hw+6,-hh+8,p.w-14,p.h-12);
+      // 首
+      ctx.fillStyle='#8b6020';ctx.fillRect(hw-18,-hh+2,10,Math.floor(p.h*.55));
+      // 頭
+      ctx.fillStyle='#7a5218';ctx.fillRect(hw-14,-hh-4,16,12);
+      // 目
+      ctx.fillStyle='#ff2200';ctx.fillRect(hw-5,-hh+1,3,3);
+      // たてがみ
+      ctx.fillStyle='#2a1800';ctx.fillRect(hw-22,-hh,10,10);
+      // 脚
+      ctx.fillStyle='#5c3c10';
+      ctx.fillRect(-hw+8, hh-8,6,8+li);ctx.fillRect(-hw+16,hh-8,6,8-li);
+      ctx.fillRect( hw-22,hh-8,6,8+li);ctx.fillRect( hw-14,hh-8,6,8-li);
+      // 蹄
+      ctx.fillStyle='#1a1008';
+      ctx.fillRect(-hw+8, hh+li,6,3);ctx.fillRect(-hw+16,hh-li,6,3);
+      ctx.fillRect( hw-22,hh+li,6,3);ctx.fillRect( hw-14,hh-li,6,3);
+      // 尻尾
+      ctx.fillStyle='#2a1800';ctx.fillRect(-hw,-hh+8,7,14);
+      // オーラ
+      ctx.globalAlpha=0.18+Math.sin(frameTime*.1)*.08;ctx.fillStyle='#ffcc44';
+      ctx.fillRect(-hw+4,-hh+6,p.w-8,p.h-10);ctx.globalAlpha=1;
+      ctx.restore();
+    }else if(p.straw){
+      // わら: 細い麦わら棒
+      const dir=p.vx>=0?1:-1;
+      ctx.save();ctx.translate(bx+p.w/2,by+p.h/2);
+      ctx.strokeStyle='#c8a832';ctx.lineWidth=3;
+      ctx.beginPath();ctx.moveTo(-p.w/2,0);ctx.lineTo(p.w/2,0);ctx.stroke();
+      ctx.strokeStyle='#d4b840';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(-p.w/2+2,-1);ctx.lineTo(p.w/2-2,-1);ctx.stroke();
+      ctx.globalAlpha=0.25;ctx.fillStyle='#ffee88';
+      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.globalAlpha=1;
+      ctx.restore();
     }else if(p.stomp){
       // 踏みつけ衝撃波: 横楕円
       const alpha=(p.life/16)*0.8;
