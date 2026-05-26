@@ -1522,7 +1522,8 @@ function doAttack(){
   const _pl=projectiles.length;
 
   switch(ci){
-    case 0:{ // BRUCE �E��E� - �E��E�A�E��E� / �E�}�E�~�E��E��E�_�E�C�E�u / 3way / �E�z�E�[�E�~�E��E��E�O�E����E      if(!player.onGround&&!player.diving){ // �E��E�: �E�}�E�~�E��E�
+    case 0:{ // BRUCE �E��E� - �E��E�A�E��E� / �E�}�E�~�E��E��E�_�E�C�E�u / 3way / �E�z�E�[�E�~�E��E��E�O�E����E
+            if(!player.onGround&&!player.diving){ // �E��E�: �E�}�E�~�E��E�
         player.diving=true;player.vy=14;
         player.invincible=Math.max(player.invincible,18);
         for(let k=0;k<12;k++){const a=Math.PI/2+(Math.random()-.5)*0.9,sp=Math.random()*3+2;particles.push({x:player.x+player.w/2+(Math.random()-.5)*10,y:player.y,vx:Math.cos(a-Math.PI/2)*sp,vy:Math.sin(a)*sp,col:k%2?'#ffcc44':'#ffffff',life:16});}
@@ -4411,17 +4412,17 @@ function drawEnding(){
     ['�E��E��E�Ƃ��E�Ɛl�E�ނ̓G�E�ł͂Ȃ��E��E��E��E��E�B','#ccddff',false],
     ['','',''],
     ['�E�X�E�T�E�m�E�I�E�A�E�^�E�P�E�~�E�J�E�d�E�`�E�A�E�J�E�O�E�d�E�`�E�A','#aabbee',false],
-    ['�E��E��E�}�E�^�E�m�E�I�E��E��E�`�E�A�E�^�E�W�E�J�E��E��E�I�E�\�E�\','#aabbee',false],
+    ['�E��E��E�}�E�^�E�m�E�I�E��E��E�`�E�A�E�^�E�W�E�J�E��E��E�I�E��E�','#aabbee',false],
     ['�E��E��E��E��E�ăc�E�N�E��E��E�~�E�A�E��E��E�̓e�E�̍c�E��E�B','#ddeeff',false],
     ['','',''],
     ['�E�ނ�͑��E�Â��E�A','#ccddff',false],
-    ['�E�I�E�[�E�u�E�̖\�E��E��E�𕕂�E��E�邽�E�߂�','#ccddff',false],
+    ['�E�I�E�[�E�u�E�̖�E��E��E�𕕂�E��E�邽�E�߂�','#ccddff',false],
     ['�E��E��E�̗��E��E��E��E��E��E�葱�E��E��E�Ă��E��E��E�@�E�^�E�̎��E�_�E��E��E��E��E��E��E�B','#eeddff',false],
     ['','',''],
     ['�E��E��E��E��E�m�E�炸�E�N�E��E��E��E��E��E��E��E��E��E��E��E��E��E��E��E�','#aabbee',false],
     ['�E��E��E�_�E��E��E��E��E�͐키�E��E��E�Ƃ�]�E�V�E�Ȃ��E��E��E�ꂽ�E�B','#aabbee',false],
     ['','',''],
-    ['�E�S�E�Ă̌��E��E��E�́@�E�V�E�}�E��E��E��E��E�\�E�\','#ff9966',true],
+    ['�E�S�E�Ă̌��E��E��E�́@�E�V�E�}�E��E��E��E��E��E�','#ff9966',true],
     ['','',''],
     ['�E�ނ̓I�E�[�E�u�E�̃G�E�l�E��E��E�M�E�[�E��E�','#ffcc88',false],
     ['�E�l�E�ނ̐�Ύx�E�z�E��E�ژ_�E�݁A','#ffcc88',false],
@@ -4510,7 +4511,7 @@ function drawStory(){
     ['','',''],
     ['�E�l�E�ނ͋ɔ�C�E��E��E��E��E��E��E�s�E��E��E��E�B','#ffee99',true],
     ['','',''],
-    ['�E��E��E��E�́\�E�\','#aabbee',false],
+    ['�E��E��E��E�́�E�','#aabbee',false],
     ['�E��E��E�֓��E�ꕔ��E��E�𑗂荞�݁A','#aabbee',false],
     ['7�E�̓e�E�I�E�[�E�u�E��E��E��E��E��E��E��E�A','#aabbee',false],
     ['�E�n�E��E��E�Ő[�E��E��E�̐[�E�C�E�֒��E�ߕ��E�󂷂�Ƃ��E��E�','#aabbee',false],
@@ -4524,11 +4525,11 @@ function drawStory(){
     ['�E��E��E��E�ɒʏ�̐l�E�Ԃł͔C�E��E��E�ɑς��E��E��E�Ȃ��E��E��E�Ƃ��E��E��E��E��E�B','#aabbee',false],
     ['','',''],
     ['�E��E��E��E��E�Ō��E��E��E�҂��E��E��E�́A�E�n�E��E��E��E�̂��E��E��E�鐶�E��E��E��E�','#b8ccff',false],
-    ['DNA�E��E�g�E�ݍ��E�݁A�E�g�E�̔\�E�͂��E�Ɍ��E�܂ŋ��E��E��E��E��E��E�','#b8ccff',false],
+    ['DNA�E��E�g�E�ݍ��E�݁A�E�g�E�̔�E�͂��E�Ɍ��E�܂ŋ��E��E��E��E��E��E�','#b8ccff',false],
     ['�E��E��E�꒲�E��E��E��E��E��E��E��E�Ґ��E��E��E��E�B','#b8ccff',false],
     ['','',''],
     ['�E��E��E��E�͐l�E�ނ��E�~�E��E��E��E��E�߂̔C�E��E��E�Ȃ̂��E�B','#ffbbbb',false],
-    ['�E��E��E��E�Ƃ��E�\�E�\','#eeccdd',false],
+    ['�E��E��E��E�Ƃ��E��E�','#eeccdd',false],
     ['�E��E��E��E��E�ĐG�E��E�Ă͂Ȃ�Ȃ�','#eeccdd',false],
     ['"�E��E��E�̐^�E��E�" �E��E�ڊo�E�߂��E��E��E��E�s�E�ׂȂ̂��E�B','#ffaaee',true],
     ['','',''],
