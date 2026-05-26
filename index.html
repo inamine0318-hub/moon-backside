@@ -793,30 +793,41 @@ function drawAnimalHead(ci,_r,AC,atk){
     _r('#223344',18,15,14, 2); _r('#334455',19,15,12, 1);
     break;
   }
-  case 5: { // ===== 装甲ロボット BUSTER =====
+  case 5: { // ===== 装甲ロボット ゴッドバスター =====
     const MT1='#1a2838',MT2='#243444',MT3='#2e4050',MHL='#4a6070',MGW=AC;
+    const gl=Math.sin(frameTime/120)*.18+.82;
     // アンテナ (センサー)
     _r(OL,13,-10, 4, 6);_r(MT2,14,-9, 2, 5);_r('#ff2200',13,-11, 4, 3);
     // ヘルメット上面プレート
     _r(OL, 2, 0,28, 4);_r(MT3, 3, 1,26, 3);_r(MHL, 3, 1,26, 1);
     // サイドパネル(左)
-    _r(OL, 2, 4, 8,14);_r(MT2, 3, 5, 6,12);_r(MHL, 3, 5, 6, 1);
-    _r(MT1, 4, 7, 4, 3);_r(MT1, 4,12, 4, 3);
+    _r(OL, 2, 4, 8,16);_r(MT2, 3, 5, 6,14);_r(MHL, 3, 5, 6, 1);
+    _r(MT1, 4, 7, 4, 3);_r(MT1, 4,13, 4, 3);
     // サイドパネル(右)
-    _r(OL,22, 4, 8,14);_r(MT2,23, 5, 6,12);_r(MHL,23, 5, 6, 1);
-    _r(MT1,24, 7, 4, 3);_r(MT1,24,12, 4, 3);
-    // バイザー (大きな横長スロット)
-    _r(OL, 9, 4,14, 9);_r('#040c14',10, 5,12, 7);
-    ctx.globalAlpha=0.9;_r(MGW,10, 5,12, 3);ctx.globalAlpha=0.45;_r(MGW,10, 8,12, 4);ctx.globalAlpha=1;
-    _r('#ffffff',11, 5, 4, 1);
-    if(atk>0){ctx.globalAlpha=0.28+atk*.07;_r(MGW, 8, 3,16,11);ctx.globalAlpha=1;}
+    _r(OL,22, 4, 8,16);_r(MT2,23, 5, 6,14);_r(MHL,23, 5, 6, 1);
+    _r(MT1,24, 7, 4, 3);_r(MT1,24,13, 4, 3);
     // 頭頂~後部装甲
     _r(OL, 9, 0,14, 5);_r(MT2,10, 1,12, 4);
-    // 顎グリル
-    _r(OL, 4,16,24, 5);_r(MT2, 5,17,22, 4);
-    for(let k=0;k<4;k++){_r(MT1, 6+k*5,18, 3, 3);}
+    // 顔面プレート
+    _r(OL, 9, 4,14,17);_r(MT2,10, 5,12,15);
+    // 左目 (矩形LEDスロット)
+    _r(OL, 9, 5, 6, 7);_r('#020810',10, 6, 4, 5);
+    ctx.globalAlpha=gl*.92;_r(MGW,10, 6, 4, 2);ctx.globalAlpha=gl*.48;_r(MGW,10, 8, 4, 3);ctx.globalAlpha=1;
+    _r('#ffffff',10, 6, 2, 1);
+    // 右目 (矩形LEDスロット)
+    _r(OL,17, 5, 6, 7);_r('#020810',18, 6, 4, 5);
+    ctx.globalAlpha=gl*.92;_r(MGW,18, 6, 4, 2);ctx.globalAlpha=gl*.48;_r(MGW,18, 8, 4, 3);ctx.globalAlpha=1;
+    _r('#ffffff',18, 6, 2, 1);
+    // 攻撃グロー (両目が輝く)
+    if(atk>0){ctx.globalAlpha=0.25+atk*.08;_r(MGW, 8, 3,16,11);ctx.globalAlpha=1;}
+    // 口 (スピーカーグリル: 縦バー5本)
+    _r(OL, 9,13,14, 7);_r('#020810',10,14,12, 5);
+    for(let k=0;k<5;k++){ctx.globalAlpha=gl*.7;_r(MGW,11+k*2,14, 1, 5);ctx.globalAlpha=1;}
+    ctx.globalAlpha=gl*.22;_r(MGW,10,14,12, 2);ctx.globalAlpha=1;
+    // 顎装甲
+    _r(OL, 4,19,24, 3);_r(MT2, 5,20,22, 2);
     // 首プレート
-    _r(OL, 3,19,22, 2);_r(MT3, 4,19,20, 2);
+    _r(OL, 3,21,22, 2);_r(MT3, 4,21,20, 2);
     break;
   }
   case 6: { // ===== 月神型 TSUKUYOMI (神格・ウサギ耳) =====
@@ -905,7 +916,7 @@ const CHARS=[
   {name:'オオカミ型',nick:'MIGUEL', dna:'狼DNA',  col:'#3a4aaa',w:30,h:48,spd:5.5,jmp:-9.0,maxHp:5,atkCd:16,atkLabel:'剣閃撃',    glide:false,djump:true, wallSlide:true, ability:'二段ジャンプ・壁張付き【主人公】'},
   {name:'サル型',   nick:'KIBA',    dna:'猿DNA',  col:'#aa7722',w:28,h:44,spd:6.8,jmp:-10.0,maxHp:5,atkCd:14,atkLabel:'電磁ムチ',  glide:false,djump:true, wallSlide:true, ability:'最速・電磁ムチ引寄せ・壁張付き・二段J・踏みつけトランポリン'},
   {name:'サイ型',   nick:'REX',     dna:'犀DNA',  col:'#556677',w:36,h:46,spd:5.5,jmp:-9.0, maxHp:7, atkCd:20,atkLabel:'猛突進',    glide:false,djump:true, wallSlide:false,ability:'HP最大・攻撃1.5倍・ボス被ダメ軽減・突進無敵'},
-  {name:'ロボ型',   nick:'BUSTER',  dna:'メカコア',col:'#1e2c3a',w:36,h:48,spd:4.8,jmp:-9.2, maxHp:10,atkCd:22,atkLabel:'レーザー砲', glide:true, djump:true, wallSlide:false,ability:'レーザー砲・アーマー(2回に1回無効化)・ホーミングミサイル・空中突進無制限'},
+  {name:'ロボ型',   nick:'ゴッドバスター',dna:'メカコア',col:'#1e2c3a',w:36,h:48,spd:4.8,jmp:-9.2, maxHp:10,atkCd:22,atkLabel:'レーザー砲', glide:true, djump:true, wallSlide:false,ability:'レーザー砲・アーマー(2回に1回無効化)・ホーミングミサイル・空中突進無制限'},
   {name:'TSUKUYOMI',  nick:'TSUKUYOMI',dna:'月霊DNA', col:'#c0ddff',w:30,h:44,spd:6.4,jmp:-9.6, maxHp:12,atkCd:14,atkLabel:'瞬身斬',   glide:false,djump:true, wallSlide:true, ability:'瞬身斬（ワープ斬）・幻影分身3体・常時半透明・残像移動'},
   {name:'わらしべ走者',nick:'わらしべ走者',dna:'わらDNA',col:'#8b7040',w:28,h:42,spd:5.8,jmp:-9.2, maxHp:6,  atkCd:16,atkLabel:'わら投げ', glide:false,djump:true, wallSlide:false,ability:'わら・アブ・ミカン投げ・馬突進の連携攻撃'},
 ];
