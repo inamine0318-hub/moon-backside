@@ -1287,7 +1287,6 @@ const activeTouches=new Map();
 function getSysBtns(){
   return{
     pause:{x:W/2-30,y:2,w:60,h:38},
-    mute: {x:W-52,  y:2,w:48,h:38},
   };
 }
 function getBtns(){
@@ -1323,9 +1322,6 @@ canvas.addEventListener('touchstart',e=>{
   // システムボタン（全画面共通: ポーズ・ミュート）
   {const t0=e.changedTouches[0];const lp0=toLogical(t0.clientX,t0.clientY);
     const sb=getSysBtns();
-    if(lp0.x>=sb.mute.x&&lp0.x<=sb.mute.x+sb.mute.w&&lp0.y>=sb.mute.y&&lp0.y<=sb.mute.y+sb.mute.h){
-      muted=!muted;if(muted)bgmStop();else if(state==='play'){bgmPlay(bossTriggered&&boss&&boss.hp>0?'boss':'play');}else if(state==='title'||state==='charselect')bgmPlay('title');return;
-    }
     if(lp0.x>=sb.pause.x&&lp0.x<=sb.pause.x+sb.pause.w&&lp0.y>=sb.pause.y&&lp0.y<=sb.pause.y+sb.pause.h){
       if(state==='play'){paused=!paused;if(paused)bgmStop();else bgmPlay(bossTriggered&&boss&&boss.hp>0?'boss':'play');}return;
     }
@@ -2115,7 +2111,8 @@ function update(){
     if(cam.x>BOSS_ARENA_RIGHT-W)cam.x=BOSS_ARENA_RIGHT-W;
   }
 
-  // 弾
+  // 弾 (上限40: 古いものから削除)
+  if(projectiles.length>40)projectiles.splice(0,projectiles.length-40);
   for(let i=projectiles.length-1;i>=0;i--){
     const p=projectiles[i];
     if(p.homing){
@@ -4029,17 +4026,8 @@ function drawHUD(){
   ctx.fillStyle='#556677';ctx.font='bold 9px monospace';ctx.textAlign='left';
   ctx.fillText(`ST.${currentStage}/${TOTAL_STAGES} ${scfg.name}`,sb.pause.x+sb.pause.w+6,28);
 
-  // ポーズ・ミュートボタン
+  // ポーズボタン
   {
-    // ミュートボタン (右)
-    const mcx=sb.mute.x+sb.mute.w/2, mcy=sb.mute.y+sb.mute.h/2;
-    ctx.globalAlpha=0.88;dr(sb.mute.x,sb.mute.y,sb.mute.w,sb.mute.h,muted?'#330000':'#0a1a2a');ctx.globalAlpha=1;
-    dr(sb.mute.x,sb.mute.y,sb.mute.w,3,muted?'#ff4444':'#336688');
-    dr(sb.mute.x,sb.mute.y,2,sb.mute.h,'#224455');
-    dr(sb.mute.x+sb.mute.w-2,sb.mute.y,2,sb.mute.h,'#224455');
-    ctx.fillStyle=muted?'#ff6666':'#88bbdd';ctx.font='bold 14px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(muted?'🔇':'♪',mcx,mcy);
-    ctx.textBaseline='alphabetic';
     // ポーズボタン (中央) - 目立つデザイン
     const pcx=sb.pause.x+sb.pause.w/2, pcy=sb.pause.y+sb.pause.h/2;
     // 背景 + 角丸っぽいfillRect
@@ -4257,7 +4245,7 @@ function drawBtns(){
 // ================================================================
 //  スキャンライン
 // ================================================================
-function scanlines(){ctx.fillStyle='rgba(0,0,0,0.16)';for(let y=0;y<H;y+=3)ctx.fillRect(0,y,W,1);}
+function scanlines(){ctx.fillStyle='rgba(0,0,0,0.14)';for(let y=0;y<H;y+=4)ctx.fillRect(0,y,W,1);}
 
 // ================================================================
 //  カットシーン (ステージ7ボス前)
