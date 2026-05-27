@@ -1297,7 +1297,7 @@ function getBtns(){
   const mS=100;  // 移動
   const jmpX=W-mg-jS, jmpY=H-mg-jS;
   const atkX=jmpX-rgap-aS, atkY=H-mg-aS;
-  const jetX=atkX+(aS-eS)/2, jetY=atkY-28-eS;
+  const jetX=(W-8-jS-rgap-aS)+(aS-eS)/2, jetY=atkY-28-eS;
   return{
     left: {x:lmg,            y:H-mg-mS, s:mS},
     right:{x:lmg+mS+ibg,     y:H-mg-mS, s:mS},
