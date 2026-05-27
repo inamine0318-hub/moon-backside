@@ -165,7 +165,6 @@ function bgmStop(){
 }
 
 let W, H, isPortrait=false;
-let _btnsCache=null;
 function resize(){
   // screen.width/height はアドレスバー影響を受けないので向き判定に使う
   const vw=window.innerWidth||screen.width;
@@ -178,7 +177,6 @@ function resize(){
   } else {
     const sc=vh/520; H=520; W=Math.ceil(vw/sc);
   }
-  _btnsCache=null;
 }
 function tryFullscreen(){
   const el=document.documentElement;
@@ -1285,7 +1283,6 @@ const STAGE_BRIEF=[
 // ================================================================
 const keys={}, touchHeld={left:false,right:false,jumpHeld:false};
 const activeTouches=new Map();
-const touchFired=new Map();
 
 function getSysBtns(){
   return{
@@ -1293,7 +1290,6 @@ function getSysBtns(){
   };
 }
 function getBtns(){
-  if(_btnsCache)return _btnsCache;
   const mg=8, lmg=28, ibg=26, rgap=48;
   const jS=106;  // JUMP
   const aS=106;  // ATK (JUMPと同サイズ)
@@ -1302,16 +1298,15 @@ function getBtns(){
   const jmpX=W-mg-jS, jmpY=H-mg-jS;
   const atkX=jmpX-rgap-aS, atkY=H-mg-aS;
   const jetX=atkX+(aS-eS)/2, jetY=atkY-28-eS;
-  _btnsCache={
+  return{
     left: {x:lmg,            y:H-mg-mS, s:mS},
     right:{x:lmg+mS+ibg,     y:H-mg-mS, s:mS},
     jump: {x:jmpX,           y:jmpY,    s:jS},
     atk:  {x:atkX,           y:atkY,    s:aS},
     jet:  {x:jetX,           y:jetY,    s:eS},
   };
-  return _btnsCache;
 }
-function inC(tx,ty,bx,by,s,pad){return Math.hypot(tx-bx-s/2,ty-by-s/2)<=(s/2+(pad||0));}
+function inC(tx,ty,bx,by,s){return Math.hypot(tx-bx-s/2,ty-by-s/2)<=s/2;}
 function updHeld(){
   const z=getBtns();let l=false,r=false,jh=false;
   for(const t of activeTouches.values()){
@@ -1384,42 +1379,18 @@ canvas.addEventListener('touchstart',e=>{
     const z=getBtns();
     for(const t of e.changedTouches){
       const lp=toLogical(t.clientX,t.clientY);
-      const tf=new Set();
-      if(inC(lp.x,lp.y,z.jump.x,z.jump.y,z.jump.s,8)){doJump();tf.add('j');}
-      if(inC(lp.x,lp.y,z.atk.x,z.atk.y,z.atk.s,8)){doAttack();tf.add('a');}
-      if(inC(lp.x,lp.y,z.jet.x,z.jet.y,z.jet.s,8)){doJet();tf.add('e');}
-      touchFired.set(t.identifier,tf);
+      if(inC(lp.x,lp.y,z.jump.x,z.jump.y,z.jump.s))doJump();
+      if(inC(lp.x,lp.y,z.atk.x,z.atk.y,z.atk.s))doAttack();
+      if(inC(lp.x,lp.y,z.jet.x,z.jet.y,z.jet.s))doJet();
     }
     updHeld();
   }
 },{passive:false});
-canvas.addEventListener('touchmove',e=>{
-  e.preventDefault();
-  for(const t of e.changedTouches){
-    const lp=toLogical(t.clientX,t.clientY);
-    activeTouches.set(t.identifier,{x:lp.x,y:lp.y});
-    if(state==='play'&&!paused){
-      const z=getBtns();
-      const tf=touchFired.get(t.identifier)||new Set();
-      // actionボタンはどれか1つ発火したら以降は発火しない（誤操作防止）
-      if(!tf.has('j')&&!tf.has('a')&&!tf.has('e')){
-        if(inC(lp.x,lp.y,z.jump.x,z.jump.y,z.jump.s,8)){doJump();tf.add('j');}
-        else if(inC(lp.x,lp.y,z.atk.x,z.atk.y,z.atk.s,8)){doAttack();tf.add('a');}
-        else if(inC(lp.x,lp.y,z.jet.x,z.jet.y,z.jet.s,8)){doJet();tf.add('e');}
-      }
-      touchFired.set(t.identifier,tf);
-    }
-  }
-  updHeld();
-},{passive:false});
+canvas.addEventListener('touchmove',e=>{e.preventDefault();for(const t of e.changedTouches){const lp=toLogical(t.clientX,t.clientY);activeTouches.set(t.identifier,{x:lp.x,y:lp.y});}updHeld();},{passive:false});
 canvas.addEventListener('touchend',e=>{
   e.preventDefault();
-  for(const t of e.changedTouches){activeTouches.delete(t.identifier);touchFired.delete(t.identifier);}
+  for(const t of e.changedTouches)activeTouches.delete(t.identifier);
   if(state==='story'){return;} // story中touchendは何もしない
-  updHeld();
-},{passive:false});
-canvas.addEventListener('touchcancel',e=>{
-  for(const t of e.changedTouches){activeTouches.delete(t.identifier);touchFired.delete(t.identifier);}
   updHeld();
 },{passive:false});
 document.addEventListener('keydown',e=>{
