@@ -1401,9 +1401,12 @@ canvas.addEventListener('touchmove',e=>{
     if(state==='play'&&!paused){
       const z=getBtns();
       const tf=touchFired.get(t.identifier)||new Set();
-      if(!tf.has('j')&&inC(lp.x,lp.y,z.jump.x,z.jump.y,z.jump.s,8)){doJump();tf.add('j');}
-      if(!tf.has('a')&&inC(lp.x,lp.y,z.atk.x,z.atk.y,z.atk.s,8)){doAttack();tf.add('a');}
-      if(!tf.has('e')&&inC(lp.x,lp.y,z.jet.x,z.jet.y,z.jet.s,8)){doJet();tf.add('e');}
+      // actionボタンはどれか1つ発火したら以降は発火しない（誤操作防止）
+      if(!tf.has('j')&&!tf.has('a')&&!tf.has('e')){
+        if(inC(lp.x,lp.y,z.jump.x,z.jump.y,z.jump.s,8)){doJump();tf.add('j');}
+        else if(inC(lp.x,lp.y,z.atk.x,z.atk.y,z.atk.s,8)){doAttack();tf.add('a');}
+        else if(inC(lp.x,lp.y,z.jet.x,z.jet.y,z.jet.s,8)){doJet();tf.add('e');}
+      }
       touchFired.set(t.identifier,tf);
     }
   }
