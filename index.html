@@ -1291,14 +1291,14 @@ function getSysBtns(){
   };
 }
 function getBtns(){
-  const mg=8, lgap=10, rgap=44;
-  const jS=106;  // JUMP
-  const aS=96;   // ATK
-  const eS=78;   // JET
-  const mS=92;   // 移動
+  const mg=6, lgap=8, rgap=16;
+  const jS=110;  // JUMP
+  const aS=88;   // ATK
+  const eS=72;   // JET
+  const mS=80;   // 移動
   const jmpX=W-mg-jS, jmpY=H-mg-jS;
   const atkX=jmpX-rgap-aS, atkY=H-mg-aS;
-  const jetX=atkX+(aS-eS)/2, jetY=atkY-rgap*1.6-eS;
+  const jetX=atkX+(aS-eS)/2, jetY=atkY-24-eS;
   return{
     left: {x:lgap,           y:H-mg-mS, s:mS},
     right:{x:lgap+mS+lgap,   y:H-mg-mS, s:mS},
