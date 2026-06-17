@@ -1573,27 +1573,27 @@ function doAttack(){
         burst(mx,my,col,opts.n||4);sfx('claw');
       };
       if(step<2){
-        shot(f*15,step?-0.8:0,20,18,'#8899ff',1,{life:42});
+        shot(f*15,step?-0.8:0,20,18,'#8899ff',2,{life:42});
       }else if(lv===0){
-        shot(f*17,0,26,22,'#aabbff',2,{life:48,n:7});
+        shot(f*17,0,26,22,'#aabbff',3,{life:48,n:7});
       }else if(lv===1){
-        for(let k=0;k<3;k++)shot(f*16,(k-1)*2.5,18,16,'#ccddff',1,{life:44,n:2});
+        for(let k=0;k<3;k++)shot(f*16,(k-1)*2.5,18,16,'#ccddff',3,{life:44,n:2});
       }else{
-        for(let k=0;k<5;k++)shot(f*18,(k-2)*2.2,16,14,'#ddeeff',1,{life:42,n:2});addShake(3);
+        for(let k=0;k<5;k++)shot(f*18,(k-2)*2.2,16,14,'#ddeeff',6,{life:42,n:2});addShake(3);
       }
       break;
     }
     case 3:{ // KIBA サル - 電磁ムチ (近接引寄せ)
       const wr=step<2?58:80;
       const wpull=step===2;
-      const wdmg=step<2?2:lv>=2?4:3;
+      const wdmg=step<2?3:lv>=2?7:5;
       const wx=f>0?px+pw:px-wr, wy=py+6;
       projectiles.push({x:wx,y:wy,vx:f*1,vy:0,w:wr,h:ph-12,col:'#ffcc00',dmg:wdmg,life:9,hit:[],pierce:true,homing:false,whip:true,pull:wpull});
       burst(wx+wr/2,wy+ph/2,'#ffdd44',step<2?4:9);sfx('slash');
       if(lv>=2&&step===2){
         // lv2: 前後両方向ムチ
         const wx2=f>0?px-38:px+pw;
-        projectiles.push({x:wx2,y:wy,vx:-f*1,vy:0,w:38,h:ph-12,col:'#ffee66',dmg:2,life:7,hit:[],pierce:true,homing:false,whip:true,pull:true});
+        projectiles.push({x:wx2,y:wy,vx:-f*1,vy:0,w:38,h:ph-12,col:'#ffee66',dmg:7,life:7,hit:[],pierce:true,homing:false,whip:true,pull:true});
         addShake(3);
       }
       break;
