@@ -4875,7 +4875,7 @@ function drawCharSelect(){
     // 右側: 性能説明（大きめテキスト）
     const desc=c.desc||'';
     const descLines=desc.split('\n');
-    const descX=W*.5, descY=panY+26;
+    const descX=W*.55, descY=panY+26;
     ctx.fillStyle='#ffddaa';ctx.font=`bold ${Math.min(W*.032,14)}px monospace`;ctx.textAlign='left';
     descLines.forEach((line,i)=>{
       ctx.fillText(line,descX,descY+i*20);
