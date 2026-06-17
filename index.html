@@ -4876,9 +4876,9 @@ function drawCharSelect(){
     const desc=c.desc||'';
     const descLines=desc.split('\n');
     const descX=W*.55, descY=panY+100;
-    ctx.fillStyle='#ffddaa';ctx.font=`bold ${Math.min(W*.096,42)}px monospace`;ctx.textAlign='left';
+    ctx.fillStyle='#ffddaa';ctx.font=`bold ${Math.min(W*.064,28)}px monospace`;ctx.textAlign='left';
     descLines.forEach((line,i)=>{
-      ctx.fillText(line,descX,descY+i*50);
+      ctx.fillText(line,descX,descY+i*35);
     });
   }
 
