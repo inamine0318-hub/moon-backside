@@ -2190,6 +2190,8 @@ function update(){
   // 敵 UPDATE (タイプ別)
   for(let i=0;i<enemies.length;i++){
     const e=enemies[i];if(e.hp<=0)continue;
+    // 硬直中は移動を一切停止
+    if(e.dmgCd>0){e.dmgCd--;continue;}
     if(e.type==='turret'){
       // 砲台: 落下して地面に定着後、一定間隔で弾発射
       e.vy+=GRAVITY;if(e.vy>18)e.vy=18;
@@ -2316,7 +2318,6 @@ function update(){
       burst(player.x+player.w/2,player.y+player.h,'#ffcc00',10);addShake(3);sfx('jump');
       continue;
     }
-    if(e.dmgCd>0){e.dmgCd--;continue;}
     if(player.invincible===0&&ov(e,player)){
       if(player.shieldActive){player.shieldActive=false;burst(player.x+player.w/2,player.y,'#44aaff',14);addShake(3);player.invincible=50;e.dmgCd=40;sfx('phit');continue;}
       let eDmg=1;
