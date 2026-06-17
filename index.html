@@ -1745,7 +1745,7 @@ function doJet(){
   player.jetTimer=22;
   player._jetSpd=3.2;
   player.invincible=Math.max(player.invincible,22);
-  player.jetCd=180;
+  player.jetCd=(player.ci===3||player.ci===4)?120:180;
   player.vx=player.facing*player.spd*3.2;
   if(!player.onGround)player.vy=Math.min(player.vy,-1);
   const ox=player.facing>0?player.x+player.w:player.x;
@@ -4294,7 +4294,8 @@ function drawBtns(){
   if(player&&player.jetCd>0&&!player.jetActive){
     const b=z.jet;
     const cx=b.x+b.s/2,cy=b.y+b.s/2,r=b.s/2;
-    const ratio=player.jetCd/180;
+    const maxJet=(player.ci===3||player.ci===4)?120:180;
+    const ratio=player.jetCd/maxJet;
     ctx.globalAlpha=0.65;
     ctx.beginPath();ctx.moveTo(cx,cy);
     ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+ratio*Math.PI*2);
