@@ -2407,6 +2407,8 @@ function hitE(j,dmg){
   e.flashTimer=8;
   if(player){const kd=e.x+e.w/2>player.x+player.w/2?1:-1;e.vx=kd*5*(pd>=2?1.8:1);}
   if(pd>=2)hitStop=Math.max(hitStop,4);
+  // レックス(4)またはキバ(3)の攻撃なら敵を硬直させる
+  if(player&&(player.ci===3||player.ci===4)){e.dmgCd=20;e.stunned=true;burst(e.x+e.w/2,e.y-e.h/2,'#ffffff',8);}
   sfx('hit');burst(e.x+e.w/2,e.y+e.h/2,'#ff4444',5);
   damageNums.push({x:e.x+e.w/2,y:e.y-4,val:pd,life:44,vy:-1.8});
   if(e.hp<=0){deathBurst(e.x,e.y);score+=100;}
@@ -3031,6 +3033,8 @@ function drawEnemies(){
     }
     // ヒットフラッシュ（白く光る）
     if(e.flashTimer>0){ctx.globalAlpha=e.flashTimer/8*0.85;dr(ex,ey,e.w,e.h,'#ffffff');ctx.globalAlpha=1;}
+    // 硬直エフェクト（白く明るく点滅）
+    if(e.dmgCd>0){const pulse=frameTime%10<5?0.3:0.1;ctx.globalAlpha=pulse;dr(ex,ey,e.w,e.h,'#ffffff');ctx.globalAlpha=1;ctx.strokeStyle='#88ccff';ctx.lineWidth=2;ctx.strokeRect(ex,ey,e.w,e.h);}
   });
 
   // 敵弾描画
