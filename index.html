@@ -1225,6 +1225,15 @@ const STARS=Array.from({length:120},()=>({
 }));
 let frameTime=0;
 
+// 古いスコアデータをクリア
+(function(){
+  try{
+    const scores=JSON.parse(localStorage.getItem('mbs')||'[]');
+    const filtered=scores.filter(s=>s.char!=='カラクリ桃太郎'&&s.char!=='マタキチ');
+    if(filtered.length<scores.length)localStorage.setItem('mbs',JSON.stringify(filtered));
+  }catch{}
+})();
+
 // ================================================================
 //  ゲーム変数
 // ================================================================
