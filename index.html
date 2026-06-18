@@ -2563,7 +2563,7 @@ function updateBoss(){
       const baseA=Math.atan2((player.y+player.h/2)-(boss.y+boss.h*.4),(player.x+player.w/2)-(boss.x+boss.w/2));
       for(let k=0;k<dirs;k++){
         const a=baseA+(k-(dirs-1)/2)*(Math.PI/(dirs*1.4));
-        eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h*.4,vx:Math.cos(a)*7,vy:Math.sin(a)*7,w:14,h:14,life:90,boss:true,stageCol:'#44ffff',dmg:2});
+        eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h*.4,vx:Math.cos(a)*7,vy:Math.sin(a)*7,w:14,h:14,life:90,boss:true,stageCol:'#44ffff',dmg:3});
       }
       sfx('explode');addShake(5);
     }
@@ -2575,7 +2575,7 @@ function updateBoss(){
     boss.orbitAngle=(boss.orbitAngle||0)+0.13;
     if(boss.stateTimer%7===0&&boss.stateTimer>10){
       const a=boss.orbitAngle;
-      eProjectiles.push({x:boss.x+boss.w/2+Math.cos(a)*50,y:boss.y+boss.h/2+Math.sin(a)*30,vx:Math.cos(a+Math.PI/2)*5.5,vy:Math.sin(a+Math.PI/2)*5.5,w:12,h:12,life:80,boss:true,stageCol:'#00ffff',dmg:2});
+      eProjectiles.push({x:boss.x+boss.w/2+Math.cos(a)*50,y:boss.y+boss.h/2+Math.sin(a)*30,vx:Math.cos(a+Math.PI/2)*5.5,vy:Math.sin(a+Math.PI/2)*5.5,w:12,h:12,life:80,boss:true,stageCol:'#00ffff',dmg:3});
     }
     if(boss.stateTimer<=0){boss.state='charge';boss.stateTimer=55;boss.chargeDir=boss.dir;}
   }
@@ -2625,7 +2625,7 @@ function updateBoss(){
       const heights=[[-3,22,16],[-6,18,13],[-10,14,10]];
       heights.forEach(([vy2,w2,h2],hi)=>{
         [-1,1].forEach(d=>{
-          eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h-10-hi*18,vx:d*(5+hi*1.5),vy:vy2,w:w2,h:h2,life:58,boss:true,wave:true,dmg:2});
+          eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h-10-hi*18,vx:d*(5+hi*1.5),vy:vy2,w:w2,h:h2,life:58,boss:true,wave:true,dmg:3});
         });
       });
       sfx('explode');
