@@ -2477,7 +2477,7 @@ function updateBoss(){
   boss.vy+=GRAVITY*.65;if(boss.vy>18)boss.vy=18;
   boss.stateTimer--;
   const spd=(boss.phase===2?1.9:1.2)*(1+currentStage*.07);
-  const atkBase=[155,135,125,115,105,95,80][currentStage-1]||80;
+  const atkBase=[155,135,125,100,95,95,80][currentStage-1]||80;
   const col=['#cc00ff','#ffff00','#ff6600','#44ffff','#eeeeff','#cc6600','#cc44ff'][currentStage-1];
 
   boss.weakPoint=false; // デフォルトは弱点なし
@@ -2539,7 +2539,7 @@ function updateBoss(){
       for(let k=0;k<count;k++){
         const a=(k/(count-1)-.5)*1.1;
         const spd2=6+currentStage*.15;
-        eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h*.4,vx:boss.dir*spd2*Math.cos(a),vy:Math.sin(a)*spd2-1,w:14,h:14,life:80,boss:true,stageCol:'#ff5500',dmg:2});
+        eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h*.4,vx:boss.dir*spd2*Math.cos(a),vy:Math.sin(a)*spd2-1,w:14,h:14,life:80,boss:true,stageCol:'#ff5500',dmg:4});
       }
       sfx('explode');addShake(3);
     }
@@ -2550,7 +2550,7 @@ function updateBoss(){
     boss.vx*=0.9;
     if(boss.stateTimer%22===0&&boss.stateTimer>10){
       const px=player.x+(Math.random()-.5)*120;
-      eProjectiles.push({x:px,y:H,vx:0,vy:-(10+currentStage*.3),w:16,h:30,life:36,boss:true,stageCol:'#ff6600',dmg:2});
+      eProjectiles.push({x:px,y:H,vx:0,vy:-(10+currentStage*.3),w:16,h:30,life:36,boss:true,stageCol:'#ff6600',dmg:4});
       addShake(3);
     }
     if(boss.stateTimer<=0)boss.state='walk';
