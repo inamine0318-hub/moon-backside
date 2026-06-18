@@ -1569,7 +1569,7 @@ function doAttack(){
         mkBomb(f*11,-4,18,5,88,120); // ×2
       }else if(lv===1){
         mkBomb(f*10,-4,15,4,74,115); // ×2
-        setTimeout(()=>{if(player)projectiles.push({x:f>0?player.x+player.w+2:player.x-2,y:player.y+4,vx:f*9,vy:-3,w:15,h:15,col:'#555520',dmg:4,life:112,hit:[],pierce:false,homing:false,bomb:true,rad:74,gravity:true,gravMult:0.8,bounces:0,maxBounces:2});},280);
+        setTimeout(()=>{if(player)projectiles.push({x:f>0?player.x+player.w+2:player.x-2,y:player.y+4,vx:f*9,vy:-3,w:15,h:15,col:'#555520',dmg:3,life:112,hit:[],pierce:false,homing:false,bomb:true,rad:74,gravity:true,gravMult:0.8,bounces:0,maxBounces:2});},280);
       }else{
         mkBomb(f*10,-5,26,7,135,125);addShake(4); // ×2
       }
@@ -1633,7 +1633,7 @@ function doAttack(){
         }
         addShake(4);
       } else if(lv===1){ // lv1フィニッシャー: 大ブレス + ミサイル5発
-        projectiles.push({x:f>0?mouthX:mouthX-560,y:mouthY,vx:0,vy:0,w:560,h:18,col:'#ff8800',dmg:4,life:16,hit:[],pierce:true,homing:false,laser:true});
+        projectiles.push({x:f>0?mouthX:mouthX-560,y:mouthY,vx:0,vy:0,w:560,h:18,col:'#ff8800',dmg:3,life:16,hit:[],pierce:true,homing:false,laser:true});
         burst(mouthX,mouthY,'#ff8800',16);sfx('laser');addShake(5);
         for(let k=0;k<5;k++){
           setTimeout(()=>{if(player){projectiles.push({x:player.x+(player.facing>0?player.w+2:-2),y:player.y+player.h*.2,vx:player.facing*(16+Math.random()*4),vy:-4+Math.random()*4,w:10,h:10,col:'#ff6600',dmg:2,life:130,hit:[],pierce:false,homing:true,missile:true});sfx('needle');}},k*80);
@@ -2539,7 +2539,7 @@ function updateBoss(){
       for(let k=0;k<count;k++){
         const a=(k/(count-1)-.5)*1.1;
         const spd2=6+currentStage*.15;
-        eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h*.4,vx:boss.dir*spd2*Math.cos(a),vy:Math.sin(a)*spd2-1,w:14,h:14,life:80,boss:true,stageCol:'#ff5500',dmg:4});
+        eProjectiles.push({x:boss.x+boss.w/2,y:boss.y+boss.h*.4,vx:boss.dir*spd2*Math.cos(a),vy:Math.sin(a)*spd2-1,w:14,h:14,life:80,boss:true,stageCol:'#ff5500',dmg:3});
       }
       sfx('explode');addShake(3);
     }
@@ -2550,7 +2550,7 @@ function updateBoss(){
     boss.vx*=0.9;
     if(boss.stateTimer%22===0&&boss.stateTimer>10){
       const px=player.x+(Math.random()-.5)*120;
-      eProjectiles.push({x:px,y:H,vx:0,vy:-(10+currentStage*.3),w:16,h:30,life:36,boss:true,stageCol:'#ff6600',dmg:4});
+      eProjectiles.push({x:px,y:H,vx:0,vy:-(10+currentStage*.3),w:16,h:30,life:36,boss:true,stageCol:'#ff6600',dmg:3});
       addShake(3);
     }
     if(boss.stateTimer<=0)boss.state='walk';
